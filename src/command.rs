@@ -57,6 +57,63 @@ pub struct External;
 /// A command
 ///
 /// The type parameter O indicates whether this plugin or something else owns the command.
+///
+/// A command execution has three phases:
+///
+/// 1. The command begins. An external command is begun by calling `Command::begin()`. The
+/// callback's `command_begin()` method is called. This corresponds to a physical button being
+/// pressed down.
+/// 2. The callback continues. X-Plane calls the callback's `command_continue` method frequently
+/// until the command execution ends.
+/// 3. The command ends. An external command is ended by calling `Command::end()`. The callback's
+/// `command_end()` method is called. This corresponds to a physical button being released.
+///
+/// ## Owned commands
+///
+/// Owned commands are created by a plugin. A callback can be set, which will be called when
+/// something executes the command.
+///
+/// When an owned command goes out of scope, its callback also goes out of scope. However, because
+/// X-Plane does not allow commands to be deleted at runtime, the command will still exist.
+/// Excecuting the command will have not effect.
+///
+/// ## External commands
+///
+/// External commands are created by X-Plane or another plugin. Because the order of plugin loading
+/// is not specified and commands created by other plugins are not available until they load,
+/// plugins should not search for other plugins' commands until the plugin enable callback.
+///
+/// # Examples
+///
+/// ## Finding and executing a command
+///
+/// ```no_run
+/// let command = Command::find("sim/systems/avionics_on").unwrap();
+/// command.begin();
+/// command.end();
+/// ```
+///
+/// ## Creating a command
+///
+/// ```no_run
+/// struct TestCommandCallback;
+///
+/// impl CommandCallback for TestCommandCallback {
+///     fn command_begin(&mut self) {
+///         println!("Command begun");
+///     }
+///     fn command_continue(&mut self) {
+///         println!("Command continues");
+///     }
+///     fn command_end(&mut self) {
+///         println!("Command ended");
+///     }
+/// }
+///
+/// let mut command = Command::create("test/my_plugin/do_something", "Does the thing").unwrap();
+/// command.set_callback(TestCommandCallback);
+/// ```
+///
 pub struct Command<O> {
     /// The command
     command: XPLMCommandRef,
@@ -133,7 +190,10 @@ impl Command<Owned> {
         })
     }
 
-    /// Sets the callback that will be called when the command is executed
+    /// Sets the callback that will be called when the command is executed.
+    ///
+    /// This Command object takes ownership of the callback.
+    ///
     pub fn set_callback<C>(&mut self, callback: C) where C: 'static + CommandCallback {
         self.clear_callback();
         let callback_box = Box::new(callback);

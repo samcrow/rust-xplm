@@ -92,7 +92,49 @@ pub enum SearchError {
     WrongDataAccess,
 }
 
-/// Provides access to a dataref
+/// Provides safe access to a dataref
+///
+/// The type parameter `D` specifies the type of the dataref. The following types are supported:
+///
+/// * `i32`: X-Plane type `int`
+/// * `f32`: X-Plane type `float`
+/// * `f64`: X-Plane type `double`
+/// * `Vec<i32>`: X-Plane type `int` array
+/// * `Vec<f32>`: X-Plane type `float` array
+/// * `Vec<u8>`: X-Plane type `byte` array
+/// * `String`: X-Plane type `byte` array
+///
+/// The type parameter `A` specifies the writeability of the dataref. This should be either
+/// `ReadWrite` for a writeable dataref or `ReadOnly` for a read-only dataref.
+///
+/// When a `DataRef` is created, its type and writeability are checked against the type and
+/// writeability specified by X-Plane. A `DataRef` can only be created if X-Plane knows about
+/// a dataref with the same name and compatible type and writeabiltiy.
+///
+/// # Examples
+///
+/// ## Read-only f32 dataref
+///
+/// ```no_run
+/// let time_ref: DataRef<f32, ReadOnly> = DataRef::find("sim/time/total_running_time_sec").unwrap();
+/// let time = time_ref.get();
+/// ```
+///
+/// ## Read-only String dataref
+///
+/// ```no_run
+/// let dataref: DataRef<String, ReadOnly> = DataRef::find("sim/version/sim_build_string").unwrap();
+/// let sim_build_time = dataref.get();
+/// ```
+///
+/// ## Writeable i32 dataref
+///
+/// ```no_run
+/// let dataref: DataRef<i32, ReadWrite> = DataRef::find("sim/cockpit2/autopilot/flight_director_mode").unwrap();
+/// let mode = dataref.get();
+/// dataref.set(3);
+/// ```
+///
 #[derive(Debug,Clone)]
 pub struct DataRef<D, A> {
     /// Dataref handle
@@ -138,36 +180,42 @@ impl<D, A> DataRef<D, A> where D: DataType, A: DataAccess {
 
 // Integer read
 impl<A> DataRef<i32, A> where A: DataAccess {
+    /// Returns the value of this dataref
     pub fn get(&self) -> i32 {
         unsafe { XPLMGetDatai(self.dataref) }
     }
 }
 // Integer write
 impl DataRef<i32, ReadWrite> {
+    /// Sets the value of this dataref
     pub fn set(&mut self, value: i32) {
         unsafe { XPLMSetDatai(self.dataref, value) }
     }
 }
 // Float read
 impl<A> DataRef<f32, A> where A: DataAccess {
+    /// Returns the value of this dataref
     pub fn get(&self) -> f32 {
         unsafe { XPLMGetDataf(self.dataref) }
     }
 }
 // Float write
 impl DataRef<f32, ReadWrite> {
+    /// Sets the value of this dataref
     pub fn set(&mut self, value: f32) {
         unsafe { XPLMSetDataf(self.dataref, value) }
     }
 }
 // Double read
 impl<A> DataRef<f64, A> where A: DataAccess {
+    /// Returns the value of this dataref
     pub fn get(&self) -> f64 {
         unsafe { XPLMGetDatad(self.dataref) }
     }
 }
 // Double write
 impl DataRef<f64, ReadWrite> {
+    /// Sets the value of this dataref
     pub fn set(&mut self, value: f64) {
         unsafe { XPLMSetDatad(self.dataref, value) }
     }

@@ -84,6 +84,25 @@ impl<F> FlightLoopCallback for F where F: Fn() -> NextCallback {
 }
 
 /// A handle to something that calls a flight loop callback
+///
+/// A `FlightLoop` object stores a callback that will be called by X-Plane every time the flight
+/// model is calculated.
+///
+/// When a `FlightLoop` object goes out of scope, the callback will be unregistered from X-Plane
+/// and deleted.
+///
+/// # Examples
+///
+/// ## A flight loop callback executed every time the flight model is calculated
+/// ```no_run
+/// let callback = || {
+///     println!("Flight loop callback running");
+///     NextCallback::after_loops(1)
+/// };
+/// let loop = FlightLoop::new(Phase::AfterFlightModel, callback);
+/// loop.schedule(NextCallback::AfterLoops(1));
+/// ```
+///
 pub struct FlightLoop {
     /// The ID of this loop
     id: XPLMFlightLoopID,

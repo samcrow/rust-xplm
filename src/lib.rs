@@ -1,10 +1,17 @@
+//!
+//! The `xplm` crate provides a convenient interface to the X-Plane plugin SDK.
+//!
 
 extern crate xplm_sys;
 extern crate libc;
 
+/// Functionality for reading, writing, and creating datarefs
 pub mod dataref;
+/// Functionality for finding, creating, and executing commands
 pub mod command;
+/// Flight loop callbacks
 pub mod flight_loop;
+/// SDK feature querying and enabling
 pub mod features;
 
 

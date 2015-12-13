@@ -1,6 +1,8 @@
 //!
 //! Allows control over optional SDK features
 //!
+//! Available features are documented at http://www.xsquawkbox.net/xpsdk/mediawiki/XPLM_Feature_Keys .
+//!
 
 use std::ffi::CString;
 use xplm_sys::plugin::*;
