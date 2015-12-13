@@ -13,6 +13,10 @@ pub mod command;
 pub mod flight_loop;
 /// SDK feature querying and enabling
 pub mod features;
+/// Terrain probing
+pub mod terrain;
+/// Position types
+pub mod position;
 
 
 /// Writes a message to the X-Plane log.txt file
