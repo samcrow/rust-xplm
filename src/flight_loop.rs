@@ -99,8 +99,8 @@ impl<F> FlightLoopCallback for F where F: Fn() -> NextCallback {
 ///     println!("Flight loop callback running");
 ///     NextCallback::after_loops(1)
 /// };
-/// let loop = FlightLoop::new(Phase::AfterFlightModel, callback);
-/// loop.schedule(NextCallback::AfterLoops(1));
+/// let flight_loop = FlightLoop::new(Phase::AfterFlightModel, callback);
+/// flight_loop.schedule(NextCallback::AfterLoops(1));
 /// ```
 ///
 pub struct FlightLoop {
