@@ -1,0 +1,11 @@
+[package]
+name = "xplm"
+version = "0.1.0"
+authors = ["Sam Crow <samcrow@uw.edu>"]
+license = "MIT"
+
+description = "Interfaces to the X-Plane plugin SDK"
+
+[dependencies]
+xplm-sys = "^0.1"
+libc = "^0.2"
