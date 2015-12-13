@@ -5,6 +5,7 @@ extern crate libc;
 pub mod dataref;
 pub mod command;
 pub mod flight_loop;
+pub mod features;
 
 
 /// Writes a message to the X-Plane log.txt file
