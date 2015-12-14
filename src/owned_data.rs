@@ -177,9 +177,14 @@ impl<A> OwnedData<Vec<u8>, A> {
     pub fn get_as_string(&self) -> String {
         String::from_utf8_lossy( unsafe { &(*self.inner).value } ).into_owned()
     }
-    /// Sets this dataref to equal a String
+    /// Sets this dataref to equal a string. If the provided string contains one or more null
+    /// bytes, the dataref is not changed. The dataref will be set to the bytes in the provided
+    /// string, with a terminating null byte.
     pub fn set_as_string(&mut self, value: &str) {
-        self.set_as_slice(value.as_bytes())
+        match CString::new(value) {
+            Ok(value_c) => self.set_as_slice(value_c.as_bytes()),
+            Err(_) => {},
+        }
     }
 }
 
