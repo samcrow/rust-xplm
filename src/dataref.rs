@@ -7,74 +7,12 @@ use std::ffi::NulError;
 use std::ffi::CString;
 use std::ptr;
 
+use ffi::StringBuffer;
 use xplm_sys::data_access::*;
+use data::*;
 
 use libc;
 
-/// Trait for types that have associated type IDs in X-Plane
-trait DataType {
-    /// Returns the XPLMDataTypeID for this type
-    fn data_type() -> XPLMDataTypeID;
-}
-
-impl DataType for i32 {
-    fn data_type() -> XPLMDataTypeID {
-        xplmType_Int as XPLMDataTypeID
-    }
-}
-
-impl DataType for f32 {
-    fn data_type() -> XPLMDataTypeID {
-        xplmType_Float as XPLMDataTypeID
-    }
-}
-
-impl DataType for f64 {
-    fn data_type() -> XPLMDataTypeID {
-        xplmType_Double as XPLMDataTypeID
-    }
-}
-
-impl DataType for Vec<f32> {
-    fn data_type() -> XPLMDataTypeID {
-        xplmType_FloatArray as XPLMDataTypeID
-    }
-}
-
-impl DataType for Vec<i32> {
-    fn data_type() -> XPLMDataTypeID {
-        xplmType_IntArray as XPLMDataTypeID
-    }
-}
-
-impl DataType for Vec<u8> {
-    fn data_type() -> XPLMDataTypeID {
-        xplmType_Data as XPLMDataTypeID
-    }
-}
-impl DataType for String {
-    fn data_type() -> XPLMDataTypeID {
-        xplmType_Data as XPLMDataTypeID
-    }
-}
-/// Trait for a read/write or read-only marker
-pub trait DataAccess {
-    /// Returns true if the dataref should be writeable
-    fn writeable() -> bool;
-}
-/// Marks a dataref that can be read and written
-#[derive(Debug,Clone)]
-pub struct ReadWrite;
-impl DataAccess for ReadWrite {
-    fn writeable() -> bool { true }
-}
-
-/// Marks a dataref that can only be read
-#[derive(Debug,Clone)]
-pub struct ReadOnly;
-impl DataAccess for ReadOnly {
-    fn writeable() -> bool { false }
-}
 
 /// Possible errors encountered when finding a dataref
 #[derive(Debug,Clone)]
@@ -344,14 +282,11 @@ impl<A> DataRef<String, A> where A: DataAccess {
     pub fn get(&self) -> String {
         // Create a byte array of the right length
         let length = self.len();
-        let mut bytes: Vec<u8> = Vec::with_capacity(length);
-        for _ in 0..length {
-            bytes.push('\0' as u8);
-        }
+        let mut buffer = StringBuffer::new(length);
         // Copy data in
-        unsafe { XPLMGetDatab(self.dataref, bytes.as_mut_ptr() as *mut libc::c_void, 0, array_length(length)) };
+        unsafe { XPLMGetDatab(self.dataref, buffer.as_mut_ptr() as *mut libc::c_void, 0, array_length(length)) };
         // Convert into a string
-        bytes_to_string(&bytes)
+        buffer.as_string()
     }
     /// Returns the maximum length of this string dataref
     fn len(&self) -> usize {
@@ -373,32 +308,4 @@ impl DataRef<String, ReadWrite> {
             array_length(value_c.as_bytes_with_nul().len())) };
         Ok(())
     }
-}
-
-/// Fits a length into an i32.
-/// If the provided value is greater than i32::max_value, returns i32::max_value().
-/// Otherwise, returns the value as an i32.
-fn array_length(length: usize) -> i32 {
-    if length > (i32::max_value() as usize) {
-        i32::max_value()
-    }
-    else {
-        length as i32
-    }
-}
-
-
-/// Converts a byte array into a String.
-///
-/// If the provided byte array contains any null bytes, the returned String excludes the first
-/// null byte and any bytes that follow it.
-fn bytes_to_string(bytes: &[u8]) -> String {
-    let mut end_index = bytes.len();
-    for (i, &byte) in bytes.iter().enumerate() {
-        if byte == '\0' as u8 {
-            end_index = i;
-            break;
-        }
-    }
-    String::from_utf8_lossy(&bytes[0..end_index]).into_owned()
 }

@@ -2,7 +2,8 @@
 //! Types that represent positions in X-Plane
 //!
 
-use dataref::{DataRef, ReadOnly};
+use data::ReadOnly;
+use dataref::DataRef;
 use xplm_sys::graphics::*;
 
 use std::convert::From;
@@ -91,6 +92,16 @@ impl From<LatLonAlt> for LatLon {
             latitude: lla.latitude,
             longitude: lla.longitude,
         }
+    }
+}
+
+/// A trait for things that have positions
+pub trait Positioned {
+    /// Returns the position of this item
+    fn position(&self) -> LatLonAlt;
+    /// Returns the position of this item in local coordinates
+    fn local_position(&self) -> Local {
+        world_to_local(&self.position())
     }
 }
 

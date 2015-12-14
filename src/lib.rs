@@ -5,8 +5,12 @@
 extern crate xplm_sys;
 extern crate libc;
 
-/// Functionality for reading, writing, and creating datarefs
+/// Common definitions for datarefs
+pub mod data;
+/// Functionality for reading and writing datarefs
 pub mod dataref;
+/// Functionality for creating datarefs
+pub mod owned_data;
 /// Functionality for finding, creating, and executing commands
 pub mod command;
 /// Flight loop callbacks
@@ -17,7 +21,16 @@ pub mod features;
 pub mod terrain;
 /// Position types
 pub mod position;
+// /// Menu bar functionality (currently incomplete)
+// pub mod menu;
 
+/// Provides access to the navigation database
+pub mod nav;
+/// Radio frequency representation
+pub mod frequency;
+
+/// Foreign function interface utilities
+mod ffi;
 
 /// Writes a message to the X-Plane log.txt file
 pub fn debug(message: &str) {
