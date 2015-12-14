@@ -24,6 +24,8 @@ pub mod position;
 // /// Menu bar functionality (currently incomplete)
 // pub mod menu;
 
+/// User interface elements
+pub mod ui;
 /// Provides access to the navigation database
 pub mod nav;
 /// Radio frequency representation
