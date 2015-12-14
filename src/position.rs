@@ -12,6 +12,7 @@ use std::convert::From;
 ///
 /// This struct uses the same axes as `Local`, but its origin, units,
 /// and meaning are context-dependent.
+#[derive(Debug,Clone)]
 pub struct Vec3 {
     /// X coordinate, East-West. East is positive.
     pub x: f64,

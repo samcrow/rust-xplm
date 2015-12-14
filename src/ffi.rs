@@ -4,6 +4,7 @@
 
 /// A fixed-length array of characters that can be passed to C functions and converted into a
 /// String
+#[derive(Debug)]
 pub struct StringBuffer {
     /// The bytes in this buffer
     bytes: Vec<u8>,

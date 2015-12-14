@@ -284,6 +284,7 @@ fn all_navaids_of_type(nav_type: XPLMNavType) -> NavaidIterator {
 }
 
 /// An iterator over available navaids
+#[derive(Debug)]
 pub struct NavaidIterator {
     /// The reference of the next navaid to provide, or -1 if no more are available
     next: XPLMNavRef,

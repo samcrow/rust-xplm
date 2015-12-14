@@ -8,6 +8,7 @@ use libc;
 use std::mem;
 
 /// Phases of execution in which a callback can run
+#[derive(Debug,Clone)]
 pub enum Phase {
     /// The callback is run before X-Plane runs the flight model
     BeforeFlightModel,
@@ -16,6 +17,7 @@ pub enum Phase {
 }
 
 /// Information on when the next callback should run
+#[derive(Debug,Clone)]
 enum NextCallbackEnum {
     /// The callback will run after a number of flight loops
     AfterLoops(u32),
@@ -38,6 +40,7 @@ impl NextCallbackEnum {
 }
 
 /// Information on when the next callback should run
+#[derive(Debug,Clone)]
 pub struct NextCallback(NextCallbackEnum);
 
 impl NextCallback {

@@ -7,6 +7,7 @@ use std::mem;
 use position::{Vec3, Local, LatLon, LatLonAlt, world_to_local, local_to_world};
 
 /// The data returned from a terrain probe
+#[derive(Debug,Clone)]
 pub struct ProbeResult {
     /// Position of the terrain
     pub position: Local,
@@ -21,6 +22,8 @@ pub struct ProbeResult {
 /// A terrain probe
 ///
 ///
+#[allow(raw_pointer_derive)]
+#[derive(Debug)]
 pub struct Probe {
     /// The probe reference
     probe: XPLMProbeRef,
