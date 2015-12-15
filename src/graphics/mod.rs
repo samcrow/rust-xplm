@@ -1,6 +1,10 @@
 
 use xplm_sys::graphics::*;
 
+/// Low-level windows
+pub mod window;
+
+
 /// Stores various flags that can be enabled or disabled
 #[derive(Debug,Clone)]
 pub struct GraphicsState {
