@@ -24,6 +24,9 @@ pub mod ui;
 pub mod nav;
 /// Radio frequency representation
 pub mod frequency;
+/// OpenGL-related functionality
+pub mod graphics;
+
 
 /// Foreign function interface utilities
 mod ffi;
@@ -47,4 +50,16 @@ pub fn enable_debug_logging() {
 unsafe extern "C" fn log_callback(message: *const ::libc::c_char) {
     use std::ffi::CStr;
     debug(&format!("XPLM error: {}\n", CStr::from_ptr(message).to_string_lossy().into_owned()));
+}
+
+/// Finds a symbol in the set of currently loaded libraries
+pub fn find_symbol(name: &str) -> *mut ::libc::c_void {
+    use std::ffi::CString;
+    use std::ptr;
+    use xplm_sys::utilities::XPLMFindSymbol;
+
+    match CString::new(name) {
+        Ok(name_c) => unsafe { XPLMFindSymbol(name_c.as_ptr()) },
+        Err(_) => ptr::null_mut(),
+    }
 }
