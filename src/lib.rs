@@ -5,12 +5,8 @@
 extern crate xplm_sys;
 extern crate libc;
 
-/// Common definitions for datarefs
+/// Functionality for reading, writing, and creating datarefs
 pub mod data;
-/// Functionality for reading and writing datarefs
-pub mod dataref;
-/// Functionality for creating datarefs
-pub mod owned_data;
 /// Functionality for finding, creating, and executing commands
 pub mod command;
 /// Flight loop callbacks
@@ -21,8 +17,6 @@ pub mod features;
 pub mod terrain;
 /// Position types
 pub mod position;
-// /// Menu bar functionality (currently incomplete)
-// pub mod menu;
 
 /// User interface elements
 pub mod ui;

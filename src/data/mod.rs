@@ -1,4 +1,8 @@
 
+/// Provides access to existing datarefs
+pub mod dataref;
+/// Allows creation of datarefs
+pub mod owned_data;
 
 use xplm_sys::data_access::*;
 

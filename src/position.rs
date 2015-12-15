@@ -3,7 +3,7 @@
 //!
 
 use data::ReadOnly;
-use dataref::DataRef;
+use data::dataref::DataRef;
 use xplm_sys::graphics::*;
 
 use std::convert::From;
