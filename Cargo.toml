@@ -1,6 +1,6 @@
 [package]
 name = "xplm"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Sam Crow <samcrow@uw.edu>"]
 license = "MIT"
 repository = "https://github.com/samcrow/rust-xplm"
