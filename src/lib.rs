@@ -44,3 +44,13 @@ pub fn debug(message: &str) {
         Err(_) => unsafe { XPLMDebugString(b"xplm::debug: Provided string not valid".as_ptr() as *const i8) },
     }
 }
+
+/// Enables the logging of plugin-related errors to the log.txt file
+pub fn enable_debug_logging() {
+    unsafe { xplm_sys::utilities::XPLMSetErrorCallback(Some(log_callback)) };
+}
+
+unsafe extern "C" fn log_callback(message: *const ::libc::c_char) {
+    use std::ffi::CStr;
+    debug(&format!("XPLM error: {}\n", CStr::from_ptr(message).to_string_lossy().into_owned()));
+}
