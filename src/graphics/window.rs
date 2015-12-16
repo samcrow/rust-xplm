@@ -101,6 +101,12 @@ impl<T> KeyboardCallback for T where T: Fn(KeyEvent, Key, ModifierKeys, Option<c
     }
 }
 
+/// A low-level window
+///
+/// A Window provides a designated area on the screen and callbacks for drawing and handling user
+/// input. By default, it is invisible and does not respond to input.
+///
+/// Windows should always be kept in `Rc<RefCell>`s to ensure proper functionality.
 pub struct Window {
     /// Pointer to the window data block, allocated in a Box
     data: *mut WindowData,
@@ -189,6 +195,10 @@ impl Window {
     /// Moves this window on top of other windows
     pub fn bring_to_front(&self) {
         unsafe { XPLMBringWindowToFront((*self.data).id); }
+    }
+    /// Gives this window keyboard focus
+    pub fn request_focus(&self) {
+        unsafe { XPLMTakeKeyboardFocus((*self.data).id); }
     }
 
     /// Returns the geometry of this window
