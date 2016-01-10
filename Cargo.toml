@@ -2,7 +2,7 @@
 name = "xplm"
 version = "0.1.2"
 authors = ["Sam Crow <samcrow@uw.edu>"]
-license = "MIT"
+license = "MIT/Apache-2.0"
 repository = "https://github.com/samcrow/rust-xplm"
 keywords = ["X-Plane", "plugin"]
 description = "Interfaces to the X-Plane plugin SDK"
