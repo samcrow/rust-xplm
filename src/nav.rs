@@ -339,9 +339,10 @@ impl Iterator for NavaidIterator {
     }
 }
 
-/// Extracts information from an XPLMNavRef.
+/// Extracts information from an XPLMNavRef. If the returned navaid information
+/// has a known type, returns the navaid and the type.
 #[allow(non_upper_case_globals)]
-fn get_navaid_info(nav_ref: XPLMNavRef) -> Option<Navaid> {
+fn get_navaid_info(nav_ref: XPLMNavRef) -> Option<(Navaid, XPLMNavType)> {
     let mut navaid_type: XPLMNavType = xplm_Nav_Unknown as XPLMNavType;
     let mut latitude = 0f32;
     let mut longitude = 0f32;
@@ -439,5 +440,5 @@ fn get_navaid_info(nav_ref: XPLMNavRef) -> Option<Navaid> {
         })),
         _ => None
     };
-    navaid
+    navaid.map(|navaid| (navaid, navaid_type))
 }
