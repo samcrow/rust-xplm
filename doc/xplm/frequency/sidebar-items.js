@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Frequency","Stores a radio frequency."]]});

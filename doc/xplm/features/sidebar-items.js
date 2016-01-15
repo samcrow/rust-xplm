@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["feature_enabled","Returns true if the specified feature is supported and enabled"],["has_feature","Returns true if X-Plane supports the feature with the provided name"],["set_feature_enabled","Sets a feature as enabled or disabled. Returns an error if the provide feature name is invalid or if the feature is not supported."]]});

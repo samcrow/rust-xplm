@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["SearchError","Possible errors encountered when finding a dataref"]],"struct":[["DataRef","Provides safe access to a dataref"]]});

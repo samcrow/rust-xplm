@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["bind_texture","Binds a texture ID to a texture number"],["generate_texture_numbers","Generates texture numbers in a range not reserved for X-Plane."],["set_state","Sets the graphics state"]],"mod":[["window","Low-level windows"]],"struct":[["GraphicsState","Stores various flags that can be enabled or disabled"]]});

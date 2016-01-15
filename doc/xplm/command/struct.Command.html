@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Command` struct in crate `xplm`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Command">
+
+    <title>xplm::command::Command - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>xplm</a>::<wbr><a href='index.html'>command</a></p><script>window.sidebarCurrent = {name: 'Command', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>xplm</a>::<wbr><a href='index.html'>command</a>::<wbr><a class='struct' href=''>Command</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-451' class='srclink' href='../../src/xplm/command.rs.html#126-135' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Command&lt;O&gt; {
+    // some fields omitted
+}</pre><div class='docblock'><p>A command</p>
+
+<p>The type parameter O indicates whether this plugin or something else owns the command.</p>
+
+<p>A command execution has three phases:</p>
+
+<ol>
+<li>The command begins. An external command is begun by calling <code>Command::begin()</code>. The
+callback&#39;s <code>command_begin()</code> method is called. This corresponds to a physical button being
+pressed down.</li>
+<li>The callback continues. X-Plane calls the callback&#39;s <code>command_continue</code> method frequently
+until the command execution ends.</li>
+<li>The command ends. An external command is ended by calling <code>Command::end()</code>. The callback&#39;s
+<code>command_end()</code> method is called. This corresponds to a physical button being released.</li>
+</ol>
+
+<h2 id='owned-commands' class='section-header'><a href='#owned-commands'>Owned commands</a></h2>
+<p>Owned commands are created by a plugin. A callback can be set, which will be called when
+something executes the command.</p>
+
+<p>When an owned command goes out of scope, its callback also goes out of scope. However, because
+X-Plane does not allow commands to be deleted at runtime, the command will still exist.
+Excecuting the command will have not effect.</p>
+
+<h2 id='external-commands' class='section-header'><a href='#external-commands'>External commands</a></h2>
+<p>External commands are created by X-Plane or another plugin. Because the order of plugin loading
+is not specified and commands created by other plugins are not available until they load,
+plugins should not search for other plugins&#39; commands until the plugin enable callback.</p>
+
+<h1 id='examples' class='section-header'><a href='#examples'>Examples</a></h1>
+<h2 id='finding-and-executing-a-command' class='section-header'><a href='#finding-and-executing-a-command'>Finding and executing a command</a></h2><pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>command</span> <span class='op'>=</span> <span class='ident'>Command</span>::<span class='ident'>find</span>(<span class='string'>&quot;sim/systems/avionics_on&quot;</span>).<span class='ident'>unwrap</span>();
+<span class='ident'>command</span>.<span class='ident'>begin</span>();
+<span class='ident'>command</span>.<span class='ident'>end</span>();</pre>
+
+<h2 id='creating-a-command' class='section-header'><a href='#creating-a-command'>Creating a command</a></h2><pre class='rust rust-example-rendered'>
+<span class='kw'>struct</span> <span class='ident'>TestCommandCallback</span>;
+
+<span class='kw'>impl</span> <span class='ident'>CommandCallback</span> <span class='kw'>for</span> <span class='ident'>TestCommandCallback</span> {
+    <span class='kw'>fn</span> <span class='ident'>command_begin</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
+        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Command begun&quot;</span>);
+    }
+    <span class='kw'>fn</span> <span class='ident'>command_continue</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
+        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Command continues&quot;</span>);
+    }
+    <span class='kw'>fn</span> <span class='ident'>command_end</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
+        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Command ended&quot;</span>);
+    }
+}
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>command</span> <span class='op'>=</span> <span class='ident'>Command</span>::<span class='ident'>create</span>(<span class='string'>&quot;test/my_plugin/do_something&quot;</span>, <span class='string'>&quot;Does the thing&quot;</span>).<span class='ident'>unwrap</span>();
+<span class='ident'>command</span>.<span class='ident'>set_callback</span>(<span class='ident'>TestCommandCallback</span>);</pre>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../xplm/command/struct.Command.html' title='xplm::command::Command'>Command</a>&lt;<a class='struct' href='../../xplm/command/struct.External.html' title='xplm::command::External'>External</a>&gt;</code></h3><div class='impl-items'><h4 id='method.find' class='method'><code>fn <a href='#method.find' class='fnname'>find</a>(name: &amp;<a href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../../xplm/command/struct.Command.html' title='xplm::command::Command'>Command</a>&lt;<a class='struct' href='../../xplm/command/struct.External.html' title='xplm::command::External'>External</a>&gt;, <a class='enum' href='../../xplm/command/enum.SearchError.html' title='xplm::command::SearchError'>SearchError</a>&gt;</code></h4>
+<div class='docblock'><p>Finds a command by its name</p>
+</div><h4 id='method.begin' class='method'><code>fn <a href='#method.begin' class='fnname'>begin</a>(&amp;self)</code></h4>
+<div class='docblock'><p>Starts executing this command</p>
+</div><h4 id='method.end' class='method'><code>fn <a href='#method.end' class='fnname'>end</a>(&amp;self)</code></h4>
+<div class='docblock'><p>Finishes executing this command</p>
+</div></div><h3 class='impl'><code>impl <a class='struct' href='../../xplm/command/struct.Command.html' title='xplm::command::Command'>Command</a>&lt;<a class='struct' href='../../xplm/command/struct.Owned.html' title='xplm::command::Owned'>Owned</a>&gt;</code></h3><div class='impl-items'><h4 id='method.create' class='method'><code>fn <a href='#method.create' class='fnname'>create</a>(name: &amp;<a href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, description: &amp;<a href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../../xplm/command/struct.Command.html' title='xplm::command::Command'>Command</a>&lt;<a class='struct' href='../../xplm/command/struct.Owned.html' title='xplm::command::Owned'>Owned</a>&gt;, <a class='enum' href='../../xplm/command/enum.CreateError.html' title='xplm::command::CreateError'>CreateError</a>&gt;</code></h4>
+<div class='docblock'><p>Creates a command</p>
+
+<p>name: The name of the command</p>
+
+<p>description: Brief text that describes the command</p>
+</div><h4 id='method.set_callback' class='method'><code>fn <a href='#method.set_callback' class='fnname'>set_callback</a>&lt;C&gt;(&amp;mut self, callback: C) <span class='where'>where C: 'static + <a class='trait' href='../../xplm/command/trait.CommandCallback.html' title='xplm::command::CommandCallback'>CommandCallback</a></span></code></h4>
+<div class='docblock'><p>Sets the callback that will be called when the command is executed.</p>
+
+<p>This Command object takes ownership of the callback.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl&lt;O&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Drop.html' title='core::ops::Drop'>Drop</a> for <a class='struct' href='../../xplm/command/struct.Command.html' title='xplm::command::Command'>Command</a>&lt;O&gt;</code></h3><div class='impl-items'><h4 id='method.drop' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Drop.html#method.drop' class='fnname'>drop</a>(&amp;mut self)</code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "xplm";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script async src="../../search-index.js"></script>
+</body>
+</html>

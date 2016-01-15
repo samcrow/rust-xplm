@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Phase","Phases of execution in which a callback can run"]],"struct":[["FlightLoop","A handle to something that calls a flight loop callback"],["NextCallback","Information on when the next callback should run"]],"trait":[["FlightLoopCallback","A trait for things that can receive flight loop callbacks"]]});

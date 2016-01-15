@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["xplm_ControlFlag",""],["xplm_DownFlag",""],["xplm_OptionAltFlag",""],["xplm_ShiftFlag",""],["xplm_UpFlag",""]],"type":[["Enum_Unnamed1",""],["XPLMKeyFlags",""],["XPLMPluginID",""]]});

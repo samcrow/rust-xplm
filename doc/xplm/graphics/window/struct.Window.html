@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Window` struct in crate `xplm`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Window">
+
+    <title>xplm::graphics::window::Window - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../index.html'>xplm</a>::<wbr><a href='../index.html'>graphics</a>::<wbr><a href='index.html'>window</a></p><script>window.sidebarCurrent = {name: 'Window', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../../index.html'>xplm</a>::<wbr><a href='../index.html'>graphics</a>::<wbr><a href='index.html'>window</a>::<wbr><a class='struct' href=''>Window</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-1808' class='srclink' href='../../../src/xplm/graphics/window.rs.html#119-122' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Window {
+    // some fields omitted
+}</pre><div class='docblock'><p>A low-level window</p>
+
+<p>A Window provides a designated area on the screen and callbacks for drawing and handling user
+input. By default, it is invisible and does not respond to input.</p>
+
+<p>Windows should always be kept in <code>Rc&lt;RefCell&gt;</code>s to ensure proper functionality.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../../xplm/graphics/window/struct.Window.html' title='xplm::graphics::window::Window'>Window</a></code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>(geometry: &amp;<a class='struct' href='../../../xplm/ui/struct.Rect.html' title='xplm::ui::Rect'>Rect</a>) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/alloc/rc/struct.Rc.html' title='alloc::rc::Rc'>Rc</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/core/cell/struct.RefCell.html' title='core::cell::RefCell'>RefCell</a>&lt;<a class='struct' href='../../../xplm/graphics/window/struct.Window.html' title='xplm::graphics::window::Window'>Window</a>&gt;&gt;</code></h4>
+<div class='docblock'><p>Creates a new window the the specified geometry</p>
+</div><h4 id='method.set_draw_callback' class='method'><code>fn <a href='#method.set_draw_callback' class='fnname'>set_draw_callback</a>&lt;C&gt;(&amp;mut self, callback: C) <span class='where'>where C: 'static + <a class='trait' href='../../../xplm/graphics/window/trait.DrawCallback.html' title='xplm::graphics::window::DrawCallback'>DrawCallback</a></span></code></h4>
+<div class='docblock'><p>Sets the callback used to draw this window</p>
+</div><h4 id='method.set_keyboard_callback' class='method'><code>fn <a href='#method.set_keyboard_callback' class='fnname'>set_keyboard_callback</a>&lt;C&gt;(&amp;mut self, callback: C) <span class='where'>where C: 'static + <a class='trait' href='../../../xplm/graphics/window/trait.KeyboardCallback.html' title='xplm::graphics::window::KeyboardCallback'>KeyboardCallback</a></span></code></h4>
+<div class='docblock'><p>Sets the callback to handle keyboard events for this window</p>
+</div><h4 id='method.set_mouse_callback' class='method'><code>fn <a href='#method.set_mouse_callback' class='fnname'>set_mouse_callback</a>&lt;C&gt;(&amp;mut self, callback: C) <span class='where'>where C: 'static + <a class='trait' href='../../../xplm/graphics/window/trait.MouseCallback.html' title='xplm::graphics::window::MouseCallback'>MouseCallback</a></span></code></h4>
+<div class='docblock'><p>Sets the callback to handle mouse events for this window</p>
+</div><h4 id='method.set_mouse_wheel_callback' class='method'><code>fn <a href='#method.set_mouse_wheel_callback' class='fnname'>set_mouse_wheel_callback</a>&lt;C&gt;(&amp;mut self, callback: C) <span class='where'>where C: 'static + <a class='trait' href='../../../xplm/graphics/window/trait.MouseWheelCallback.html' title='xplm::graphics::window::MouseWheelCallback'>MouseWheelCallback</a></span></code></h4>
+<div class='docblock'><p>Sets the callback to handle mouse wheel events for this window</p>
+</div><h4 id='method.set_cursor_callback' class='method'><code>fn <a href='#method.set_cursor_callback' class='fnname'>set_cursor_callback</a>&lt;C&gt;(&amp;mut self, callback: C) <span class='where'>where C: 'static + <a class='trait' href='../../../xplm/graphics/window/trait.CursorCallback.html' title='xplm::graphics::window::CursorCallback'>CursorCallback</a></span></code></h4>
+<div class='docblock'><p>Sets the callback to specify cursors for this window</p>
+</div><h4 id='method.set_visible' class='method'><code>fn <a href='#method.set_visible' class='fnname'>set_visible</a>(&amp;mut self, visible: <a href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>)</code></h4>
+<div class='docblock'><p>Sets a window to be visible or hidden</p>
+</div><h4 id='method.bring_to_front' class='method'><code>fn <a href='#method.bring_to_front' class='fnname'>bring_to_front</a>(&amp;self)</code></h4>
+<div class='docblock'><p>Moves this window on top of other windows</p>
+</div><h4 id='method.request_focus' class='method'><code>fn <a href='#method.request_focus' class='fnname'>request_focus</a>(&amp;self)</code></h4>
+<div class='docblock'><p>Gives this window keyboard focus</p>
+</div><h4 id='method.get_geometry' class='method'><code>fn <a href='#method.get_geometry' class='fnname'>get_geometry</a>(&amp;self) -&gt; <a class='struct' href='../../../xplm/ui/struct.Rect.html' title='xplm::ui::Rect'>Rect</a></code></h4>
+<div class='docblock'><p>Returns the geometry of this window</p>
+</div><h4 id='method.set_geometry' class='method'><code>fn <a href='#method.set_geometry' class='fnname'>set_geometry</a>(&amp;mut self, geometry: &amp;<a class='struct' href='../../../xplm/ui/struct.Rect.html' title='xplm::ui::Rect'>Rect</a>)</code></h4>
+<div class='docblock'><p>Sets the geometry of this window</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Drop.html' title='core::ops::Drop'>Drop</a> for <a class='struct' href='../../../xplm/graphics/window/struct.Window.html' title='xplm::graphics::window::Window'>Window</a></code></h3><div class='impl-items'><h4 id='method.drop' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Drop.html#method.drop' class='fnname'>drop</a>(&amp;mut self)</code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "xplm";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script async src="../../../search-index.js"></script>
+</body>
+</html>

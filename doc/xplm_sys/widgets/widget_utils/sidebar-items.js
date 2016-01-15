@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["XPUCreateWidgets",""],["XPUDefocusKeyboard",""],["XPUDragWidget",""],["XPUFixedLayout",""],["XPUMoveWidgetBy",""],["XPUSelectIfNeeded",""]],"struct":[["Struct_Unnamed1",""]],"type":[["XPWidgetCreate_t",""]]});
