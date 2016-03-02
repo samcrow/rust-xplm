@@ -33,7 +33,7 @@ use data::*;
 ///
 ///
 #[allow(raw_pointer_derive)]
-#[derive(Debug,Clone)]
+#[derive(Debug)]
 pub struct OwnedData<D, A> {
     /// The associated data, allocated in a Box
     /// refcons in the callbacks are pointers to these.
