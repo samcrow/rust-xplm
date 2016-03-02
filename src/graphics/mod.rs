@@ -76,3 +76,14 @@ pub fn generate_texture_numbers(numbers: &mut [i32]) {
         XPLMGenerateTextureNumbers(numbers.as_mut_ptr(), count);
     }
 }
+
+///
+/// Generates a single texture number
+///
+/// See generate_texture_numbers for more detail.
+///
+pub fn generate_texture_number() -> i32 {
+    let number = 0;
+    generate_texture_numbers(&mut [number]);
+    number
+}
