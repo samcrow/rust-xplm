@@ -47,7 +47,7 @@ pub fn debug(message: &str) {
 
     match CString::new(message) {
         Ok(message_c) => unsafe { XPLMDebugString(message_c.as_ptr()) },
-        Err(_) => unsafe { XPLMDebugString(b"xplm::debug: Provided string not valid".as_ptr() as *const i8) },
+        Err(_) => unsafe { XPLMDebugString(b"xplm::debug: Provided string not valid".as_ptr() as *const libc::c_char) },
     }
 }
 

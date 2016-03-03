@@ -11,6 +11,8 @@
 //! Foreign function interface utilities
 //!
 
+extern crate libc;
+
 /// A fixed-length array of characters that can be passed to C functions and converted into a
 /// String
 #[derive(Debug)]
@@ -25,14 +27,14 @@ impl StringBuffer {
     pub fn new(length: usize) -> StringBuffer {
         let mut bytes = Vec::with_capacity(length);
         for _ in 0..length {
-            bytes.push('\0' as u8);
+            bytes.push(b'\0');
         }
         StringBuffer { bytes: bytes }
     }
 
     /// Returns a mutable pointer to the data in this buffer
-    pub unsafe fn as_mut_ptr(&mut self) -> *mut i8 {
-        self.bytes.as_mut_ptr() as *mut i8
+    pub unsafe fn as_mut_ptr(&mut self) -> *mut libc::c_char {
+        self.bytes.as_mut_ptr() as *mut libc::c_char
     }
 
     /// Returns a String containing all bytes in this buffer, up to and not including the first
@@ -40,7 +42,7 @@ impl StringBuffer {
     pub fn as_string(&self) -> String {
         let mut end_index = self.bytes.len();
         for (i, &byte) in self.bytes.iter().enumerate() {
-            if byte == '\0' as u8 {
+            if byte == b'\0' {
                 end_index = i;
                 break;
             }
