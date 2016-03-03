@@ -31,7 +31,6 @@ pub struct ProbeResult {
 /// A terrain probe
 ///
 ///
-#[allow(raw_pointer_derive)]
 #[derive(Debug)]
 pub struct Probe {
     /// The probe reference

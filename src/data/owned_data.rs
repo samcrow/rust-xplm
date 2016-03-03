@@ -32,7 +32,6 @@ use data::*;
 /// `ReadWrite` for a writeable dataref or `ReadOnly` for a read-only dataref.
 ///
 ///
-#[allow(raw_pointer_derive)]
 #[derive(Debug)]
 pub struct OwnedData<D, A> {
     /// The associated data, allocated in a Box
