@@ -85,7 +85,7 @@ impl DataAccess for ReadOnly {
 /// Fits a length into an i32.
 /// If the provided value is greater than i32::max_value, returns i32::max_value().
 /// Otherwise, returns the value as an i32.
-pub fn array_length(length: usize) -> i32 {
+fn array_length(length: usize) -> i32 {
     if length > (i32::max_value() as usize) {
         i32::max_value()
     }

@@ -19,6 +19,7 @@ use std::ptr;
 use ffi::StringBuffer;
 use xplm_sys::data_access::*;
 use data::*;
+use super::array_length;
 
 use libc;
 

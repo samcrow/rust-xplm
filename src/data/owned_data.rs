@@ -14,6 +14,7 @@ use std::ptr;
 use std::cmp::min;
 
 use xplm_sys::data_access::*;
+use super::array_length;
 use data::*;
 
 
