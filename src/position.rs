@@ -11,7 +11,7 @@
 //! Types that represent positions in X-Plane
 //!
 
-use data::{DataRef, Readable, Borrowed, ReadOnly};
+use data::{Readable, Borrowed, ReadOnly};
 use xplm_sys::graphics::*;
 
 use std::convert::From;

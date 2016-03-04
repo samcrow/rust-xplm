@@ -120,29 +120,23 @@ impl<D, A> Owned<D, A> where D: DataType, A: DataAccess {
     }
 }
 
+impl<D, A> Owned<D, A> {
+    fn get<'a>(&'a self) -> &'a D {
+        unsafe { &(*self.inner).value }
+    }
+    fn get_mut<'a>(&'a mut self) -> &'a mut D {
+        unsafe { &mut (*self.inner).value }
+    }
+    fn set(&mut self, value: D) {
+        unsafe { (*self.inner).value = value }
+    }
+}
+
 impl<D, A> Drop for Owned<D, A> {
     fn drop(&mut self) {
         // Deallocate inner
         let inner_box = unsafe { Box::from_raw(self.inner) };
         drop(inner_box);
-    }
-}
-
-///
-/// Implement DataRef<D, ReadWrite> so that this plugin can write datarefs it owns regardless
-/// of other plugins' access.
-///
-/// This implementation goes through X-Plane. A faster set of implementations would access
-/// the values directly.
-///
-impl<D, A> DataRef<D, ReadWrite> for Owned<D, A> where D: DataType, A: DataAccess {
-    fn dataref(&self) -> XPLMDataRef {
-        unsafe { (*self.inner).dataref }
-    }
-}
-impl<'a, D, A> DataRef<D, ReadWrite> for &'a Owned<D, A> where D: DataType, A: DataAccess {
-    fn dataref(&self) -> XPLMDataRef {
-        unsafe { (*self.inner).dataref }
     }
 }
 
@@ -254,5 +248,54 @@ unsafe fn handle_write<T>(data: &mut [T], in_values: *const T, offset: usize, ma
     for i in offset..upper_bound {
         let non_offset = i - offset;
         data[i] = (*(in_values.offset(non_offset as isize))).clone();
+    }
+}
+
+// All implementations are done regardless of type parameter A. This plugin can always write
+// datarefs it owns, even if other plugins cannot write them.
+
+// Read
+impl<D, A> Readable<D> for Owned<D, A> where D: Clone {
+    fn get(&self) -> D {
+        self.get().clone()
+    }
+}
+// Write
+impl<D, A> Writeable<D> for Owned<D, A> {
+    fn set(&mut self, value: D) {
+        self.set(value)
+    }
+}
+// Array read
+impl<D, A> ArrayReadable<D> for Owned<Vec<D>, A> where D: Clone {
+    fn len(&self) -> usize {
+        self.get().len()
+    }
+}
+// Array write
+impl<D, A> ArrayWriteable<D> for Owned<Vec<D>, A> where D: Clone {
+    fn set_from_slice(&mut self, value: &[D]) {
+        let elements = self.get_mut();
+        for (i, v) in value.iter().enumerate() {
+            elements[i] = v.clone();
+        }
+    }
+}
+
+// String read
+impl<A> StringReadable for Owned<String, A> {
+    fn len(&self) -> usize {
+        self.get().len()
+    }
+}
+// String write
+impl<A> StringWriteable for Owned<String, A> {
+    fn set_string(&mut self, value: &str) -> Result<(), NulError> {
+        // Ensure the value does not have null bytes
+        let _ = try!(CString::new(value));
+        let string = self.get_mut();
+        string.clear();
+        string.push_str(value);
+        Ok(())
     }
 }

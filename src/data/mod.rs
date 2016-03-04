@@ -19,27 +19,12 @@ extern crate libc;
 
 use xplm_sys::data_access::*;
 
-use ffi::StringBuffer;
-
-use std::ffi::{CString, NulError};
-use std::ptr;
+use std::ffi::NulError;
 
 // Use types
 pub use self::borrowed::Borrowed;
 pub use self::owned::Owned;
 pub use self::shared::Shared;
-
-///
-/// Trait for objects that can be accessed through an XPLMDataRef handle
-///
-/// D is the data type. A is the data access level
-///
-pub trait DataRef<D, A> where D: DataType, A: DataAccess {
-    ///
-    /// Returns the dataref that this object contains
-    ///
-    fn dataref(&self) -> XPLMDataRef;
-}
 
 ///
 /// A trait for objects that can be 'dereferenced' to get a value
@@ -83,196 +68,19 @@ pub trait ArrayWriteable<T> : ArrayReadable<T> + Writeable<Vec<T>> {
 ///
 /// A trait for objects that can be read as Strings
 ///
-pub trait StringReadable {
-    /// Reads this value as a string
-    fn get_string(&self) -> String;
+pub trait StringReadable : Readable<String> {
     /// Returns the length of this string value in bytes
     fn len(&self) -> usize;
 }
 ///
 /// A trait for objects that can be written as Strings
 ///
-pub trait StringWriteable : StringReadable {
-    /// Sets the values in this array from a string
+pub trait StringWriteable : Writeable<String> + StringReadable {
+    /// Sets the values in this array from a string slice
     /// If the string contains one or more null bytes, an error
     /// is returned.
     fn set_string(&mut self, value: &str) -> Result<(), NulError>;
 }
-
-// Integer read
-impl<T> Readable<i32> for T where T: DataRef<i32, ReadOnly> {
-    /// Returns the value of this dataref
-    fn get(&self) -> i32 {
-        unsafe { XPLMGetDatai(self.dataref()) }
-    }
-}
-impl<T> Readable<i32> for T where T: DataRef<i32, ReadWrite> {
-    /// Returns the value of this dataref
-    fn get(&self) -> i32 {
-        unsafe { XPLMGetDatai(self.dataref()) }
-    }
-}
-// Integer write
-impl Writeable<i32> for DataRef<i32, ReadWrite> {
-    /// Sets the value of this dataref
-    fn set(&mut self, value: i32) {
-        unsafe { XPLMSetDatai(self.dataref(), value) }
-    }
-}
-// Float read
-impl<T> Readable<f32> for T where T: DataRef<f32, ReadOnly> {
-    fn get(&self) -> f32 {
-        unsafe { XPLMGetDataf(self.dataref()) }
-    }
-}
-// Float write
-impl Writeable<f32> for DataRef<f32, ReadWrite> {
-    /// Sets the value of this dataref
-    fn set(&mut self, value: f32) {
-        unsafe { XPLMSetDataf(self.dataref(), value) }
-    }
-}
-// Double read
-impl<A> Readable<f64> for DataRef<f64, A> {
-    /// Returns the value of this dataref
-    fn get(&self) -> f64 {
-        unsafe { XPLMGetDatad(self.dataref()) }
-    }
-}
-// Double write
-impl DataRef<f64, ReadWrite> {
-    /// Sets the value of this dataref
-    pub fn set(&mut self, value: f64) {
-        unsafe { XPLMSetDatad(self.dataref(), value) }
-    }
-}
-
-// Integer array read
-impl<A> Readable<Vec<i32>> for DataRef<Vec<i32>, A> {
-    fn get(&self) -> Vec<i32> {
-        let length = self.len();
-        let mut values = Vec::with_capacity(length);
-        unsafe {
-            values.set_len(length);
-            XPLMGetDatavi(self.dataref(), values.as_mut_ptr(), 0, array_length(length));
-        }
-        values
-    }
-}
-impl<A> ArrayReadable<i32> for DataRef<Vec<i32>, A> {
-    fn len(&self) -> usize {
-        let size_int = unsafe { XPLMGetDatavi(self.dataref(), ptr::null_mut(), 0, 0) };
-        size_int as usize
-    }
-}
-// Integer array write
-impl Writeable<Vec<i32>> for DataRef<Vec<i32>, ReadWrite> {
-    fn set(&mut self, value: Vec<i32>) {
-        self.set_from_slice(&value)
-    }
-}
-impl ArrayWriteable<i32> for DataRef<Vec<i32>, ReadWrite> {
-    fn set_from_slice(&mut self, value: &[i32]) {
-        unsafe {
-            XPLMSetDatavi(self.dataref(), value.as_ptr() as *mut i32,
-                0, array_length(value.len()));
-        }
-    }
-}
-
-// Float array read
-impl<A> Readable<Vec<f32>> for DataRef<Vec<f32>, A> {
-    fn get(&self) -> Vec<f32> {
-        let length = self.len();
-        let mut values = Vec::with_capacity(length);
-        unsafe {
-            values.set_len(length);
-            XPLMGetDatavf(self.dataref(), values.as_mut_ptr(), 0, array_length(length));
-        }
-        values
-    }
-}
-impl<A> ArrayReadable<f32> for DataRef<Vec<f32>, A> {
-    fn len(&self) -> usize {
-        let size_int = unsafe { XPLMGetDatavf(self.dataref(), ptr::null_mut(), 0, 0) };
-        size_int as usize
-    }
-}
-// Float array write
-impl Writeable<Vec<f32>> for DataRef<Vec<f32>, ReadWrite> {
-    fn set(&mut self, value: Vec<f32>) {
-        self.set_from_slice(&value)
-    }
-}
-impl ArrayWriteable<f32> for DataRef<Vec<f32>, ReadWrite> {
-    fn set_from_slice(&mut self, value: &[f32]) {
-        unsafe {
-            XPLMSetDatavf(self.dataref(), value.as_ptr() as *mut f32,
-                0, array_length(value.len()));
-        }
-    }
-}
-
-// Byte array read
-impl<A> Readable<Vec<u8>> for DataRef<Vec<u8>, A> {
-    fn get(&self) -> Vec<u8> {
-        let length = self.len();
-        let mut values = Vec::with_capacity(length);
-        unsafe {
-            values.set_len(length);
-            XPLMGetDatab(self.dataref(), values.as_mut_ptr() as *mut libc::c_void,
-                0, array_length(length));
-        }
-        values
-    }
-}
-impl<A> ArrayReadable<u8> for DataRef<Vec<u8>, A> {
-    fn len(&self) -> usize {
-        let size_int = unsafe { XPLMGetDatab(self.dataref(), ptr::null_mut(), 0, 0) };
-        size_int as usize
-    }
-}
-// Byte array write
-impl Writeable<Vec<u8>> for DataRef<Vec<u8>, ReadWrite> {
-    fn set(&mut self, value: Vec<u8>) {
-        self.set_from_slice(&value)
-    }
-}
-impl ArrayWriteable<u8> for DataRef<Vec<u8>, ReadWrite> {
-    fn set_from_slice(&mut self, value: &[u8]) {
-        unsafe {
-            XPLMSetDatab(self.dataref(), value.as_ptr() as *mut libc::c_void,
-                0, array_length(value.len()));
-        }
-    }
-}
-// String read
-impl<A> StringReadable for DataRef<String, A> {
-    fn get_string(&self) -> String {
-        // Create a byte array of the right length
-        let length = self.len();
-        let mut buffer = StringBuffer::new(length);
-        // Copy data in
-        unsafe { XPLMGetDatab(self.dataref(), buffer.as_mut_ptr() as *mut libc::c_void,
-            0, array_length(length)) };
-        // Convert into a string
-        buffer.as_string()
-    }
-    fn len(&self) -> usize {
-        let size_int = unsafe { XPLMGetDatab(self.dataref(), ptr::null_mut(), 0, 0) };
-        size_int as usize
-    }
-}
-// String write
-impl StringWriteable for DataRef<String, ReadWrite> {
-    fn set_string(&mut self, value: &str) -> Result<(), NulError> {
-        let value_c = try!(CString::new(value));
-        unsafe { XPLMSetDatab(self.dataref(), value_c.as_ptr() as *mut libc::c_void, 0,
-            array_length(value_c.as_bytes_with_nul().len())) };
-        Ok(())
-    }
-}
-
 
 /// Possible errors encountered when finding a dataref
 #[derive(Debug,Clone)]
