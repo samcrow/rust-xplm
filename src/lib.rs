@@ -16,6 +16,7 @@ extern crate libc;
 
 /// Functionality for reading, writing, and creating datarefs
 pub mod data;
+pub mod data2;
 /// Functionality for finding, creating, and executing commands
 pub mod command;
 /// Flight loop callbacks

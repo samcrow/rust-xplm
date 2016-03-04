@@ -11,8 +11,8 @@
 //! Provides access to X-Plane datarefs
 //!
 
-use std::marker::PhantomData;
 use std::ffi::NulError;
+use std::marker::PhantomData;
 use std::ffi::CString;
 use std::ptr;
 
@@ -22,23 +22,6 @@ use data::*;
 use super::array_length;
 
 use libc;
-
-
-/// Possible errors encountered when finding a dataref
-#[derive(Debug,Clone)]
-pub enum SearchError {
-    /// Indicates that the provided name contains one or more null bytes
-    /// Includes the NulError to provide more details
-    InvalidName(NulError),
-    /// Indicates that no dataref with the specified name was found
-    NotFound,
-    /// Indicates that the requested data type and the dataref's type
-    /// do not match
-    WrongDataType,
-    /// Indicates that the wrong DataAccess was requested, which usually
-    /// means that a ReadWrite DataRef object was used with a read-only dataref
-    WrongDataAccess,
-}
 
 /// Provides safe access to a dataref
 ///

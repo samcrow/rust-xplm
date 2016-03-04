@@ -12,8 +12,29 @@
 pub mod dataref;
 /// Allows creation of datarefs
 pub mod owned_data;
+/// Allows creation of and access to shared data
+pub mod shared;
 
 use xplm_sys::data_access::*;
+
+use std::ffi::NulError;
+
+
+/// Possible errors encountered when finding a dataref
+#[derive(Debug,Clone)]
+pub enum SearchError {
+    /// Indicates that the provided name contains one or more null bytes
+    /// Includes the NulError to provide more details
+    InvalidName(NulError),
+    /// Indicates that no dataref with the specified name was found
+    NotFound,
+    /// Indicates that the requested data type and the dataref's type
+    /// do not match
+    WrongDataType,
+    /// Indicates that the wrong DataAccess was requested, which usually
+    /// means that a ReadWrite DataRef object was used with a read-only dataref
+    WrongDataAccess,
+}
 
 /// Trait for types that have associated type IDs in X-Plane
 pub trait DataType : Clone {
