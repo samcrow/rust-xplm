@@ -135,7 +135,12 @@ impl<D, A> Drop for Owned<D, A> {
 /// This implementation goes through X-Plane. A faster set of implementations would access
 /// the values directly.
 ///
-impl<D, A> DataRef<D, ReadWrite> for Owned<D, A> {
+impl<D, A> DataRef<D, ReadWrite> for Owned<D, A> where D: DataType, A: DataAccess {
+    fn dataref(&self) -> XPLMDataRef {
+        unsafe { (*self.inner).dataref }
+    }
+}
+impl<'a, D, A> DataRef<D, ReadWrite> for &'a Owned<D, A> where D: DataType, A: DataAccess {
     fn dataref(&self) -> XPLMDataRef {
         unsafe { (*self.inner).dataref }
     }

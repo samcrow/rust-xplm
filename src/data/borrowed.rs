@@ -96,6 +96,9 @@ impl<D, A> Borrowed<D, A> where D: DataType, A: DataAccess {
     }
 }
 
-impl<D, A> DataRef<D, A> for Borrowed<D, A> {
+impl<D, A> DataRef<D, A> for Borrowed<D, A> where D: DataType, A: DataAccess {
+    fn dataref(&self) -> XPLMDataRef { self.dataref }
+}
+impl<'a, D, A> DataRef<D, A> for &'a Borrowed<D, A> where D: DataType, A: DataAccess {
     fn dataref(&self) -> XPLMDataRef { self.dataref }
 }

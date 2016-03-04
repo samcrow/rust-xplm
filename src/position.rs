@@ -11,8 +11,7 @@
 //! Types that represent positions in X-Plane
 //!
 
-use data::ReadOnly;
-use data::dataref::DataRef;
+use data::{DataRef, Readable, Borrowed, ReadOnly};
 use xplm_sys::graphics::*;
 
 use std::convert::From;
@@ -116,9 +115,9 @@ pub trait Positioned {
 }
 
 /// Origin latitude dataref
-static mut origin_latitude: Option<DataRef<f32, ReadOnly>> = None;
+static mut origin_latitude: Option<Borrowed<f32, ReadOnly>> = None;
 /// Origin longitude dataref
-static mut origin_longitude: Option<DataRef<f32, ReadOnly>> = None;
+static mut origin_longitude: Option<Borrowed<f32, ReadOnly>> = None;
 
 /// Returns the latitude and longitude of the origin of the local coordinate
 /// system
@@ -126,11 +125,11 @@ pub fn local_origin() -> LatLon {
     unsafe {
         if origin_latitude.is_none() {
             origin_latitude = Some(
-                DataRef::find("sim/flightmodel/position/lat_ref").unwrap());
+                Borrowed::find("sim/flightmodel/position/lat_ref").unwrap());
         }
         if origin_longitude.is_none() {
             origin_longitude = Some(
-                DataRef::find("sim/flightmodel/position/lon_ref").unwrap());
+                Borrowed::find("sim/flightmodel/position/lon_ref").unwrap());
         }
 
         match (&origin_latitude, &origin_longitude) {
