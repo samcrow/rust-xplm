@@ -77,6 +77,19 @@ impl Plugin {
             Err(_) => None,
         }
     }
+    ///
+    /// Returns all available plugins, including disabled ones
+    ///
+    pub fn all_plugins() -> Vec<Plugin> {
+        let plugin_count = unsafe { XPLMCountPlugins() };
+        let mut plugins = Vec::with_capacity(plugin_count as usize);
+        for i in 0..plugin_count {
+            let id = unsafe { XPLMGetNthPlugin(i) };
+            assert!(id != NO_ID);
+            plugins.push(Plugin { id: id });
+        }
+        plugins
+    }
 
     ///
     /// Returns true if this plugin is enabled
