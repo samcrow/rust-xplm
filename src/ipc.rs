@@ -8,6 +8,8 @@ use xplm_sys::defs::XPLMPluginID;
 
 use std::ffi::CString;
 use std::ptr;
+use std::error::Error;
+use std::fmt;
 use ffi::StringBuffer;
 
 ///
@@ -159,7 +161,7 @@ impl Plugin {
     ///
     /// Returns Err if the message is less than the minimum user message (`0x00FFFFFF`).
     ///
-    pub fn send_message(&self, message: u32) -> Result<(), ()> {
+    pub fn send_message(&self, message: u32) -> Result<(), SendError> {
         if message >= MIN_USER_MESSAGE {
             unsafe {
                 XPLMSendMessageToPlugin(self.id, message as libc::c_int, ptr::null_mut());
@@ -167,7 +169,24 @@ impl Plugin {
             Ok(())
         } else {
             // Reserved message number
-            Err(())
+            Err(SendError)
         }
+    }
+}
+
+/// An error that indicates that a message could not be sent because its message number
+/// was invald
+#[derive(Debug)]
+pub struct SendError;
+
+impl fmt::Display for SendError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Message number less than {}", MIN_USER_MESSAGE)
+    }
+}
+
+impl Error for SendError {
+    fn description(&self) -> &str {
+        "Message number less than minimum"
     }
 }
