@@ -35,6 +35,8 @@ pub mod nav;
 pub mod frequency;
 /// OpenGL-related functionality
 pub mod graphics;
+/// Inter-plugin communication
+pub mod ipc;
 
 
 /// Foreign function interface utilities
