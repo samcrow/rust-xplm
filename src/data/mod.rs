@@ -20,6 +20,8 @@ extern crate libc;
 use xplm_sys::data_access::*;
 
 use std::ffi::NulError;
+use std::fmt;
+use std::error::Error;
 
 // Use types
 pub use self::borrowed::Borrowed;
@@ -83,7 +85,7 @@ pub trait StringWriteable : Writeable<String> + StringReadable {
 }
 
 /// Possible errors encountered when finding a dataref
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub enum SearchError {
     /// Indicates that the provided name contains one or more null bytes
     /// Includes the NulError to provide more details
@@ -97,6 +99,24 @@ pub enum SearchError {
     /// means that a ReadWrite DataRef object was used with a read-only dataref
     WrongDataAccess,
 }
+
+impl fmt::Display for SearchError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.description())
+    }
+}
+
+impl Error for SearchError {
+    fn description(&self) -> &str {
+        match self {
+            &SearchError::InvalidName(_) => "Invalid name",
+            &SearchError::NotFound => "Not found",
+            &SearchError::WrongDataType => "Wrong data type",
+            &SearchError::WrongDataAccess => "Wrong data access",
+        }
+    }
+}
+
 
 /// Trait for types that have associated type IDs in X-Plane
 pub trait DataType : Clone {
