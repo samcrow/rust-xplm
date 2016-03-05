@@ -115,6 +115,7 @@ impl<F> FlightLoopCallback for F where F: Fn() -> NextCallback {
 /// flight_loop.schedule(NextCallback::AfterLoops(1));
 /// ```
 ///
+#[allow(missing_debug_implementations)]
 pub struct FlightLoop {
     /// The ID of this loop
     id: XPLMFlightLoopID,

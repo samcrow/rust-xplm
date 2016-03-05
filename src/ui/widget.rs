@@ -27,7 +27,8 @@ use xplm_sys::widgets::standard_widgets;
 /// the same Base.
 ///
 /// Each Base corresponds to one X-Plane widget resource.
-struct Base {
+#[allow(missing_debug_implementations)]
+pub struct Base {
     /// The ID of this widget
     id: XPWidgetID,
     /// The children of this widget
@@ -85,13 +86,13 @@ impl Drop for Base {
 }
 
 /// A refernece-counted, runtime-mutability-checked, pointer to a Base
-type BasePtr = Rc<RefCell<Base>>;
+pub type BasePtr = Rc<RefCell<Base>>;
 /// A weak pointer to a base
 type WeakBasePtr = Weak<RefCell<Base>>;
 
 /// Trait for all widgets that contain a Base. All widges should implement this trait.
 /// Implementing this trait also implements Widget (see below).
-trait HasBase {
+pub trait HasBase {
     fn base(&self) -> BasePtr;
 }
 
@@ -112,6 +113,7 @@ impl<T> WidgetDelegate for T where T: Fn(XPWidgetID, XPWidgetMessage, isize, isi
 }
 
 /// A delegate that ignores all messages
+#[derive(Debug)]
 pub struct DefaultDelegate;
 
 impl WidgetDelegate for DefaultDelegate {
@@ -239,6 +241,7 @@ const WINDOW_WIDGET_CLASS: XPWidgetClass = 1;
 /// By default, a window has close buttons.
 ///
 /// The descriptor of a window is its title.
+#[allow(missing_debug_implementations)]
 pub struct Window {
     base: BasePtr,
 }
@@ -275,6 +278,7 @@ impl HasBase for Window {
     }
 }
 /// A delegate that hides a window when a close button is pressed
+#[derive(Debug)]
 struct DefaultWindowDelegate;
 impl WidgetDelegate for DefaultWindowDelegate {
     fn handle_message(&mut self, widget: XPWidgetID, message: XPWidgetMessage, _: isize,
@@ -291,6 +295,7 @@ impl WidgetDelegate for DefaultWindowDelegate {
 }
 
 /// Appearance styles for panes
+#[derive(Debug)]
 pub enum PaneType {
     /// A standard pane
     Pane,
@@ -307,6 +312,7 @@ const PANE_WIDGET_CLASS: XPWidgetClass = 2;
 /// While a Window automatically moves its children when the user drags it around the screen,
 /// a Pane does not. Therefore, it may be better to have UI elements be children of a window than
 /// children of a Pane.
+#[allow(missing_debug_implementations)]
 pub struct Pane {
     base: BasePtr,
 }
@@ -342,6 +348,7 @@ impl HasBase for Pane {
 const BUTTON_WIDGET_CLASS: XPWidgetClass = 3;
 
 /// A push button
+#[allow(missing_debug_implementations)]
 pub struct Button {
     base: BasePtr,
 }
@@ -402,6 +409,7 @@ impl<L> WidgetDelegate for ButtonDelegate<L> where L: ButtonListener {
 /// A check box
 ///
 /// A check box does not include a label.
+#[allow(missing_debug_implementations)]
 pub struct CheckBox {
     base: BasePtr,
 }
@@ -447,6 +455,7 @@ impl<F> CheckBoxListener for F where F: Fn(bool) {
     fn value_changed(&mut self, checked: bool) { self(checked) }
 }
 
+#[derive(Debug)]
 struct CheckBoxDelegate<L> where L: CheckBoxListener {
     listener: L,
 }

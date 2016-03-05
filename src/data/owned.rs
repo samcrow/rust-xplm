@@ -18,6 +18,7 @@ use std::boxed::Box;
 /// The DataAccess type parameter for owned datarefs is the access that other plugins have.
 /// This plugin can always write datarefs that it owns.
 ///
+#[derive(Debug)]
 pub struct Owned<D, A> {
     /// The associated data, allocated in a Box.
     /// refcons in the callbacks are pointers to this.
@@ -28,7 +29,7 @@ impl<D, A> Owned<D, A> where D: DataType, A: DataAccess {
     /// Creates a dataref with the provided name, set to the provided value
     ///
     /// Returns the dataref on success, or an error if the provided name was invalid.
-    #[allow(non_upper_case_globals)]
+    #[allow(non_upper_case_globals, trivial_casts)]
     pub fn create(name: &str, initial_value: D) -> Result<Owned<D, A>, NulError> {
         let name_c = try!(CString::new(name));
         let inner = Box::into_raw(Box::new(InnerOwnedData {
@@ -194,7 +195,7 @@ unsafe extern "C" fn get_data_vi(refcon: *mut ::libc::c_void, values: *mut ::lib
 unsafe extern "C" fn set_data_vi(refcon: *mut ::libc::c_void, values: *mut ::libc::c_int,
                                            offset: ::libc::c_int, max: ::libc::c_int) {
     let data = refcon as *mut InnerOwnedData<Vec<i32>, ReadWrite>;
-    handle_write(&mut (*data).value, values as *const ::libc::c_int,offset as usize, max as usize);
+    handle_write(&mut (*data).value, values, offset as usize, max as usize);
 }
 unsafe extern "C" fn get_data_vf(refcon: *mut ::libc::c_void, values: *mut ::libc::c_float,
                                            offset: ::libc::c_int, max: ::libc::c_int)
@@ -205,7 +206,7 @@ unsafe extern "C" fn get_data_vf(refcon: *mut ::libc::c_void, values: *mut ::lib
 unsafe extern "C" fn set_data_vf(refcon: *mut ::libc::c_void, values: *mut ::libc::c_float,
                                            offset: ::libc::c_int, max: ::libc::c_int) {
     let data = refcon as *mut InnerOwnedData<Vec<f32>, ReadWrite>;
-    handle_write(&mut (*data).value, values as *const ::libc::c_float, offset as usize,
+    handle_write(&mut (*data).value, values, offset as usize,
     max as usize);
 }
 unsafe extern "C" fn get_data_b(refcon: *mut ::libc::c_void, values: *mut ::libc::c_void,

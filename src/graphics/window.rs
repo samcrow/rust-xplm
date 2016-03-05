@@ -116,6 +116,7 @@ impl<T> KeyboardCallback for T where T: Fn(KeyEvent, Key, ModifierKeys, Option<c
 /// input. By default, it is invisible and does not respond to input.
 ///
 /// Windows should always be kept in `Rc<RefCell>`s to ensure proper functionality.
+#[allow(missing_debug_implementations)]
 pub struct Window {
     /// Pointer to the window data block, allocated in a Box
     data: *mut WindowData,

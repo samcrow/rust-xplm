@@ -58,9 +58,11 @@ pub trait CommandCallback {
 }
 
 /// Marks a command that this plugin owns
+#[derive(Debug)]
 pub struct Owned;
 
 /// Marks a command that is owned by something else
+#[derive(Debug)]
 pub struct External;
 
 /// A command
@@ -123,6 +125,7 @@ pub struct External;
 /// command.set_callback(TestCommandCallback);
 /// ```
 ///
+#[allow(missing_debug_implementations)]
 pub struct Command<O> {
     /// The command
     command: XPLMCommandRef,

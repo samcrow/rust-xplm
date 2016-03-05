@@ -21,7 +21,7 @@ use ffi::StringBuffer;
 const INVALID_NAV: XPLMNavRef = -1;
 
 /// Represents a non-directional beacon
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub struct NDB {
     /// Position
     pub position: LatLonAlt,
@@ -39,7 +39,7 @@ impl Positioned for NDB {
     }
 }
 /// Represents a VOR
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub struct VOR {
     /// Position
     pub position: LatLonAlt,
@@ -57,7 +57,7 @@ impl Positioned for VOR {
     }
 }
 /// Represents an airport
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub struct Airport {
     /// Position
     pub position: LatLonAlt,
@@ -73,7 +73,7 @@ impl Positioned for Airport {
     }
 }
 /// Represents an ILS localizer (the glideslope is a separate Glideslope object)
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub struct ILSLocalizer {
     /// Position
     pub position: LatLonAlt,
@@ -93,7 +93,7 @@ impl Positioned for ILSLocalizer {
     }
 }
 /// Represents a standalone localizer
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub struct Localizer {
     /// Position
     pub position: LatLonAlt,
@@ -113,7 +113,7 @@ impl Positioned for Localizer {
     }
 }
 /// Represents an ILS glideslope
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub struct Glideslope {
     /// Position
     pub position: LatLonAlt,
@@ -133,7 +133,7 @@ impl Positioned for Glideslope {
     }
 }
 /// Represents an outer marker
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub struct OuterMarker {
     /// Position
     pub position: LatLonAlt,
@@ -149,7 +149,7 @@ impl Positioned for OuterMarker {
     }
 }
 /// Represents a middle marker
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub struct MiddleMarker {
     /// Position
     pub position: LatLonAlt,
@@ -165,7 +165,7 @@ impl Positioned for MiddleMarker {
     }
 }
 /// Represents an inner marker
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub struct InnerMarker {
     /// Position
     pub position: LatLonAlt,
@@ -181,7 +181,7 @@ impl Positioned for InnerMarker {
     }
 }
 /// Represents a fix
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub struct Fix {
     /// Position
     pub position: LatLonAlt,
@@ -197,7 +197,7 @@ impl Positioned for Fix {
     }
 }
 /// Represents a DME
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub struct DME {
     /// Position
     pub position: LatLonAlt,
@@ -216,6 +216,7 @@ impl Positioned for DME {
 }
 
 /// Contains a navaid of any of the supported types
+#[derive(Debug, Clone)]
 pub enum Navaid {
     Airport(Airport),
     NDB(NDB),
@@ -343,7 +344,7 @@ impl Iterator for NavaidIterator {
 /// has a known type, returns the navaid and the type.
 #[allow(non_upper_case_globals)]
 fn get_navaid_info(nav_ref: XPLMNavRef) -> Option<(Navaid, XPLMNavType)> {
-    let mut navaid_type: XPLMNavType = xplm_Nav_Unknown as XPLMNavType;
+    let mut navaid_type: XPLMNavType = xplm_Nav_Unknown;
     let mut latitude = 0f32;
     let mut longitude = 0f32;
     let mut altitude = 0f32;

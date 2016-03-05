@@ -11,6 +11,12 @@
 //! The `xplm` crate provides a convenient interface to the X-Plane plugin SDK.
 //!
 
+#![deny(missing_docs,
+        missing_debug_implementations,
+        trivial_casts, trivial_numeric_casts,
+        unstable_features,
+        unused_import_braces, unused_qualifications)]
+
 extern crate xplm_sys;
 extern crate libc;
 
@@ -28,8 +34,10 @@ pub mod terrain;
 pub mod position;
 
 /// User interface elements
+#[allow(missing_docs)]
 pub mod ui;
 /// Provides access to the navigation database
+#[allow(missing_docs)]
 pub mod nav;
 /// Radio frequency representation
 pub mod frequency;
@@ -76,6 +84,7 @@ pub fn find_symbol(name: &str) -> *mut ::libc::c_void {
 }
 
 /// Stores information about a plugin that is provided to X-Plane
+#[derive(Debug, Clone)]
 pub struct PluginInfo {
     /// The plugin name
     pub name: &'static str,
@@ -202,6 +211,7 @@ extern {
 
 #[allow(non_snake_case)]
 #[no_mangle]
+#[doc(hidden)]
 pub unsafe extern "C" fn XPluginStart(outName: *mut libc::c_char, outSig: *mut libc::c_char,
     outDescription: *mut libc::c_char) -> libc::c_int
 {
@@ -234,24 +244,28 @@ pub unsafe extern "C" fn XPluginStart(outName: *mut libc::c_char, outSig: *mut l
 
 #[allow(non_snake_case)]
 #[no_mangle]
+#[doc(hidden)]
 pub unsafe extern "C" fn XPluginStop() {
     plugin_stop()
 }
 
 #[allow(non_snake_case)]
 #[no_mangle]
+#[doc(hidden)]
 pub unsafe extern "C" fn XPluginEnable() {
     plugin_enable()
 }
 
 #[allow(non_snake_case)]
 #[no_mangle]
+#[doc(hidden)]
 pub unsafe extern "C" fn XPluginDisable() {
     plugin_disable()
 }
 
 #[allow(non_snake_case)]
 #[no_mangle]
+#[doc(hidden)]
 pub unsafe extern "C" fn XPluginReceiveMessage(inFrom: libc::c_int, inMessage: libc::c_int,
     _: *mut libc::c_void)
 {

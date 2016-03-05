@@ -28,29 +28,24 @@ pub use self::borrowed::Borrowed;
 pub use self::owned::Owned;
 pub use self::shared::Shared;
 
-///
-/// A trait for objects that can be 'dereferenced' to get a value
-///
+/// A trait for objects that can be read to get a value
 pub trait Readable<T> {
     /// Returns the value stored in this object
     fn get(&self) -> T;
 }
 
-///
 /// A trait for objects in which a value can be stored
-///
 pub trait Writeable<T> {
     /// Sets the value in this object
     fn set(&mut self, value: T);
 }
-///
 /// A trait for objects in which an array of values can be stored
-///
 pub trait ArrayReadable<T> : Readable<Vec<T>> {
     /// Returns the number of values in this array
     fn len(&self) -> usize;
 }
 
+/// A trait for objects that can be written like arrays
 pub trait ArrayWriteable<T> : ArrayReadable<T> + Writeable<Vec<T>> {
     ///
     /// Sets the values in this array with the values from a slice.
