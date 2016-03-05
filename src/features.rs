@@ -13,38 +13,58 @@
 //! http://www.xsquawkbox.net/xpsdk/mediawiki/XPLM_Feature_Keys .
 //!
 
-use std::ffi::CString;
+use std::ffi::{CString, CStr};
 use xplm_sys::plugin::*;
 
-/// Returns true if X-Plane supports the feature with the provided name
-pub fn has_feature(name: &str) -> bool {
-    match CString::new(name) {
-        Ok(name_c) => unsafe { 1 == XPLMHasFeature(name_c.as_ptr()) },
-        Err(_) => false,
+/// A feature that can be enabled or disabled
+#[derive(Debug)]
+pub struct Feature {
+    /// The name of this feature
+    name: CString,
+}
+
+impl Feature {
+    /// Creates a feature with a name
+    ///
+    /// Returns None if X-Plane does not support the requested feature, or if the name
+    /// contains one or more null bytes.
+    pub fn with_name(name: &str) -> Option<Feature> {
+        match CString::new(name) {
+            Ok(name_c) => {
+                match unsafe { XPLMHasFeature(name_c.as_ptr()) } {
+                    1 => Some(Feature { name: name_c }),
+                    _ => None,
+                }
+            }
+            Err(_) => None,
+        }
+    }
+    /// Returns all the features that X-Plane supports
+    pub fn all() -> Vec<Feature> {
+        let mut features = Vec::new();
+        unsafe {
+            XPLMEnumerateFeatures(Some(feature_enumerator),
+                                  ::std::mem::transmute(&mut features))
+        };
+        features
+    }
+
+    /// Returns the name of this feature
+    ///
+    /// Returns None if the feature name is not a valid UTF-8 string.
+    pub fn name(&self) -> Option<&str> {
+        self.name.to_str().ok()
+    }
+
+    /// Enables or disables this feature
+    pub fn set_enabled(&mut self, enabled: bool) {
+        unsafe { XPLMEnableFeature(self.name.as_ptr(), enabled as i32) };
     }
 }
 
-/// Returns true if the specified feature is supported and enabled
-pub fn feature_enabled(name: &str) -> bool {
-    if !has_feature(name) {
-        return false;
-    }
-    match CString::new(name) {
-        Ok(name_c) => unsafe { 1 == XPLMIsFeatureEnabled(name_c.as_ptr()) },
-        Err(_) => false,
-    }
-}
-/// Sets a feature as enabled or disabled. Returns an error if the provide feature name
-/// is invalid or if the feature is not supported.
-pub fn set_feature_enabled(name: &str, enabled: bool) -> Result<(), ()> {
-    if !has_feature(name) {
-        return Err(());
-    }
-    match CString::new(name) {
-        Ok(name_c) => {
-            unsafe { XPLMEnableFeature(name_c.as_ptr(), enabled as i32) };
-            Ok(())
-        }
-        Err(_) => Err(()),
-    }
+unsafe extern "C" fn feature_enumerator(feature: *const ::libc::c_char,
+                                        refcon: *mut ::libc::c_void) {
+    let features = refcon as *mut Vec<Feature>;
+    let feature_c = CStr::from_ptr(feature);
+    (*features).push(Feature { name: feature_c.to_owned() });
 }
