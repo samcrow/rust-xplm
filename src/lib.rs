@@ -158,8 +158,11 @@ macro_rules! xplane_plugin {
                     PLUGIN = Box::into_raw(Box::new(plugin));
                     Ok(())
                 },
-                // TODO: Error reporting
-                Err(_) => Err(()),
+                Err(e) => {
+                    xplm::debug(&format!("Plugin {} failed to start: {}\n",
+                    PluginType::info().name, e));
+                    Err(())
+                },
             }
         }
         #[no_mangle]
