@@ -36,6 +36,7 @@ pub const MIN_USER_MESSAGE: u32 = 0x00FFFFFF;
 ///
 /// Information about a plugin
 ///
+#[derive(Debug, Clone)]
 pub struct PluginInfo {
     /// The name of the plugin
     pub name: String,
@@ -50,6 +51,7 @@ pub struct PluginInfo {
 ///
 /// Represents a plugin and allows access to it
 ///
+#[derive(Debug, Clone)]
 pub struct Plugin {
     /// The ID of this plugin
     id: XPLMPluginID,
@@ -96,6 +98,12 @@ impl Plugin {
             plugins.push(Plugin { id: id });
         }
         plugins
+    }
+    /// Creates a Plugin from an XPLMPluginID.
+    ///
+    /// This function is unsafe because it may create an invalid Plugin.
+    pub unsafe fn with_id(id: XPLMPluginID) -> Plugin {
+        Plugin { id: id }
     }
 
     ///
@@ -197,6 +205,7 @@ impl Error for SendError {
 }
 
 /// Messages that X-Plane can send to a plugin
+#[derive(Debug, Clone)]
 pub enum XPlaneMessage {
     /// Indicates that the plane has crashed
     PlaneCrashed,
@@ -218,7 +227,7 @@ pub enum XPlaneMessage {
 
 impl XPlaneMessage {
     /// Converts an integer value (as provided by X-Plane) into an XPlaneMessage
-    fn from_u32(value: u32) -> Option<XPlaneMessage> {
+    pub fn from_i32(value: i32) -> Option<XPlaneMessage> {
         match value {
             101 => Some(XPlaneMessage::PlaneCrashed),
             102 => Some(XPlaneMessage::PlaneLoaded),
