@@ -7,7 +7,6 @@
 // notice may not be copied, modified, or distributed except
 // according to those terms.
 
-//!
 //! User-interface-related types
 //!
 //! The 2D coordinate system used in X-Plane uses units of screen pixels. The origin is at the
@@ -78,7 +77,10 @@ impl Rect {
 
     /// Returns the lower left corner of this rectangle
     pub fn lower_left(&self) -> Point {
-        Point { x: self.left, y: self.bottom }
+        Point {
+            x: self.left,
+            y: self.bottom,
+        }
     }
     /// Returns the width of this rectangle
     pub fn width(&self) -> i32 {

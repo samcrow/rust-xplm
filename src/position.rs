@@ -7,7 +7,6 @@
 // notice may not be copied, modified, or distributed except
 // according to those terms.
 
-//!
 //! Types that represent positions in X-Plane
 //!
 
@@ -33,7 +32,11 @@ pub struct Vec3 {
 impl Vec3 {
     /// Returns a (0, 0, 0) vector
     pub fn origin() -> Vec3 {
-        Vec3 { x: 0.0, y: 0.0, z: 0.0 }
+        Vec3 {
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+        }
     }
 }
 
@@ -58,7 +61,11 @@ pub struct Local {
 impl Local {
     /// Returns the local coordinates of the origin point (0, 0, 0)
     pub fn origin() -> Local {
-        Local { x: 0.0, y: 0.0, z: 0.0 }
+        Local {
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+        }
     }
 }
 
@@ -124,19 +131,19 @@ static mut origin_longitude: Option<Borrowed<f32, ReadOnly>> = None;
 pub fn local_origin() -> LatLon {
     unsafe {
         if origin_latitude.is_none() {
-            origin_latitude = Some(
-                Borrowed::find("sim/flightmodel/position/lat_ref").unwrap());
+            origin_latitude = Some(Borrowed::find("sim/flightmodel/position/lat_ref").unwrap());
         }
         if origin_longitude.is_none() {
-            origin_longitude = Some(
-                Borrowed::find("sim/flightmodel/position/lon_ref").unwrap());
+            origin_longitude = Some(Borrowed::find("sim/flightmodel/position/lon_ref").unwrap());
         }
 
         match (&origin_latitude, &origin_longitude) {
-            (&Some(ref lat), &Some(ref lon)) => LatLon {
-                latitude: lat.get() as f64,
-                longitude: lon.get() as f64,
-            },
+            (&Some(ref lat), &Some(ref lon)) => {
+                LatLon {
+                    latitude: lat.get() as f64,
+                    longitude: lon.get() as f64,
+                }
+            }
             _ => unreachable!(),
         }
     }
@@ -146,8 +153,12 @@ pub fn local_origin() -> LatLon {
 pub fn world_to_local(world: &LatLonAlt) -> Local {
     let mut local = Local::origin();
     unsafe {
-        XPLMWorldToLocal(world.latitude, world.longitude, world.altitude,
-            &mut local.x, &mut local.y, &mut local.z);
+        XPLMWorldToLocal(world.latitude,
+                         world.longitude,
+                         world.altitude,
+                         &mut local.x,
+                         &mut local.y,
+                         &mut local.z);
     }
     local
 }
@@ -157,10 +168,18 @@ pub fn world_to_local(world: &LatLonAlt) -> Local {
 /// Because world coordinates are less precise than local coordinates, converting a position
 /// to world and then back to local may cause a loss of precision.
 pub fn local_to_world(local: &Local) -> LatLonAlt {
-    let mut world = LatLonAlt { latitude: 0.0, longitude: 0.0, altitude: 0.0 };
+    let mut world = LatLonAlt {
+        latitude: 0.0,
+        longitude: 0.0,
+        altitude: 0.0,
+    };
     unsafe {
-        XPLMLocalToWorld(local.x, local.y, local.z,
-            &mut world.latitude, &mut world.longitude, &mut world.altitude);
+        XPLMLocalToWorld(local.x,
+                         local.y,
+                         local.z,
+                         &mut world.latitude,
+                         &mut world.longitude,
+                         &mut world.altitude);
     }
     world
 }

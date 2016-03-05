@@ -1,4 +1,3 @@
-//!
 //! Functionality for inter-plugin communication
 //!
 extern crate libc;
@@ -64,9 +63,7 @@ impl Plugin {
     pub fn this_plugin() -> Plugin {
         let plugin_id = unsafe { XPLMGetMyID() };
         assert!(plugin_id != NO_ID);
-        Plugin {
-            id: plugin_id
-        }
+        Plugin { id: plugin_id }
     }
 
     ///
@@ -75,14 +72,12 @@ impl Plugin {
     pub fn with_signature(signature: &str) -> Option<Plugin> {
         match CString::new(signature) {
             Ok(c_sig) => {
-                let plugin_id = unsafe {
-                    XPLMFindPluginBySignature(c_sig.as_ptr())
-                };
+                let plugin_id = unsafe { XPLMFindPluginBySignature(c_sig.as_ptr()) };
                 match plugin_id {
                     NO_ID => None,
                     id => Some(Plugin { id: id }),
                 }
-            },
+            }
             Err(_) => None,
         }
     }
@@ -128,7 +123,7 @@ impl Plugin {
                 // Disable
                 unsafe { XPLMDisablePlugin(self.id) };
                 Ok(())
-            },
+            }
             (false, true) => {
                 // Enable
                 let result = unsafe { XPLMEnablePlugin(self.id) };
@@ -136,7 +131,7 @@ impl Plugin {
                     1 => Ok(()),
                     _ => Err(()),
                 }
-            },
+            }
             _ => {
                 // Already in requested state
                 Ok(())
@@ -154,12 +149,11 @@ impl Plugin {
         let mut description = StringBuffer::new(BUFFER_SIZE);
 
         unsafe {
-            XPLMGetPluginInfo(
-                self.id,
-                name.as_mut_ptr(),
-                path.as_mut_ptr(),
-                signature.as_mut_ptr(),
-                description.as_mut_ptr());
+            XPLMGetPluginInfo(self.id,
+                              name.as_mut_ptr(),
+                              path.as_mut_ptr(),
+                              signature.as_mut_ptr(),
+                              description.as_mut_ptr());
         }
         PluginInfo {
             name: name.as_string(),

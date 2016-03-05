@@ -40,15 +40,13 @@ pub struct GraphicsState {
 /// Sets the graphics state
 pub fn set_state(state: &GraphicsState) {
     unsafe {
-        XPLMSetGraphicsState(
-            state.fog as i32,
-            state.textures,
-            state.lighting as i32,
-            state.alpha_testing as i32,
-            state.alpha_blending as i32,
-            state.depth_testing as i32,
-            state.depth_writing as i32
-        );
+        XPLMSetGraphicsState(state.fog as i32,
+                             state.textures,
+                             state.lighting as i32,
+                             state.alpha_testing as i32,
+                             state.alpha_blending as i32,
+                             state.depth_testing as i32,
+                             state.depth_writing as i32);
     }
 }
 
@@ -56,7 +54,9 @@ pub fn set_state(state: &GraphicsState) {
 ///
 /// This function should be used instead of glBindTexture
 pub fn bind_texture(texture_number: i32, texture_id: i32) {
-    unsafe { XPLMBindTexture2d(texture_number, texture_id); }
+    unsafe {
+        XPLMBindTexture2d(texture_number, texture_id);
+    }
 }
 
 /// Generates texture numbers in a range not reserved for X-Plane.
@@ -68,8 +68,7 @@ pub fn bind_texture(texture_number: i32, texture_id: i32) {
 pub fn generate_texture_numbers(numbers: &mut [i32]) {
     let count = if numbers.len() < (i32::max_value() as usize) {
         numbers.len() as i32
-    }
-    else {
+    } else {
         i32::max_value()
     };
     unsafe {

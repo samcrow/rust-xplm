@@ -7,7 +7,6 @@
 // notice may not be copied, modified, or distributed except
 // according to those terms.
 
-//!
 //! Radio frequency representation
 //!
 use std::ops::{Add, Sub, Neg};

@@ -20,7 +20,10 @@ pub struct Shared<D, A> {
     data_type: XPLMDataTypeID,
 }
 
-impl<D, A> Shared<D, A> where D: DataType, A: DataAccess {
+impl<D, A> Shared<D, A>
+    where D: DataType,
+          A: DataAccess
+{
     ///
     /// Finds a dataref with the provided name. If a shared dataref with the provided name already
     /// exists, it will be found. Otherwise, a shared dataref will be created.
@@ -40,7 +43,7 @@ impl<D, A> Shared<D, A> where D: DataType, A: DataAccess {
                             name: name_c,
                             data_type: D::data_type(),
                         })
-                    },
+                    }
                     _ => Err(SearchError::WrongDataType),
                 }
             },

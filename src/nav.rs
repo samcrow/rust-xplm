@@ -7,7 +7,6 @@
 // notice may not be copied, modified, or distributed except
 // according to those terms.
 
-//!
 //! Navigation database access
 //!
 
@@ -307,8 +306,7 @@ impl Iterator for NavaidIterator {
     fn next(&mut self) -> Option<Navaid> {
         if self.next == INVALID_NAV {
             None
-        }
-        else {
+        } else {
             // Get information on next
             let navaid_option = get_navaid_info(self.next);
             match navaid_option {
@@ -323,13 +321,12 @@ impl Iterator for NavaidIterator {
                         // Find next
                         self.next = unsafe { XPLMGetNextNavAid(self.next) };
                         Some(navaid)
-                    }
-                    else {
+                    } else {
                         // No more navaids
                         self.next = INVALID_NAV;
                         None
                     }
-                },
+                }
                 None => {
                     // No more navaids
                     self.next = INVALID_NAV;
@@ -354,18 +351,16 @@ fn get_navaid_info(nav_ref: XPLMNavRef) -> Option<(Navaid, XPLMNavType)> {
     let mut name = StringBuffer::new(256);
 
     unsafe {
-        XPLMGetNavAidInfo(
-            nav_ref,
-            &mut navaid_type,
-            &mut latitude,
-            &mut longitude,
-            &mut altitude,
-            &mut frequency,
-            &mut heading,
-            code.as_mut_ptr(),
-            name.as_mut_ptr(),
-            ptr::null_mut(),
-        );
+        XPLMGetNavAidInfo(nav_ref,
+                          &mut navaid_type,
+                          &mut latitude,
+                          &mut longitude,
+                          &mut altitude,
+                          &mut frequency,
+                          &mut heading,
+                          code.as_mut_ptr(),
+                          name.as_mut_ptr(),
+                          ptr::null_mut());
     }
 
     let position = LatLonAlt {
@@ -375,71 +370,93 @@ fn get_navaid_info(nav_ref: XPLMNavRef) -> Option<(Navaid, XPLMNavType)> {
     };
 
     let navaid = match navaid_type {
-        xplm_Nav_Airport => Some(Navaid::Airport(Airport {
-            position: position,
-            code: code.as_string(),
-            name: name.as_string(),
-        })),
-        xplm_Nav_NDB => Some(Navaid::NDB(NDB {
-            position: position,
-            frequency: Frequency::kilohertz(frequency as f32),
-            code: code.as_string(),
-            name: name.as_string(),
-        })),
-        xplm_Nav_VOR => Some(Navaid::VOR(VOR {
-            position: position,
-            frequency: Frequency::megahertz((frequency as f32) / 100.0),
-            code: code.as_string(),
-            name: name.as_string(),
-        })),
-        xplm_Nav_ILS => Some(Navaid::ILSLocalizer(ILSLocalizer {
-            position: position,
-            heading: heading as f64,
-            frequency: Frequency::megahertz((frequency as f32) / 100.0),
-            code: code.as_string(),
-            name: name.as_string(),
-        })),
-        xplm_Nav_Localizer => Some(Navaid::Localizer(Localizer {
-            position: position,
-            heading: heading as f64,
-            frequency: Frequency::megahertz((frequency as f32) / 100.0),
-            code: code.as_string(),
-            name: name.as_string(),
-        })),
-        xplm_Nav_GlideSlope => Some(Navaid::Glideslope(Glideslope {
-            position: position,
-            heading: heading as f64,
-            frequency: Frequency::megahertz((frequency as f32) / 100.0),
-            code: code.as_string(),
-            name: name.as_string(),
-        })),
-        xplm_Nav_OuterMarker => Some(Navaid::OuterMarker(OuterMarker {
-            position: position,
-            code: code.as_string(),
-            name: name.as_string(),
-        })),
-        xplm_Nav_MiddleMarker => Some(Navaid::MiddleMarker(MiddleMarker {
-            position: position,
-            code: code.as_string(),
-            name: name.as_string(),
-        })),
-        xplm_Nav_InnerMarker => Some(Navaid::InnerMarker(InnerMarker {
-            position: position,
-            code: code.as_string(),
-            name: name.as_string(),
-        })),
-        xplm_Nav_Fix => Some(Navaid::Fix(Fix {
-            position: position,
-            code: code.as_string(),
-            name: name.as_string(),
-        })),
-        xplm_Nav_DME => Some(Navaid::DME(DME {
-            position: position,
-            frequency: Frequency::megahertz((frequency as f32) / 100.0),
-            code: code.as_string(),
-            name: name.as_string(),
-        })),
-        _ => None
+        xplm_Nav_Airport => {
+            Some(Navaid::Airport(Airport {
+                position: position,
+                code: code.as_string(),
+                name: name.as_string(),
+            }))
+        }
+        xplm_Nav_NDB => {
+            Some(Navaid::NDB(NDB {
+                position: position,
+                frequency: Frequency::kilohertz(frequency as f32),
+                code: code.as_string(),
+                name: name.as_string(),
+            }))
+        }
+        xplm_Nav_VOR => {
+            Some(Navaid::VOR(VOR {
+                position: position,
+                frequency: Frequency::megahertz((frequency as f32) / 100.0),
+                code: code.as_string(),
+                name: name.as_string(),
+            }))
+        }
+        xplm_Nav_ILS => {
+            Some(Navaid::ILSLocalizer(ILSLocalizer {
+                position: position,
+                heading: heading as f64,
+                frequency: Frequency::megahertz((frequency as f32) / 100.0),
+                code: code.as_string(),
+                name: name.as_string(),
+            }))
+        }
+        xplm_Nav_Localizer => {
+            Some(Navaid::Localizer(Localizer {
+                position: position,
+                heading: heading as f64,
+                frequency: Frequency::megahertz((frequency as f32) / 100.0),
+                code: code.as_string(),
+                name: name.as_string(),
+            }))
+        }
+        xplm_Nav_GlideSlope => {
+            Some(Navaid::Glideslope(Glideslope {
+                position: position,
+                heading: heading as f64,
+                frequency: Frequency::megahertz((frequency as f32) / 100.0),
+                code: code.as_string(),
+                name: name.as_string(),
+            }))
+        }
+        xplm_Nav_OuterMarker => {
+            Some(Navaid::OuterMarker(OuterMarker {
+                position: position,
+                code: code.as_string(),
+                name: name.as_string(),
+            }))
+        }
+        xplm_Nav_MiddleMarker => {
+            Some(Navaid::MiddleMarker(MiddleMarker {
+                position: position,
+                code: code.as_string(),
+                name: name.as_string(),
+            }))
+        }
+        xplm_Nav_InnerMarker => {
+            Some(Navaid::InnerMarker(InnerMarker {
+                position: position,
+                code: code.as_string(),
+                name: name.as_string(),
+            }))
+        }
+        xplm_Nav_Fix => {
+            Some(Navaid::Fix(Fix {
+                position: position,
+                code: code.as_string(),
+                name: name.as_string(),
+            }))
+        }
+        xplm_Nav_DME => {
+            Some(Navaid::DME(DME {
+                position: position,
+                frequency: Frequency::megahertz((frequency as f32) / 100.0),
+                code: code.as_string(),
+                name: name.as_string(),
+            }))
+        }
+        _ => None,
     };
     navaid.map(|navaid| (navaid, navaid_type))
 }

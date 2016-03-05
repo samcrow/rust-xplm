@@ -50,19 +50,36 @@ impl Base {
     /// added as a child of a root widget to be displayed.
     ///
     /// delegate: A delegate that will handle message sent to this widget
-    pub fn new<D>(widget_type: XPWidgetClass, descriptor: &str, geometry: &Rect, root: bool,
-        delegate: D) -> Base where D: 'static + WidgetDelegate {
+    pub fn new<D>(widget_type: XPWidgetClass,
+                  descriptor: &str,
+                  geometry: &Rect,
+                  root: bool,
+                  delegate: D)
+                  -> Base
+        where D: 'static + WidgetDelegate
+    {
 
         let id = unsafe {
-            XPCreateWidget(geometry.left, geometry.top, geometry.right, geometry.bottom,
-                0, c_string_or_empty(descriptor).as_ptr(), root as i32, 0 as XPWidgetID, widget_type)
+            XPCreateWidget(geometry.left,
+                           geometry.top,
+                           geometry.right,
+                           geometry.bottom,
+                           0,
+                           c_string_or_empty(descriptor).as_ptr(),
+                           root as i32,
+                           0 as XPWidgetID,
+                           widget_type)
         };
 
         let delegate_ptr = Box::into_raw(Box::new(delegate));
         // Set the delegate as the widget's refcon
-        unsafe { XPSetWidgetProperty(id, xpProperty_Refcon as i32, delegate_ptr as isize); }
+        unsafe {
+            XPSetWidgetProperty(id, xpProperty_Refcon as i32, delegate_ptr as isize);
+        }
         // Install the callback
-        unsafe { XPAddWidgetCallback(id, Some(message_handler::<D>)); }
+        unsafe {
+            XPAddWidgetCallback(id, Some(message_handler::<D>));
+        }
 
         Base {
             id: id,
@@ -101,13 +118,23 @@ pub trait WidgetDelegate {
     ///
     /// Returns true if the message was processed and no other components should receive the
     /// message. Otherwise returns false.
-    fn handle_message(&mut self, widget: XPWidgetID, message: XPWidgetMessage, param1: isize,
-        param2: isize) -> bool;
+    fn handle_message(&mut self,
+                      widget: XPWidgetID,
+                      message: XPWidgetMessage,
+                      param1: isize,
+                      param2: isize)
+                      -> bool;
 }
 
-impl<T> WidgetDelegate for T where T: Fn(XPWidgetID, XPWidgetMessage, isize, isize) -> bool {
-    fn handle_message(&mut self, widget: XPWidgetID, message: XPWidgetMessage, param1: isize,
-        param2: isize) -> bool {
+impl<T> WidgetDelegate for T
+    where T: Fn(XPWidgetID, XPWidgetMessage, isize, isize) -> bool
+{
+    fn handle_message(&mut self,
+                      widget: XPWidgetID,
+                      message: XPWidgetMessage,
+                      param1: isize,
+                      param2: isize)
+                      -> bool {
         self(widget, message, param1, param2)
     }
 }
@@ -117,8 +144,9 @@ impl<T> WidgetDelegate for T where T: Fn(XPWidgetID, XPWidgetMessage, isize, isi
 pub struct DefaultDelegate;
 
 impl WidgetDelegate for DefaultDelegate {
-    fn handle_message(&mut self, _: XPWidgetID, _: XPWidgetMessage, _: isize, _: isize)
-     -> bool { false }
+    fn handle_message(&mut self, _: XPWidgetID, _: XPWidgetMessage, _: isize, _: isize) -> bool {
+        false
+    }
 }
 
 /// Common functions for all types of widgets
@@ -152,7 +180,9 @@ pub trait Widget {
 }
 
 /// Implements Widget for all widgets that have bases
-impl<T> Widget for T where T: HasBase {
+impl<T> Widget for T
+    where T: HasBase
+{
     fn widget_id(&self) -> XPWidgetID {
         let base = self.base();
         let borrow = base.borrow();
@@ -171,13 +201,10 @@ impl<T> Widget for T where T: HasBase {
     }
     fn get_property(&self, property: i32) -> Option<isize> {
         let mut exists: i32 = 0;
-        let result = unsafe {
-            XPGetWidgetProperty(self.widget_id(), property, &mut exists)
-        };
+        let result = unsafe { XPGetWidgetProperty(self.widget_id(), property, &mut exists) };
         if exists == 1 {
             Some(result)
-        }
-        else {
+        } else {
             None
         }
     }
@@ -188,9 +215,7 @@ impl<T> Widget for T where T: HasBase {
     }
     fn get_descriptor(&self) -> String {
         let id = self.widget_id();
-        let length = unsafe {
-            XPGetWidgetDescriptor(id, ptr::null_mut(), 0) as usize
-        };
+        let length = unsafe { XPGetWidgetDescriptor(id, ptr::null_mut(), 0) as usize };
         let mut buffer = StringBuffer::new(length);
         unsafe {
             XPGetWidgetDescriptor(id, buffer.as_mut_ptr(), length as i32);
@@ -202,21 +227,32 @@ impl<T> Widget for T where T: HasBase {
             Ok(descriptor_c) => unsafe {
                 XPSetWidgetDescriptor(self.widget_id(), descriptor_c.as_ptr());
             },
-            Err(_) => {},
+            Err(_) => {}
         }
     }
     fn get_geometry(&self) -> Rect {
-        let mut rect: Rect = Rect { left: 0, top: 0, right: 0, bottom: 0 };
+        let mut rect: Rect = Rect {
+            left: 0,
+            top: 0,
+            right: 0,
+            bottom: 0,
+        };
         unsafe {
-            XPGetWidgetGeometry(self.widget_id(), &mut rect.left, &mut rect.top, &mut rect.right,
-            &mut rect.bottom);
+            XPGetWidgetGeometry(self.widget_id(),
+                                &mut rect.left,
+                                &mut rect.top,
+                                &mut rect.right,
+                                &mut rect.bottom);
         }
         rect
     }
     fn set_geometry(&mut self, geometry: &Rect) {
         unsafe {
-            XPSetWidgetGeometry(self.widget_id(), geometry.left, geometry.top, geometry.right,
-            geometry.bottom);
+            XPSetWidgetGeometry(self.widget_id(),
+                                geometry.left,
+                                geometry.top,
+                                geometry.right,
+                                geometry.bottom);
         }
     }
     fn clear_children(&mut self) {
@@ -250,7 +286,11 @@ impl Window {
     /// Creates a new Window with the provided title and geometry
     pub fn new(title: &str, geometry: &Rect) -> Window {
         let mut window = Window {
-            base: Rc::new(RefCell::new(Base::new(WINDOW_WIDGET_CLASS, title, geometry, true, DefaultWindowDelegate)))
+            base: Rc::new(RefCell::new(Base::new(WINDOW_WIDGET_CLASS,
+                                                 title,
+                                                 geometry,
+                                                 true,
+                                                 DefaultWindowDelegate))),
         };
         window.set_close_buttons(true);
         window.set_translucent(false);
@@ -259,7 +299,7 @@ impl Window {
     /// Sets whether this window should have close buttons
     pub fn set_close_buttons(&mut self, close_buttons: bool) {
         self.set_property(standard_widgets::xpProperty_MainWindowHasCloseBoxes as i32,
-            close_buttons as isize);
+                          close_buttons as isize);
     }
     /// Sets whether this window should be translucent or should be a standard opaque window
     pub fn set_translucent(&mut self, translucent: bool) {
@@ -268,7 +308,7 @@ impl Window {
             false => standard_widgets::xpMainWindowStyle_MainWindow,
         };
         self.set_property(standard_widgets::xpProperty_MainWindowType as i32,
-            property_value as isize);
+                          property_value as isize);
     }
 }
 
@@ -281,14 +321,19 @@ impl HasBase for Window {
 #[derive(Debug)]
 struct DefaultWindowDelegate;
 impl WidgetDelegate for DefaultWindowDelegate {
-    fn handle_message(&mut self, widget: XPWidgetID, message: XPWidgetMessage, _: isize,
-        _: isize) -> bool {
+    fn handle_message(&mut self,
+                      widget: XPWidgetID,
+                      message: XPWidgetMessage,
+                      _: isize,
+                      _: isize)
+                      -> bool {
 
         if message == standard_widgets::xpMessage_CloseButtonPushed as i32 {
-            unsafe { XPHideWidget(widget); }
+            unsafe {
+                XPHideWidget(widget);
+            }
             true
-        }
-        else {
+        } else {
             false
         }
     }
@@ -321,7 +366,11 @@ impl Pane {
     /// Creates a pane with the provided title and geometry
     pub fn new(title: &str, geometry: &Rect) -> Pane {
         let mut pane = Pane {
-            base: Rc::new(RefCell::new(Base::new(PANE_WIDGET_CLASS, title, geometry, false, DefaultDelegate)))
+            base: Rc::new(RefCell::new(Base::new(PANE_WIDGET_CLASS,
+                                                 title,
+                                                 geometry,
+                                                 false,
+                                                 DefaultDelegate))),
         };
         pane.set_pane_type(PaneType::Pane);
         pane
@@ -334,7 +383,7 @@ impl Pane {
             PaneType::List => standard_widgets::xpSubWindowStyle_ListView,
         };
         self.set_property(standard_widgets::xpProperty_SubWindowType as i32,
-            value as isize);
+                          value as isize);
     }
 }
 
@@ -356,19 +405,22 @@ pub struct Button {
 impl Button {
     /// Creates a button with the provided text and geometry
     pub fn new<L>(text: &str, geometry: &Rect, listener: L) -> Button
-    where L: 'static + ButtonListener {
+        where L: 'static + ButtonListener
+    {
         let mut button = Button {
-            base: Rc::new(RefCell::new(Base::new(BUTTON_WIDGET_CLASS, text, geometry, false,
-                ButtonDelegate { listener: listener })))
+            base: Rc::new(RefCell::new(Base::new(BUTTON_WIDGET_CLASS,
+                                                 text,
+                                                 geometry,
+                                                 false,
+                                                 ButtonDelegate { listener: listener }))),
         };
         button.set_property(standard_widgets::xpProperty_ButtonType as i32,
-            standard_widgets::xpPushButton as isize);
+                            standard_widgets::xpPushButton as isize);
         button.set_property(standard_widgets::xpProperty_ButtonBehavior as i32,
-            standard_widgets::xpButtonBehaviorPushButton as isize);
+                            standard_widgets::xpButtonBehaviorPushButton as isize);
 
         button
     }
-
 }
 
 impl HasBase for Button {
@@ -385,22 +437,33 @@ pub trait ButtonListener {
     fn button_pressed(&mut self);
 }
 
-impl<F> ButtonListener for F where F: Fn() {
-    fn button_pressed(&mut self) { self() }
+impl<F> ButtonListener for F
+    where F: Fn()
+{
+    fn button_pressed(&mut self) {
+        self()
+    }
 }
 
-struct ButtonDelegate<L> where L: ButtonListener {
+struct ButtonDelegate<L>
+    where L: ButtonListener
+{
     listener: L,
 }
-impl<L> WidgetDelegate for ButtonDelegate<L> where L: ButtonListener {
-    fn handle_message(&mut self, _: XPWidgetID, message: XPWidgetMessage, _: isize,
-        _: isize) -> bool {
+impl<L> WidgetDelegate for ButtonDelegate<L>
+    where L: ButtonListener
+{
+    fn handle_message(&mut self,
+                      _: XPWidgetID,
+                      message: XPWidgetMessage,
+                      _: isize,
+                      _: isize)
+                      -> bool {
 
         if message == standard_widgets::xpMsg_PushButtonPressed as i32 {
             self.listener.button_pressed();
             true
-        }
-        else {
+        } else {
             false
         }
     }
@@ -416,15 +479,20 @@ pub struct CheckBox {
 
 impl CheckBox {
     /// Creates a check box with the provided geometry
-    pub fn new<L>(geometry: &Rect, listener: L) -> CheckBox where L: 'static + CheckBoxListener {
+    pub fn new<L>(geometry: &Rect, listener: L) -> CheckBox
+        where L: 'static + CheckBoxListener
+    {
         let mut checkbox = CheckBox {
-            base: Rc::new(RefCell::new(Base::new(BUTTON_WIDGET_CLASS, "", geometry, false,
-            CheckBoxDelegate { listener: listener })))
+            base: Rc::new(RefCell::new(Base::new(BUTTON_WIDGET_CLASS,
+                                                 "",
+                                                 geometry,
+                                                 false,
+                                                 CheckBoxDelegate { listener: listener }))),
         };
         checkbox.set_property(standard_widgets::xpProperty_ButtonType as i32,
-            standard_widgets::xpRadioButton as isize);
+                              standard_widgets::xpRadioButton as isize);
         checkbox.set_property(standard_widgets::xpProperty_ButtonBehavior as i32,
-            standard_widgets::xpButtonBehaviorCheckBox as isize);
+                              standard_widgets::xpButtonBehaviorCheckBox as isize);
 
         checkbox
     }
@@ -432,7 +500,8 @@ impl CheckBox {
         Some(1) == self.get_property(standard_widgets::xpProperty_ButtonState as i32)
     }
     pub fn set_checked(&mut self, checked: bool) {
-        self.set_property(standard_widgets::xpProperty_ButtonState as i32, checked as isize);
+        self.set_property(standard_widgets::xpProperty_ButtonState as i32,
+                          checked as isize);
     }
 }
 
@@ -451,26 +520,40 @@ pub trait CheckBoxListener {
     fn value_changed(&mut self, checked: bool);
 }
 
-impl<F> CheckBoxListener for F where F: Fn(bool) {
-    fn value_changed(&mut self, checked: bool) { self(checked) }
+impl<F> CheckBoxListener for F
+    where F: Fn(bool)
+{
+    fn value_changed(&mut self, checked: bool) {
+        self(checked)
+    }
 }
 
 #[derive(Debug)]
-struct CheckBoxDelegate<L> where L: CheckBoxListener {
+struct CheckBoxDelegate<L>
+    where L: CheckBoxListener
+{
     listener: L,
 }
 
-impl<L> WidgetDelegate for CheckBoxDelegate<L> where L: CheckBoxListener {
-    fn handle_message(&mut self, widget: XPWidgetID, message: XPWidgetMessage, _: isize,
-        _: isize) -> bool {
+impl<L> WidgetDelegate for CheckBoxDelegate<L>
+    where L: CheckBoxListener
+{
+    fn handle_message(&mut self,
+                      widget: XPWidgetID,
+                      message: XPWidgetMessage,
+                      _: isize,
+                      _: isize)
+                      -> bool {
 
         if message == standard_widgets::xpMsg_ButtonStateChanged as i32 {
-            let checked = unsafe { XPGetWidgetProperty(widget, standard_widgets::xpProperty_ButtonState as i32,
-                ptr::null_mut()) };
+            let checked = unsafe {
+                XPGetWidgetProperty(widget,
+                                    standard_widgets::xpProperty_ButtonState as i32,
+                                    ptr::null_mut())
+            };
             self.listener.value_changed(checked == 1);
             true
-        }
-        else {
+        } else {
             false
         }
     }
@@ -490,18 +573,22 @@ fn c_string_or_empty(value: &str) -> CString {
 /// Callback used for all Windows
 ///
 /// D is tye type of widget delegate that is used for this widget
-extern "C" fn message_handler<D>(message: XPWidgetMessage, widget: XPWidgetID,
-                                    param1: ::libc::intptr_t, param2: ::libc::intptr_t)
-                                    -> ::libc::c_int where D: WidgetDelegate {
+extern "C" fn message_handler<D>(message: XPWidgetMessage,
+                                 widget: XPWidgetID,
+                                 param1: ::libc::intptr_t,
+                                 param2: ::libc::intptr_t)
+                                 -> ::libc::c_int
+    where D: WidgetDelegate
+{
     unsafe {
         // The refcon is a pointer to the widget delegate
         let mut exists: i32 = 0;
-        let delegate: *mut D =
-            mem::transmute(XPGetWidgetProperty(widget, xpProperty_Refcon as i32, &mut exists));
+        let delegate: *mut D = mem::transmute(XPGetWidgetProperty(widget,
+                                                                  xpProperty_Refcon as i32,
+                                                                  &mut exists));
         if exists == 1 {
             (*delegate).handle_message(widget, message, param1, param2) as i32
-        }
-        else {
+        } else {
             // Not processed
             0
         }

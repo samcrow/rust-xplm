@@ -37,21 +37,24 @@ use ffi::StringBuffer;
 /// ## Read-only f32 dataref
 ///
 /// ```no_run
-/// let time_ref: Borrowed<f32, ReadOnly> = Borrowed::find("sim/time/total_running_time_sec").unwrap();
+/// let time_ref: Borrowed<f32, ReadOnly>
+///     = Borrowed::find("sim/time/total_running_time_sec").unwrap();
 /// let time = time_ref.get();
 /// ```
 ///
 /// ## Read-only String dataref
 ///
 /// ```no_run
-/// let dataref: Borrowed<String, ReadOnly> = Borrowed::find("sim/version/sim_build_string").unwrap();
+/// let dataref: Borrowed<String, ReadOnly>
+///      = Borrowed::find("sim/version/sim_build_string").unwrap();
 /// let sim_build_time = dataref.get();
 /// ```
 ///
 /// ## Writeable i32 dataref
 ///
 /// ```no_run
-/// let dataref: Borrowed<i32, ReadWrite> = Borrowed::find("sim/cockpit2/autopilot/flight_director_mode").unwrap();
+/// let dataref: Borrowed<i32, ReadWrite>
+///     = Borrowed::find("sim/cockpit2/autopilot/flight_director_mode").unwrap();
 /// let mode = dataref.get();
 /// dataref.set(3);
 /// ```
@@ -66,7 +69,10 @@ pub struct Borrowed<D, A> {
     access_phantom: PhantomData<A>,
 }
 
-impl<D, A> Borrowed<D, A> where D: DataType, A: DataAccess {
+impl<D, A> Borrowed<D, A>
+    where D: DataType,
+          A: DataAccess
+{
     ///
     /// Finds a dataref with the provided name.
     /// Returns a Borrowed object or an error
@@ -165,8 +171,10 @@ impl Writeable<Vec<i32>> for Borrowed<Vec<i32>, ReadWrite> {
 impl ArrayWriteable<i32> for Borrowed<Vec<i32>, ReadWrite> {
     fn set_from_slice(&mut self, value: &[i32]) {
         unsafe {
-            XPLMSetDatavi(self.dataref, value.as_ptr() as *mut i32,
-                0, array_length(value.len()));
+            XPLMSetDatavi(self.dataref,
+                          value.as_ptr() as *mut i32,
+                          0,
+                          array_length(value.len()));
         }
     }
 }
@@ -198,8 +206,10 @@ impl Writeable<Vec<f32>> for Borrowed<Vec<f32>, ReadWrite> {
 impl ArrayWriteable<f32> for Borrowed<Vec<f32>, ReadWrite> {
     fn set_from_slice(&mut self, value: &[f32]) {
         unsafe {
-            XPLMSetDatavf(self.dataref, value.as_ptr() as *mut f32,
-                0, array_length(value.len()));
+            XPLMSetDatavf(self.dataref,
+                          value.as_ptr() as *mut f32,
+                          0,
+                          array_length(value.len()));
         }
     }
 }
@@ -211,8 +221,10 @@ impl<A> Readable<Vec<u8>> for Borrowed<Vec<u8>, A> {
         let mut values = Vec::with_capacity(length);
         unsafe {
             values.set_len(length);
-            XPLMGetDatab(self.dataref, values.as_mut_ptr() as *mut libc::c_void,
-                0, array_length(length));
+            XPLMGetDatab(self.dataref,
+                         values.as_mut_ptr() as *mut libc::c_void,
+                         0,
+                         array_length(length));
         }
         values
     }
@@ -232,8 +244,10 @@ impl Writeable<Vec<u8>> for Borrowed<Vec<u8>, ReadWrite> {
 impl ArrayWriteable<u8> for Borrowed<Vec<u8>, ReadWrite> {
     fn set_from_slice(&mut self, value: &[u8]) {
         unsafe {
-            XPLMSetDatab(self.dataref, value.as_ptr() as *mut libc::c_void,
-                0, array_length(value.len()));
+            XPLMSetDatab(self.dataref,
+                         value.as_ptr() as *mut libc::c_void,
+                         0,
+                         array_length(value.len()));
         }
     }
 }
@@ -244,8 +258,12 @@ impl<A> Readable<String> for Borrowed<String, A> {
         let length = self.len();
         let mut buffer = StringBuffer::new(length);
         // Copy data in
-        unsafe { XPLMGetDatab(self.dataref, buffer.as_mut_ptr() as *mut libc::c_void,
-            0, array_length(length)) };
+        unsafe {
+            XPLMGetDatab(self.dataref,
+                         buffer.as_mut_ptr() as *mut libc::c_void,
+                         0,
+                         array_length(length))
+        };
         // Convert into a string
         buffer.as_string()
     }
@@ -260,11 +278,13 @@ impl Writeable<String> for Borrowed<String, ReadWrite> {
     fn set(&mut self, value: String) {
         match CString::new(value) {
             Ok(value_c) => unsafe {
-                XPLMSetDatab(self.dataref, value_c.as_ptr() as *mut libc::c_void,
-                    0, array_length(value_c.to_bytes().len()));
+                XPLMSetDatab(self.dataref,
+                             value_c.as_ptr() as *mut libc::c_void,
+                             0,
+                             array_length(value_c.to_bytes().len()));
             },
             // NulError -> do nothing
-            Err(_) => {},
+            Err(_) => {}
         }
     }
 }
@@ -272,8 +292,12 @@ impl Writeable<String> for Borrowed<String, ReadWrite> {
 impl StringWriteable for Borrowed<String, ReadWrite> {
     fn set_string(&mut self, value: &str) -> Result<(), NulError> {
         let value_c = try!(CString::new(value));
-        unsafe { XPLMSetDatab(self.dataref, value_c.as_ptr() as *mut libc::c_void, 0,
-            array_length(value_c.as_bytes_with_nul().len())) };
+        unsafe {
+            XPLMSetDatab(self.dataref,
+                         value_c.as_ptr() as *mut libc::c_void,
+                         0,
+                         array_length(value_c.as_bytes_with_nul().len()))
+        };
         Ok(())
     }
 }

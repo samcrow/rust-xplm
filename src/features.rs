@@ -7,10 +7,10 @@
 // notice may not be copied, modified, or distributed except
 // according to those terms.
 
-//!
 //! Allows control over optional SDK features
 //!
-//! Available features are documented at http://www.xsquawkbox.net/xpsdk/mediawiki/XPLM_Feature_Keys .
+//! Available features are documented at
+//! http://www.xsquawkbox.net/xpsdk/mediawiki/XPLM_Feature_Keys .
 //!
 
 use std::ffi::CString;
@@ -44,7 +44,7 @@ pub fn set_feature_enabled(name: &str, enabled: bool) -> Result<(), ()> {
         Ok(name_c) => {
             unsafe { XPLMEnableFeature(name_c.as_ptr(), enabled as i32) };
             Ok(())
-        },
+        }
         Err(_) => Err(()),
     }
 }

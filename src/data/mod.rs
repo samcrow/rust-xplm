@@ -168,14 +168,18 @@ pub trait DataAccess {
 #[derive(Debug,Clone)]
 pub struct ReadWrite;
 impl DataAccess for ReadWrite {
-    fn writeable() -> bool { true }
+    fn writeable() -> bool {
+        true
+    }
 }
 
 /// Marks a dataref that can only be read
 #[derive(Debug,Clone)]
 pub struct ReadOnly;
 impl DataAccess for ReadOnly {
-    fn writeable() -> bool { false }
+    fn writeable() -> bool {
+        false
+    }
 }
 
 /// Fits a length into an i32.
@@ -184,8 +188,7 @@ impl DataAccess for ReadOnly {
 fn array_length(length: usize) -> i32 {
     if length > (i32::max_value() as usize) {
         i32::max_value()
-    }
-    else {
+    } else {
         length as i32
     }
 }

@@ -7,7 +7,6 @@
 // notice may not be copied, modified, or distributed except
 // according to those terms.
 
-//!
 //! Allows scheduling flight loop callbacks
 //!
 
@@ -58,8 +57,7 @@ impl NextCallback {
     pub fn after_loops(loops: u32) -> NextCallback {
         if loops > 0 {
             NextCallback(NextCallbackEnum::AfterLoops(loops))
-        }
-        else {
+        } else {
             NextCallback(NextCallbackEnum::AfterLoops(1))
         }
     }
@@ -69,8 +67,7 @@ impl NextCallback {
     pub fn after_seconds(seconds: f32) -> NextCallback {
         if seconds > 0f32 {
             NextCallback(NextCallbackEnum::AfterSeconds(seconds))
-        }
-        else {
+        } else {
             NextCallback(NextCallbackEnum::AfterLoops(1))
         }
     }
@@ -89,7 +86,9 @@ pub trait FlightLoopCallback {
     fn callback(&mut self) -> NextCallback;
 }
 /// FlightLoopCallback implementation for closures
-impl<F> FlightLoopCallback for F where F: Fn() -> NextCallback {
+impl<F> FlightLoopCallback for F
+    where F: Fn() -> NextCallback
+{
     fn callback(&mut self) -> NextCallback {
         self()
     }
@@ -130,7 +129,9 @@ impl FlightLoop {
     /// phase.
     ///
     /// The callback will not be called until `schedule()` is called.
-    pub fn new<C>(phase: Phase, callback: C) -> FlightLoop where C: 'static + FlightLoopCallback {
+    pub fn new<C>(phase: Phase, callback: C) -> FlightLoop
+        where C: 'static + FlightLoopCallback
+    {
 
         let callback_box = Box::new(callback);
         let callback_ptr = Box::into_raw(callback_box);
@@ -156,7 +157,6 @@ impl FlightLoop {
     pub fn schedule(&self, time: NextCallback) {
         unsafe { XPLMScheduleFlightLoop(self.id, time.0.as_float(), 1) };
     }
-
 }
 
 impl Drop for FlightLoop {
@@ -169,10 +169,14 @@ impl Drop for FlightLoop {
 }
 
 /// The global flight loop callback
-unsafe extern "C" fn global_callback<C>(_: ::libc::c_float, _: ::libc::c_float, _: ::libc::c_int,
-                                           refcon: *mut ::libc::c_void) -> ::libc::c_float
-                                           where C: FlightLoopCallback {
-   let callback = refcon as *mut C;
-   let next = (*callback).callback();
-   next.0.as_float()
+unsafe extern "C" fn global_callback<C>(_: ::libc::c_float,
+                                        _: ::libc::c_float,
+                                        _: ::libc::c_int,
+                                        refcon: *mut ::libc::c_void)
+                                        -> ::libc::c_float
+    where C: FlightLoopCallback
+{
+    let callback = refcon as *mut C;
+    let next = (*callback).callback();
+    next.0.as_float()
 }

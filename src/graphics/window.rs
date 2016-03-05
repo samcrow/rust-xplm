@@ -10,7 +10,7 @@
 
 use xplm_sys::display::*;
 use xplm_sys::defs::{XPLMKeyFlags, xplm_ShiftFlag, xplm_OptionAltFlag, xplm_ControlFlag,
-    xplm_DownFlag, xplm_UpFlag};
+                     xplm_DownFlag, xplm_UpFlag};
 use ui::{Rect, Point, Cursor, MouseEvent, KeyEvent, ModifierKeys, Key};
 
 use std::ptr;
@@ -27,7 +27,9 @@ pub trait DrawCallback {
     fn draw(&mut self, window: &mut Window);
 }
 
-impl<F> DrawCallback for F where F: Fn(&mut Window) {
+impl<F> DrawCallback for F
+    where F: Fn(&mut Window)
+{
     fn draw(&mut self, window: &mut Window) {
         self(window)
     }
@@ -41,7 +43,9 @@ pub trait CursorCallback {
     fn cursor(&mut self, cursor_pos: &Point, window: &mut Window) -> Cursor;
 }
 
-impl<F> CursorCallback for F where F: Fn(&Point, &mut Window) -> Cursor {
+impl<F> CursorCallback for F
+    where F: Fn(&Point, &mut Window) -> Cursor
+{
     fn cursor(&mut self, cursor_pos: &Point, window: &mut Window) -> Cursor {
         self(cursor_pos, window)
     }
@@ -60,7 +64,9 @@ pub trait MouseCallback {
     fn mouse_event(&mut self, cursor_pos: &Point, event: MouseEvent, window: &mut Window) -> bool;
 }
 
-impl<T> MouseCallback for T where T: Fn(&Point, MouseEvent, &mut Window) -> bool {
+impl<T> MouseCallback for T
+    where T: Fn(&Point, MouseEvent, &mut Window) -> bool
+{
     fn mouse_event(&mut self, cursor_pos: &Point, event: MouseEvent, window: &mut Window) -> bool {
         self(cursor_pos, event, window)
     }
@@ -77,13 +83,23 @@ pub trait MouseWheelCallback {
     ///
     /// This function should return true if it has processed the event and other code should not
     /// receive it.
-    fn mouse_wheel_event(&mut self, cursor_pos: &Point, delta_x: i32, delta_y: i32,
-        window: &mut Window) -> bool;
+    fn mouse_wheel_event(&mut self,
+                         cursor_pos: &Point,
+                         delta_x: i32,
+                         delta_y: i32,
+                         window: &mut Window)
+                         -> bool;
 }
 
-impl<T> MouseWheelCallback for T where T: Fn(&Point, i32, i32, &mut Window) -> bool {
-    fn mouse_wheel_event(&mut self, cursor_pos: &Point, delta_x: i32, delta_y: i32,
-        window: &mut Window) -> bool {
+impl<T> MouseWheelCallback for T
+    where T: Fn(&Point, i32, i32, &mut Window) -> bool
+{
+    fn mouse_wheel_event(&mut self,
+                         cursor_pos: &Point,
+                         delta_x: i32,
+                         delta_y: i32,
+                         window: &mut Window)
+                         -> bool {
         self(cursor_pos, delta_x, delta_y, window)
     }
 }
@@ -99,13 +115,23 @@ pub trait KeyboardCallback {
     /// modifiers stores the modifier keys that were held down during this event
     ///
     /// ascii stores a character representation of the key pressed, if one exists
-    fn keyboard_event(&mut self, event_type: KeyEvent, key: Key, modifiers: ModifierKeys,
-        ascii: Option<char>, window: &mut Window);
+    fn keyboard_event(&mut self,
+                      event_type: KeyEvent,
+                      key: Key,
+                      modifiers: ModifierKeys,
+                      ascii: Option<char>,
+                      window: &mut Window);
 }
 
-impl<T> KeyboardCallback for T where T: Fn(KeyEvent, Key, ModifierKeys, Option<char>, &mut Window) {
-    fn keyboard_event(&mut self, event_type: KeyEvent, key: Key, modifiers: ModifierKeys,
-        ascii: Option<char>, window: &mut Window) {
+impl<T> KeyboardCallback for T
+    where T: Fn(KeyEvent, Key, ModifierKeys, Option<char>, &mut Window)
+{
+    fn keyboard_event(&mut self,
+                      event_type: KeyEvent,
+                      key: Key,
+                      modifiers: ModifierKeys,
+                      ascii: Option<char>,
+                      window: &mut Window) {
         self(event_type, key, modifiers, ascii, window)
     }
 }
@@ -142,9 +168,7 @@ impl Window {
         let window_id = unsafe { XPLMCreateWindowEx(&mut params) };
 
         // Create a window
-        let window = Rc::new(RefCell::new(Window {
-            data: ptr::null_mut(),
-        }));
+        let window = Rc::new(RefCell::new(Window { data: ptr::null_mut() }));
 
         // Allocate a data block with a weak pointer to the window
         let data_ptr = Box::into_raw(Box::new(WindowData {
@@ -167,31 +191,41 @@ impl Window {
     }
 
     /// Sets the callback used to draw this window
-    pub fn set_draw_callback<C>(&mut self, callback: C) where C: 'static + DrawCallback {
+    pub fn set_draw_callback<C>(&mut self, callback: C)
+        where C: 'static + DrawCallback
+    {
         unsafe {
             (*self.data).draw_callback = Some(Box::new(callback));
         }
     }
     /// Sets the callback to handle keyboard events for this window
-    pub fn set_keyboard_callback<C>(&mut self, callback: C) where C: 'static + KeyboardCallback {
+    pub fn set_keyboard_callback<C>(&mut self, callback: C)
+        where C: 'static + KeyboardCallback
+    {
         unsafe {
             (*self.data).keyboard_callback = Some(Box::new(callback));
         }
     }
     /// Sets the callback to handle mouse events for this window
-    pub fn set_mouse_callback<C>(&mut self, callback: C) where C: 'static + MouseCallback {
+    pub fn set_mouse_callback<C>(&mut self, callback: C)
+        where C: 'static + MouseCallback
+    {
         unsafe {
             (*self.data).mouse_callback = Some(Box::new(callback));
         }
     }
     /// Sets the callback to handle mouse wheel events for this window
-    pub fn set_mouse_wheel_callback<C>(&mut self, callback: C) where C: 'static + MouseWheelCallback {
+    pub fn set_mouse_wheel_callback<C>(&mut self, callback: C)
+        where C: 'static + MouseWheelCallback
+    {
         unsafe {
             (*self.data).mouse_wheel_callback = Some(Box::new(callback));
         }
     }
     /// Sets the callback to specify cursors for this window
-    pub fn set_cursor_callback<C>(&mut self, callback: C) where C: 'static + CursorCallback {
+    pub fn set_cursor_callback<C>(&mut self, callback: C)
+        where C: 'static + CursorCallback
+    {
         unsafe {
             (*self.data).cursor_callback = Some(Box::new(callback));
         }
@@ -199,24 +233,38 @@ impl Window {
 
     /// Sets a window to be visible or hidden
     pub fn set_visible(&mut self, visible: bool) {
-        unsafe { XPLMSetWindowIsVisible((*self.data).id, visible as i32); }
+        unsafe {
+            XPLMSetWindowIsVisible((*self.data).id, visible as i32);
+        }
     }
 
     /// Moves this window on top of other windows
     pub fn bring_to_front(&self) {
-        unsafe { XPLMBringWindowToFront((*self.data).id); }
+        unsafe {
+            XPLMBringWindowToFront((*self.data).id);
+        }
     }
     /// Gives this window keyboard focus
     pub fn request_focus(&self) {
-        unsafe { XPLMTakeKeyboardFocus((*self.data).id); }
+        unsafe {
+            XPLMTakeKeyboardFocus((*self.data).id);
+        }
     }
 
     /// Returns the geometry of this window
     pub fn get_geometry(&self) -> Rect {
-        let mut rect = Rect { left: 0, top: 0, right: 0, bottom: 0 };
+        let mut rect = Rect {
+            left: 0,
+            top: 0,
+            right: 0,
+            bottom: 0,
+        };
         unsafe {
-            XPLMGetWindowGeometry((*self.data).id, &mut rect.left, &mut rect.top, &mut rect.right,
-            &mut rect.bottom);
+            XPLMGetWindowGeometry((*self.data).id,
+                                  &mut rect.left,
+                                  &mut rect.top,
+                                  &mut rect.right,
+                                  &mut rect.bottom);
         }
         rect
     }
@@ -224,8 +272,11 @@ impl Window {
     /// Sets the geometry of this window
     pub fn set_geometry(&mut self, geometry: &Rect) {
         unsafe {
-            XPLMSetWindowGeometry((*self.data).id, geometry.left, geometry.top, geometry.right,
-            geometry.bottom);
+            XPLMSetWindowGeometry((*self.data).id,
+                                  geometry.left,
+                                  geometry.top,
+                                  geometry.right,
+                                  geometry.bottom);
         }
     }
 }
@@ -266,27 +317,33 @@ impl WindowData {
                 match self.window.upgrade() {
                     Some(window_strong) => {
                         callback.draw(window_strong.borrow_mut().deref_mut());
-                    },
-                    None => {},
+                    }
+                    None => {}
                 }
-            },
-            None => {},
+            }
+            None => {}
         }
     }
     /// Calls the keyboard callback, if it is available
-    pub fn keyboard_callback(&mut self, event_type: KeyEvent, key: Key, modifiers: ModifierKeys,
-        ascii: Option<char>) {
+    pub fn keyboard_callback(&mut self,
+                             event_type: KeyEvent,
+                             key: Key,
+                             modifiers: ModifierKeys,
+                             ascii: Option<char>) {
         match self.keyboard_callback {
             Some(ref mut callback) => {
                 match self.window.upgrade() {
                     Some(window_strong) => {
-                        callback.keyboard_event(event_type, key, modifiers, ascii,
-                            window_strong.borrow_mut().deref_mut());
-                    },
-                    None => {},
+                        callback.keyboard_event(event_type,
+                                                key,
+                                                modifiers,
+                                                ascii,
+                                                window_strong.borrow_mut().deref_mut());
+                    }
+                    None => {}
                 }
-            },
-            None => {},
+            }
+            None => {}
         }
     }
     /// Calls the mouse callback, if it is available
@@ -295,12 +352,13 @@ impl WindowData {
             Some(ref mut callback) => {
                 match self.window.upgrade() {
                     Some(window_strong) => {
-                        callback.mouse_event(cursor_pos, event,
-                            window_strong.borrow_mut().deref_mut())
-                    },
+                        callback.mouse_event(cursor_pos,
+                                             event,
+                                             window_strong.borrow_mut().deref_mut())
+                    }
                     None => true,
                 }
-            },
+            }
             None => true,
         }
     }
@@ -310,12 +368,14 @@ impl WindowData {
             Some(ref mut callback) => {
                 match self.window.upgrade() {
                     Some(window_strong) => {
-                        callback.mouse_wheel_event(cursor_pos, delta_x, delta_y,
-                            window_strong.borrow_mut().deref_mut())
-                    },
+                        callback.mouse_wheel_event(cursor_pos,
+                                                   delta_x,
+                                                   delta_y,
+                                                   window_strong.borrow_mut().deref_mut())
+                    }
                     None => true,
                 }
-            },
+            }
             None => true,
         }
     }
@@ -326,10 +386,10 @@ impl WindowData {
                 match self.window.upgrade() {
                     Some(window_strong) => {
                         callback.cursor(cursor_pos, window_strong.borrow_mut().deref_mut())
-                    },
+                    }
                     None => Cursor::Default,
                 }
-            },
+            }
             None => Cursor::Default,
         }
     }
@@ -343,9 +403,12 @@ unsafe extern "C" fn draw_callback(_: XPLMWindowID, refcon: *mut ::libc::c_void)
     (*data).draw_callback();
 }
 
-unsafe extern "C" fn key_callback(_: XPLMWindowID, key: ::libc::c_char, flags: XPLMKeyFlags,
-                                virtual_key: ::libc::c_char, refcon: *mut ::libc::c_void,
-                                _: ::libc::c_int) {
+unsafe extern "C" fn key_callback(_: XPLMWindowID,
+                                  key: ::libc::c_char,
+                                  flags: XPLMKeyFlags,
+                                  virtual_key: ::libc::c_char,
+                                  refcon: *mut ::libc::c_void,
+                                  _: ::libc::c_int) {
     let data = refcon as *mut WindowData;
     let ascii = match key {
         0 => None,
@@ -360,9 +423,12 @@ unsafe extern "C" fn key_callback(_: XPLMWindowID, key: ::libc::c_char, flags: X
 }
 
 #[allow(non_upper_case_globals)]
-unsafe extern "C" fn mouse_click_callback(_: XPLMWindowID, x: ::libc::c_int, y: ::libc::c_int,
-                                    status: XPLMMouseStatus, refcon: *mut ::libc::c_void)
-                                    -> ::libc::c_int {
+unsafe extern "C" fn mouse_click_callback(_: XPLMWindowID,
+                                          x: ::libc::c_int,
+                                          y: ::libc::c_int,
+                                          status: XPLMMouseStatus,
+                                          refcon: *mut ::libc::c_void)
+                                          -> ::libc::c_int {
     let data = refcon as *mut WindowData;
     let event = match status as u32 {
         xplm_MouseDown => Some(MouseEvent::Pressed),
@@ -372,23 +438,29 @@ unsafe extern "C" fn mouse_click_callback(_: XPLMWindowID, x: ::libc::c_int, y: 
     };
     if let Some(event) = event {
         (*data).mouse_callback(&Point { x: x, y: y }, event) as i32
-    }
-    else {
+    } else {
         // Unrecognized event not processed
         0
     }
 }
 
-unsafe extern "C" fn cursor_callback(_: XPLMWindowID, x: ::libc::c_int, y: ::libc::c_int,
-                                           refcon: *mut ::libc::c_void) -> XPLMCursorStatus {
+unsafe extern "C" fn cursor_callback(_: XPLMWindowID,
+                                     x: ::libc::c_int,
+                                     y: ::libc::c_int,
+                                     refcon: *mut ::libc::c_void)
+                                     -> XPLMCursorStatus {
     let data = refcon as *mut WindowData;
     let cursor = (*data).cursor_callback(&Point { x: x, y: y });
     cursor_to_xplm_cursor(cursor)
 }
 
-unsafe extern "C" fn mouse_wheel_callback(_: XPLMWindowID, x: ::libc::c_int, y: ::libc::c_int,
-                                           wheel: ::libc::c_int, clicks: ::libc::c_int,
-                                           refcon: *mut ::libc::c_void) -> ::libc::c_int {
+unsafe extern "C" fn mouse_wheel_callback(_: XPLMWindowID,
+                                          x: ::libc::c_int,
+                                          y: ::libc::c_int,
+                                          wheel: ::libc::c_int,
+                                          clicks: ::libc::c_int,
+                                          refcon: *mut ::libc::c_void)
+                                          -> ::libc::c_int {
     let data = refcon as *mut WindowData;
     let (dx, dy) = match wheel {
         0 => (0, clicks), // vertical
@@ -422,11 +494,9 @@ fn flags_to_event(flags: XPLMKeyFlags) -> Option<KeyEvent> {
     let flags = flags as u32;
     if (flags & xplm_DownFlag) != 0 {
         Some(KeyEvent::KeyDown)
-    }
-    else if (flags & xplm_UpFlag) != 0 {
+    } else if (flags & xplm_UpFlag) != 0 {
         Some(KeyEvent::KeyUp)
-    }
-    else {
+    } else {
         None
     }
 }

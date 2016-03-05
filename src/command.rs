@@ -7,7 +7,6 @@
 // notice may not be copied, modified, or distributed except
 // according to those terms.
 
-//!
 //! Provides functionality for accessing and creating commands
 //!
 
@@ -142,8 +141,10 @@ impl<O> Command<O> {
     fn clear_callback(&mut self) {
         if let (Some(callback), Some(global_callback)) = (self.callback, self.global_callback) {
             unsafe {
-                XPLMUnregisterCommandHandler(self.command, Some(global_callback), BEFORE,
-                callback as *mut ::libc::c_void);
+                XPLMUnregisterCommandHandler(self.command,
+                                             Some(global_callback),
+                                             BEFORE,
+                                             callback as *mut ::libc::c_void);
             }
             let callback_box = unsafe { Box::from_raw(callback) };
             drop(callback_box);
@@ -206,14 +207,18 @@ impl Command<Owned> {
     ///
     /// This Command object takes ownership of the callback.
     ///
-    pub fn set_callback<C>(&mut self, callback: C) where C: 'static + CommandCallback {
+    pub fn set_callback<C>(&mut self, callback: C)
+        where C: 'static + CommandCallback
+    {
         self.clear_callback();
         let callback_box = Box::new(callback);
         let callback_ptr = Box::into_raw(callback_box);
 
         unsafe {
-            XPLMRegisterCommandHandler(self.command, Some(global_callback::<C>), BEFORE,
-                callback_ptr as *mut ::libc::c_void);
+            XPLMRegisterCommandHandler(self.command,
+                                       Some(global_callback::<C>),
+                                       BEFORE,
+                                       callback_ptr as *mut ::libc::c_void);
         }
         self.callback = Some(callback_ptr);
         self.global_callback = Some(global_callback::<C>);
@@ -229,9 +234,12 @@ impl<O> Drop for Command<O> {
 
 /// The global callback used for all commands
 #[allow(non_upper_case_globals)]
-unsafe extern "C" fn global_callback<C>(_: XPLMCommandRef, phase: XPLMCommandPhase,
-                                           refcon: *mut ::libc::c_void) -> ::libc::c_int
-                                           where C: CommandCallback {
+unsafe extern "C" fn global_callback<C>(_: XPLMCommandRef,
+                                        phase: XPLMCommandPhase,
+                                        refcon: *mut ::libc::c_void)
+                                        -> ::libc::c_int
+    where C: CommandCallback
+{
     let callback = refcon as *mut C;
     match phase as u32 {
         xplm_CommandBegin => (*callback).command_begin(),

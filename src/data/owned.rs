@@ -22,10 +22,13 @@ use std::boxed::Box;
 pub struct Owned<D, A> {
     /// The associated data, allocated in a Box.
     /// refcons in the callbacks are pointers to this.
-    inner: *mut InnerOwnedData<D, A>
+    inner: *mut InnerOwnedData<D, A>,
 }
 
-impl<D, A> Owned<D, A> where D: DataType, A: DataAccess {
+impl<D, A> Owned<D, A>
+    where D: DataType,
+          A: DataAccess
+{
     /// Creates a dataref with the provided name, set to the provided value
     ///
     /// Returns the dataref on success, or an error if the provided name was invalid.
@@ -39,85 +42,125 @@ impl<D, A> Owned<D, A> where D: DataType, A: DataAccess {
         }));
         // Select the correct callbacks based on the data type and writeability
         let read_i = match D::data_type() as u32 {
-            xplmType_Int => Some(get_data_i
-                 as unsafe extern "C" fn(*mut ::libc::c_void) -> ::libc::c_int),
+            xplmType_Int => {
+                Some(get_data_i as unsafe extern "C" fn(*mut ::libc::c_void) -> ::libc::c_int)
+            }
             _ => None,
         };
         let write_i = match (D::data_type() as u32, A::writeable()) {
-            (xplmType_Int, true) => Some(set_data_i
-                 as unsafe extern "C" fn(*mut ::libc::c_void, ::libc::c_int)),
+            (xplmType_Int, true) => {
+                Some(set_data_i as unsafe extern "C" fn(*mut ::libc::c_void, ::libc::c_int))
+            }
             _ => None,
         };
         let read_f = match D::data_type() as u32 {
-            xplmType_Float => Some(get_data_f
-                 as unsafe extern "C" fn(*mut ::libc::c_void) -> ::libc::c_float),
+            xplmType_Float => {
+                Some(get_data_f as unsafe extern "C" fn(*mut ::libc::c_void) -> ::libc::c_float)
+            }
             _ => None,
         };
         let write_f = match (D::data_type() as u32, A::writeable()) {
-            (xplmType_Float, true) => Some(set_data_f
-                 as unsafe extern "C" fn(*mut ::libc::c_void, ::libc::c_float)),
+            (xplmType_Float, true) => {
+                Some(set_data_f as unsafe extern "C" fn(*mut ::libc::c_void, ::libc::c_float))
+            }
             _ => None,
         };
         let read_d = match D::data_type() as u32 {
-            xplmType_Double => Some(get_data_d
-                 as unsafe extern "C" fn(*mut ::libc::c_void) -> ::libc::c_double),
+            xplmType_Double => {
+                Some(get_data_d as unsafe extern "C" fn(*mut ::libc::c_void) -> ::libc::c_double)
+            }
             _ => None,
         };
         let write_d = match (D::data_type() as u32, A::writeable()) {
-            (xplmType_Double, true) => Some(set_data_d
-                 as unsafe extern "C" fn(*mut ::libc::c_void, ::libc::c_double)),
+            (xplmType_Double, true) => {
+                Some(set_data_d as unsafe extern "C" fn(*mut ::libc::c_void, ::libc::c_double))
+            }
             _ => None,
         };
         let read_vi = match D::data_type() as u32 {
-            xplmType_IntArray => Some(get_data_vi
-                 as unsafe extern "C" fn(*mut ::libc::c_void, *mut ::libc::c_int, ::libc::c_int,
-                 ::libc::c_int) -> ::libc::c_int),
+            xplmType_IntArray => {
+                Some(get_data_vi as unsafe extern "C" fn(*mut ::libc::c_void,
+                                                         *mut ::libc::c_int,
+                                                         ::libc::c_int,
+                                                         ::libc::c_int)
+                                                         -> ::libc::c_int)
+            }
             _ => None,
         };
         let write_vi = match (D::data_type() as u32, A::writeable()) {
-            (xplmType_IntArray, true) => Some(set_data_vi
-                as unsafe extern "C" fn(*mut ::libc::c_void, *mut ::libc::c_int, ::libc::c_int,
-                ::libc::c_int)),
+            (xplmType_IntArray, true) => {
+                Some(set_data_vi as unsafe extern "C" fn(*mut ::libc::c_void,
+                                                         *mut ::libc::c_int,
+                                                         ::libc::c_int,
+                                                         ::libc::c_int)
+                                                        )
+            }
             _ => None,
         };
         let read_vf = match D::data_type() as u32 {
-            xplmType_FloatArray => Some(get_data_vf
-                 as unsafe extern "C" fn(*mut ::libc::c_void, *mut ::libc::c_float, ::libc::c_int,
-                 ::libc::c_int) -> ::libc::c_int),
+            xplmType_FloatArray => {
+                Some(get_data_vf as unsafe extern "C" fn(*mut ::libc::c_void,
+                                                         *mut ::libc::c_float,
+                                                         ::libc::c_int,
+                                                         ::libc::c_int)
+                                                         -> ::libc::c_int)
+            }
             _ => None,
         };
         let write_vf = match (D::data_type() as u32, A::writeable()) {
-            (xplmType_FloatArray, true) => Some(set_data_vf
-                as unsafe extern "C" fn(*mut ::libc::c_void, *mut ::libc::c_float, ::libc::c_int,
-                ::libc::c_int)),
+            (xplmType_FloatArray, true) => {
+                Some(set_data_vf as unsafe extern "C" fn(*mut ::libc::c_void,
+                                                         *mut ::libc::c_float,
+                                                         ::libc::c_int,
+                                                         ::libc::c_int)
+                                                        )
+            }
             _ => None,
         };
         let read_b = match D::data_type() as u32 {
-            xplmType_Data => Some(get_data_b
-                 as unsafe extern "C" fn(*mut ::libc::c_void, *mut ::libc::c_void, ::libc::c_int,
-                 ::libc::c_int) -> ::libc::c_int),
+            xplmType_Data => {
+                Some(get_data_b as unsafe extern "C" fn(*mut ::libc::c_void,
+                                                        *mut ::libc::c_void,
+                                                        ::libc::c_int,
+                                                        ::libc::c_int)
+                                                        -> ::libc::c_int)
+            }
             _ => None,
         };
         let write_b = match (D::data_type() as u32, A::writeable()) {
-            (xplmType_Data, true) => Some(set_data_b
-                as unsafe extern "C" fn(*mut ::libc::c_void, *mut ::libc::c_void, ::libc::c_int,
-                ::libc::c_int)),
+            (xplmType_Data, true) => {
+                Some(set_data_b as unsafe extern "C" fn(*mut ::libc::c_void,
+                                                        *mut ::libc::c_void,
+                                                        ::libc::c_int,
+                                                        ::libc::c_int)
+                                                       )
+            }
             _ => None,
         };
 
         unsafe {
             // Register a dataref, and provide the address of the inner data as a refcon
-            let dataref = XPLMRegisterDataAccessor(name_c.as_ptr(), D::data_type(),
-                A::writeable() as i32,
-                read_i, write_i, read_f, write_f, read_d, write_d, read_vi, write_vi, read_vf,
-                write_vf, read_b, write_b,
-                inner as *mut ::libc::c_void, inner as *mut ::libc::c_void);
+            let dataref = XPLMRegisterDataAccessor(name_c.as_ptr(),
+                                                   D::data_type(),
+                                                   A::writeable() as i32,
+                                                   read_i,
+                                                   write_i,
+                                                   read_f,
+                                                   write_f,
+                                                   read_d,
+                                                   write_d,
+                                                   read_vi,
+                                                   write_vi,
+                                                   read_vf,
+                                                   write_vf,
+                                                   read_b,
+                                                   write_b,
+                                                   inner as *mut ::libc::c_void,
+                                                   inner as *mut ::libc::c_void);
             assert!(!dataref.is_null());
             (*inner).dataref = dataref;
         }
-        Ok(Owned {
-            inner: inner,
-        })
+        Ok(Owned { inner: inner })
     }
 }
 
@@ -156,7 +199,9 @@ struct InnerOwnedData<D, A> {
 
 impl<D, A> Drop for InnerOwnedData<D, A> {
     fn drop(&mut self) {
-        unsafe { XPLMUnregisterDataAccessor(self.dataref); }
+        unsafe {
+            XPLMUnregisterDataAccessor(self.dataref);
+        }
     }
 }
 
@@ -186,53 +231,69 @@ unsafe extern "C" fn set_data_d(refcon: *mut ::libc::c_void, value: ::libc::c_do
     let data = refcon as *mut InnerOwnedData<f64, ReadWrite>;
     (*data).value = value;
 }
-unsafe extern "C" fn get_data_vi(refcon: *mut ::libc::c_void, values: *mut ::libc::c_int,
-                                           offset: ::libc::c_int, max: ::libc::c_int)
-                                            -> ::libc::c_int {
+unsafe extern "C" fn get_data_vi(refcon: *mut ::libc::c_void,
+                                 values: *mut ::libc::c_int,
+                                 offset: ::libc::c_int,
+                                 max: ::libc::c_int)
+                                 -> ::libc::c_int {
     let data = refcon as *const InnerOwnedData<Vec<i32>, ReadOnly>;
     handle_read(&(*data).value, values, offset as usize, max as usize)
 }
-unsafe extern "C" fn set_data_vi(refcon: *mut ::libc::c_void, values: *mut ::libc::c_int,
-                                           offset: ::libc::c_int, max: ::libc::c_int) {
+unsafe extern "C" fn set_data_vi(refcon: *mut ::libc::c_void,
+                                 values: *mut ::libc::c_int,
+                                 offset: ::libc::c_int,
+                                 max: ::libc::c_int) {
     let data = refcon as *mut InnerOwnedData<Vec<i32>, ReadWrite>;
     handle_write(&mut (*data).value, values, offset as usize, max as usize);
 }
-unsafe extern "C" fn get_data_vf(refcon: *mut ::libc::c_void, values: *mut ::libc::c_float,
-                                           offset: ::libc::c_int, max: ::libc::c_int)
-                                            -> ::libc::c_int {
+unsafe extern "C" fn get_data_vf(refcon: *mut ::libc::c_void,
+                                 values: *mut ::libc::c_float,
+                                 offset: ::libc::c_int,
+                                 max: ::libc::c_int)
+                                 -> ::libc::c_int {
     let data = refcon as *mut InnerOwnedData<Vec<f32>, ReadOnly>;
     handle_read(&(*data).value, values, offset as usize, max as usize)
 }
-unsafe extern "C" fn set_data_vf(refcon: *mut ::libc::c_void, values: *mut ::libc::c_float,
-                                           offset: ::libc::c_int, max: ::libc::c_int) {
+unsafe extern "C" fn set_data_vf(refcon: *mut ::libc::c_void,
+                                 values: *mut ::libc::c_float,
+                                 offset: ::libc::c_int,
+                                 max: ::libc::c_int) {
     let data = refcon as *mut InnerOwnedData<Vec<f32>, ReadWrite>;
-    handle_write(&mut (*data).value, values, offset as usize,
-    max as usize);
+    handle_write(&mut (*data).value, values, offset as usize, max as usize);
 }
-unsafe extern "C" fn get_data_b(refcon: *mut ::libc::c_void, values: *mut ::libc::c_void,
-                                           offset: ::libc::c_int, max: ::libc::c_int)
-                                            -> ::libc::c_int {
+unsafe extern "C" fn get_data_b(refcon: *mut ::libc::c_void,
+                                values: *mut ::libc::c_void,
+                                offset: ::libc::c_int,
+                                max: ::libc::c_int)
+                                -> ::libc::c_int {
     let data = refcon as *mut InnerOwnedData<Vec<u8>, ReadOnly>;
-    handle_read(&(*data).value, values as *mut u8, offset as usize, max as usize)
+    handle_read(&(*data).value,
+                values as *mut u8,
+                offset as usize,
+                max as usize)
 }
-unsafe extern "C" fn set_data_b(refcon: *mut ::libc::c_void, values: *mut ::libc::c_void,
-                                           offset: ::libc::c_int, max: ::libc::c_int) {
+unsafe extern "C" fn set_data_b(refcon: *mut ::libc::c_void,
+                                values: *mut ::libc::c_void,
+                                offset: ::libc::c_int,
+                                max: ::libc::c_int) {
     let data = refcon as *mut InnerOwnedData<Vec<u8>, ReadWrite>;
-    handle_write(&mut (*data).value, values as *const u8, offset as usize, max as usize);
+    handle_write(&mut (*data).value,
+                 values as *const u8,
+                 offset as usize,
+                 max as usize);
 }
 
 /// Handles a read request
 unsafe fn handle_read<T>(data: &[T], out_values: *mut T, offset: usize, max: usize) -> i32
-    where T: Clone {
+    where T: Clone
+{
     if out_values.is_null() {
         array_length(data.len())
-    }
-    else {
+    } else {
         let upper_bound = min(data.len(), offset + max);
         if upper_bound <= offset {
             0
-        }
-        else {
+        } else {
             for i in offset..upper_bound {
                 let non_offset = i - offset;
                 *(out_values.offset(non_offset as isize)) = data[i].clone();
@@ -243,8 +304,11 @@ unsafe fn handle_read<T>(data: &[T], out_values: *mut T, offset: usize, max: usi
 }
 /// Handles a write request
 unsafe fn handle_write<T>(data: &mut [T], in_values: *const T, offset: usize, max: usize)
-    where T: Clone {
-    if in_values.is_null() { return; }
+    where T: Clone
+{
+    if in_values.is_null() {
+        return;
+    }
     let upper_bound = min(data.len(), offset + max);
     for i in offset..upper_bound {
         let non_offset = i - offset;
@@ -256,7 +320,9 @@ unsafe fn handle_write<T>(data: &mut [T], in_values: *const T, offset: usize, ma
 // datarefs it owns, even if other plugins cannot write them.
 
 // Read
-impl<D, A> Readable<D> for Owned<D, A> where D: Clone {
+impl<D, A> Readable<D> for Owned<D, A>
+    where D: Clone
+{
     fn get(&self) -> D {
         self.get().clone()
     }
@@ -268,13 +334,17 @@ impl<D, A> Writeable<D> for Owned<D, A> {
     }
 }
 // Array read
-impl<D, A> ArrayReadable<D> for Owned<Vec<D>, A> where D: Clone {
+impl<D, A> ArrayReadable<D> for Owned<Vec<D>, A>
+    where D: Clone
+{
     fn len(&self) -> usize {
         self.get().len()
     }
 }
 // Array write
-impl<D, A> ArrayWriteable<D> for Owned<Vec<D>, A> where D: Clone {
+impl<D, A> ArrayWriteable<D> for Owned<Vec<D>, A>
+    where D: Clone
+{
     fn set_from_slice(&mut self, value: &[D]) {
         let elements = self.get_mut();
         for (i, v) in value.iter().enumerate() {

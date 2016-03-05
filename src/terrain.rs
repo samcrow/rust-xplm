@@ -7,7 +7,6 @@
 // notice may not be copied, modified, or distributed except
 // according to those terms.
 
-//!
 //! Provides access to scenery through terrain probes
 //!
 
@@ -40,9 +39,7 @@ pub struct Probe {
 impl Probe {
     /// Creates a new terrain probe
     pub fn new() -> Probe {
-        Probe {
-            probe: unsafe { XPLMCreateProbe(xplm_ProbeY as i32) }
-        }
+        Probe { probe: unsafe { XPLMCreateProbe(xplm_ProbeY as i32) } }
     }
 
     /// Probes terain at the specified location in local coordinates
@@ -51,8 +48,11 @@ impl Probe {
         let mut result = XPLMProbeInfo_t::default();
         result.structSize = mem::size_of::<XPLMProbeInfo_t>() as i32;
         let status = unsafe {
-            XPLMProbeTerrainXYZ(self.probe, position.x as f32, position.y as f32,
-                position.z as f32, &mut result)
+            XPLMProbeTerrainXYZ(self.probe,
+                                position.x as f32,
+                                position.y as f32,
+                                position.z as f32,
+                                &mut result)
         };
         match status as u32 {
             xplm_ProbeHitTerrain => Some(convert_result(&result)),
@@ -71,7 +71,7 @@ impl Probe {
             Some(result) => {
                 let probed_altitude = local_to_world(&result.position).altitude;
                 Some(LatLonAlt::with_altitude(position, probed_altitude))
-            },
+            }
             None => None,
         }
     }

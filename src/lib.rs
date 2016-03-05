@@ -7,7 +7,6 @@
 // notice may not be copied, modified, or distributed except
 // according to those terms.
 
-//!
 //! The `xplm` crate provides a convenient interface to the X-Plane plugin SDK.
 //!
 
@@ -57,7 +56,10 @@ pub fn debug(message: &str) {
 
     match CString::new(message) {
         Ok(message_c) => unsafe { XPLMDebugString(message_c.as_ptr()) },
-        Err(_) => unsafe { XPLMDebugString(b"xplm::debug: Provided string not valid".as_ptr() as *const libc::c_char) },
+        Err(_) => unsafe {
+            XPLMDebugString(b"xplm::debug: Provided string not valid"
+                                .as_ptr() as *const libc::c_char)
+        },
     }
 }
 
@@ -69,7 +71,8 @@ pub fn enable_debug_logging() {
 /// The error callback provided to X-Plane that receives error messages
 unsafe extern "C" fn log_callback(message: *const ::libc::c_char) {
     use std::ffi::CStr;
-    debug(&format!("XPLM error: {}\n", CStr::from_ptr(message).to_string_lossy().into_owned()));
+    debug(&format!("XPLM error: {}\n",
+                   CStr::from_ptr(message).to_string_lossy().into_owned()));
 }
 
 /// Finds a symbol in the set of currently loaded libraries
@@ -190,7 +193,7 @@ macro_rules! xplane_plugin {
 // These are marked as extern "C" because extern "Rust" is not supported. The improper_ctypes
 // warning is suppressed because they are only ever called from Rust code.
 #[allow(improper_ctypes)]
-extern {
+extern "C" {
     /// Returns information about this plugin
     fn plugin_info() -> PluginInfo;
     /// Starts the plugin. Returns Ok on success or Err on failure
@@ -212,9 +215,10 @@ extern {
 #[allow(non_snake_case)]
 #[no_mangle]
 #[doc(hidden)]
-pub unsafe extern "C" fn XPluginStart(outName: *mut libc::c_char, outSig: *mut libc::c_char,
-    outDescription: *mut libc::c_char) -> libc::c_int
-{
+pub unsafe extern "C" fn XPluginStart(outName: *mut libc::c_char,
+                                      outSig: *mut libc::c_char,
+                                      outDescription: *mut libc::c_char)
+                                      -> libc::c_int {
     match plugin_start() {
         Ok(_) => {
             let info = plugin_info();
@@ -234,11 +238,11 @@ pub unsafe extern "C" fn XPluginStart(outName: *mut libc::c_char, outSig: *mut l
 
             // Success
             1
-        },
+        }
         Err(_) => {
             // Return failure
             0
-        },
+        }
     }
 }
 
@@ -266,9 +270,9 @@ pub unsafe extern "C" fn XPluginDisable() {
 #[allow(non_snake_case)]
 #[no_mangle]
 #[doc(hidden)]
-pub unsafe extern "C" fn XPluginReceiveMessage(inFrom: libc::c_int, inMessage: libc::c_int,
-    _: *mut libc::c_void)
-{
+pub unsafe extern "C" fn XPluginReceiveMessage(inFrom: libc::c_int,
+                                               inMessage: libc::c_int,
+                                               _: *mut libc::c_void) {
     if inFrom == ipc::XPLANE_ID {
         if let Some(message) = ipc::XPlaneMessage::from_i32(inMessage) {
             plugin_message_from_xplane(message);
