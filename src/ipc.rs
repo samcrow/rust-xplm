@@ -18,6 +18,11 @@ use ffi::StringBuffer;
 const NO_ID: XPLMPluginID = -1;
 
 ///
+/// A plugin ID that indicates a message sent by X-Plane
+///
+pub const XPLANE_ID: XPLMPluginID = 0;
+
+///
 /// Size of string buffers to allocate when getting plugin information
 ///
 const BUFFER_SIZE: usize = 512;
@@ -188,5 +193,42 @@ impl fmt::Display for SendError {
 impl Error for SendError {
     fn description(&self) -> &str {
         "Message number less than minimum"
+    }
+}
+
+/// Messages that X-Plane can send to a plugin
+pub enum XPlaneMessage {
+    /// Indicates that the plane has crashed
+    PlaneCrashed,
+    /// Indicates that the user has loaded a new aircraft
+    PlaneLoaded,
+    /// Indicates a new livery for the current aircraft has been loaded
+    LiveryLoaded,
+    /// Indicates that the number of active aircraft has changed
+    PlaneCountChanged,
+    /// Indicates that the user has unloaded the aircraft
+    PlaneUnloaded,
+    /// Indicates that the user has positioned the aircraft at an airport
+    AirportLoaded,
+    /// Indicates that some new scenery has been loaded
+    SceneryLoaded,
+    /// Indicates that X-Plane is about to write preferences
+    WillWritePreferences,
+}
+
+impl XPlaneMessage {
+    /// Converts an integer value (as provided by X-Plane) into an XPlaneMessage
+    fn from_u32(value: u32) -> Option<XPlaneMessage> {
+        match value {
+            101 => Some(XPlaneMessage::PlaneCrashed),
+            102 => Some(XPlaneMessage::PlaneLoaded),
+            103 => Some(XPlaneMessage::AirportLoaded),
+            104 => Some(XPlaneMessage::SceneryLoaded),
+            105 => Some(XPlaneMessage::PlaneCountChanged),
+            106 => Some(XPlaneMessage::PlaneUnloaded),
+            107 => Some(XPlaneMessage::WillWritePreferences),
+            108 => Some(XPlaneMessage::LiveryLoaded),
+            _ => None,
+        }
     }
 }
