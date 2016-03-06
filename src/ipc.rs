@@ -167,7 +167,7 @@ impl Plugin {
     ///
     /// Returns Err if the message is less than the minimum user message (`0x00FFFFFF`).
     ///
-    pub fn send_message(&self, message: u32, argument: usize) -> Result<(), SendError> {
+    pub fn send_message(&self, message: i32, argument: usize) -> Result<(), SendError> {
         if message >= MIN_USER_MESSAGE {
             unsafe {
                 XPLMSendMessageToPlugin(self.id,
