@@ -6,7 +6,6 @@ use xplm_sys::plugin::*;
 use xplm_sys::defs::XPLMPluginID;
 
 use std::ffi::CString;
-use std::ptr;
 use std::error::Error;
 use std::fmt;
 use ffi::StringBuffer;
@@ -168,10 +167,12 @@ impl Plugin {
     ///
     /// Returns Err if the message is less than the minimum user message (`0x00FFFFFF`).
     ///
-    pub fn send_message(&self, message: u32) -> Result<(), SendError> {
+    pub fn send_message(&self, message: u32, argument: usize) -> Result<(), SendError> {
         if message >= MIN_USER_MESSAGE {
             unsafe {
-                XPLMSendMessageToPlugin(self.id, message as libc::c_int, ptr::null_mut());
+                XPLMSendMessageToPlugin(self.id,
+                                        message as libc::c_int,
+                                        argument as *mut libc::c_void);
             }
             Ok(())
         } else {
