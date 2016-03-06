@@ -17,6 +17,12 @@ pub trait DeferredInitCallback {
     fn deferred_init(&mut self);
 }
 
+impl<F> DeferredInitCallback for F where F: FnMut() {
+    fn deferred_init(&mut self) {
+        self()
+    }
+}
+
 /// Wraps a DeferredInitCallback and implements FlightLoopCallback
 struct DeferredCallbackAdapter<C> {
     callback: C,
