@@ -25,6 +25,8 @@ pub mod data;
 pub mod command;
 /// Flight loop callbacks
 pub mod flight_loop;
+/// Callbacks for deferred initialization
+pub mod deferred_init;
 /// SDK feature querying and enabling
 pub mod features;
 /// Terrain probing
