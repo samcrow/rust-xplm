@@ -49,3 +49,12 @@ impl StringBuffer {
         String::from_utf8_lossy(&self.bytes[0..end_index]).into_owned()
     }
 }
+
+/// Reexported types from libc
+///
+/// These types are not normally used directly in plugins.
+pub mod types {
+    pub use libc::c_int;
+    pub use libc::c_char;
+    pub use libc::c_void;
+}

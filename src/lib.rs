@@ -60,7 +60,7 @@ pub fn debug(message: &str) {
         Ok(message_c) => unsafe { XPLMDebugString(message_c.as_ptr()) },
         Err(_) => unsafe {
             XPLMDebugString(b"xplm::debug: Provided string not valid"
-                                .as_ptr() as *const libc::c_char)
+                                .as_ptr() as *const ffi::types::c_char)
         },
     }
 }
@@ -71,14 +71,14 @@ pub fn enable_debug_logging() {
 }
 
 /// The error callback provided to X-Plane that receives error messages
-unsafe extern "C" fn log_callback(message: *const ::libc::c_char) {
+unsafe extern "C" fn log_callback(message: *const ffi::types::c_char) {
     use std::ffi::CStr;
     debug(&format!("XPLM error: {}\n",
                    CStr::from_ptr(message).to_string_lossy().into_owned()));
 }
 
 /// Finds a symbol in the set of currently loaded libraries
-pub fn find_symbol(name: &str) -> *mut ::libc::c_void {
+pub fn find_symbol(name: &str) -> *mut ffi::types::c_void {
     use std::ptr;
     use xplm_sys::utilities::XPLMFindSymbol;
 
@@ -135,155 +135,90 @@ pub trait Plugin : Sized {
 
 /// Creates an X-Plane plugin
 ///
-/// Provide the type name of your plugin struct. The callbacks that X-Plane uses will be created.
+/// Provide the name of your plugin struct. The callbacks that X-Plane uses will be created.
 ///
 #[macro_export]
 macro_rules! xplane_plugin {
     ($plugin_type: ty) => (
-        use xplm::Plugin;
+        use ::std::ptr;
+        use ::std::ffi;
         type PluginType = $plugin_type;
         type PluginPtr = *mut PluginType;
         // The plugin
         static mut PLUGIN: PluginPtr = 0 as PluginPtr;
 
+        #[allow(non_snake_case)]
         #[no_mangle]
-        pub extern fn plugin_info() -> xplm::PluginInfo {
-            PluginType::info()
-        }
-        #[no_mangle]
-        pub unsafe extern fn plugin_start() -> Result<(), ()> {
+        pub extern "C" fn XPluginStart(outName: *mut ::xplm::ffi::types::c_char, outSig: *mut ::xplm::ffi::types::c_char,
+            outDescription: *mut ::xplm::ffi::types::c_char) -> ::xplm::ffi::types::c_int
+        {
             // Create the plugin, temporarily, on the stack
             let plugin_option = PluginType::start();
             match plugin_option {
-                Ok(plugin) => {
+                Some(plugin) => {
                     // Allocate storage
-                    PLUGIN = Box::into_raw(Box::new(plugin));
-                    Ok(())
+                    PLUGIN = unsafe { Box::into_raw(Box::new(plugin)); }
+
+                    let info = (*PLUGIN).info();
+
+                    match ffi::CString::new(info.name).ok() {
+                        Some(name) => ::xplm::ffi::types::strcpy(outName, name.as_ptr()),
+                        None => ::xplm::ffi::types::strcpy(outName, b"<invalid>".as_ptr() as *const ::xplm::ffi::types::c_char),
+                    };
+                    match ffi::CString::new(info.signature).ok() {
+                        Some(signature) => ::xplm::ffi::types::strcpy(outSig, signature.as_ptr()),
+                        None => ::xplm::ffi::types::strcpy(outSig, b"<invalid>".as_ptr() as *const ::xplm::ffi::types::c_char),
+                    };
+                    match ffi::CString::new(info.description).ok() {
+                        Some(description) => ::xplm::ffi::types::strcpy(outDescription, description.as_ptr()),
+                        None => ::xplm::ffi::types::strcpy(outDescription, b"<invalid>".as_ptr() as *const ::xplm::ffi::types::c_char),
+                    };
+
+                    // Success
+                    1
                 },
-                Err(e) => {
-                    xplm::debug(&format!("Plugin {} failed to start: {}\n",
-                    PluginType::info().name, e));
-                    Err(())
+                None => {
+                    // Return failure
+                    0
                 },
             }
         }
+
+        #[allow(non_snake_case)]
         #[no_mangle]
-        pub unsafe extern fn plugin_enable() {
-            (*PLUGIN).enable()
-        }
-        #[no_mangle]
-        pub unsafe extern fn plugin_disable() {
-            (*PLUGIN).disable()
-        }
-        #[no_mangle]
-        pub unsafe extern fn plugin_stop() {
+        pub unsafe extern "C" fn XPluginStop() {
             (*PLUGIN).stop();
             // Free plugin
             let plugin_box = Box::from_raw(PLUGIN);
             drop(plugin_box);
-            PLUGIN = ::std::ptr::null_mut();
+            PLUGIN = ptr::null_mut();
         }
+
+        #[allow(non_snake_case)]
         #[no_mangle]
-        pub unsafe extern fn plugin_message_from_plugin(message: i32, from: ::xplm::ipc::Plugin) {
-            (*PLUGIN).message_from_plugin(message, from)
+        pub unsafe extern "C" fn XPluginEnable() {
+            (*PLUGIN).enable();
         }
+
+        #[allow(non_snake_case)]
         #[no_mangle]
-        pub unsafe extern fn plugin_message_from_xplane(message: ::xplm::ipc::XPlaneMessage) {
-            (*PLUGIN).message_from_xplane(message)
+        pub unsafe extern "C" fn XPluginDisable() {
+            (*PLUGIN).disable();
+        }
+
+        #[allow(non_snake_case)]
+        #[no_mangle]
+        pub unsafe extern "C" fn XPluginReceiveMessage(inFrom: ::xplm::ffi::types::c_int, inMessage: ::xplm::ffi::types::c_int,
+            _: *mut ::xplm::ffi::types::c_void)
+        {
+            if inFrom == ipc::XPLANE_ID {
+                if let Some(message) = ::xplm::ipc::XPlaneMessage::from_i32(inMessage) {
+                    (*PLUGIN).message_from_xplane(message);
+                }
+            } else {
+                let sender = ipc::Plugin::with_id(inFrom);
+                (*PLUGIN).message_from_plugin(inMessage, sender);
+            }
         }
     )
-}
-
-// Extern functions that plugin crates must implement
-// These are marked as extern "C" because extern "Rust" is not supported. The improper_ctypes
-// warning is suppressed because they are only ever called from Rust code.
-#[allow(improper_ctypes)]
-extern "C" {
-    /// Returns information about this plugin
-    fn plugin_info() -> PluginInfo;
-    /// Starts the plugin. Returns Ok on success or Err on failure
-    fn plugin_start() -> Result<(), ()>;
-    /// Enables the plugin
-    fn plugin_enable();
-    /// Disables the plugin
-    fn plugin_disable();
-    /// Stops and destroys the plugin
-    fn plugin_stop();
-    /// Called from X-Plane when the plugin receives a message from another plugin
-    fn plugin_message_from_plugin(message: i32, from: ipc::Plugin);
-    /// Called from X-Plane when the plugin receives a message from X-Plane
-    fn plugin_message_from_xplane(message: ipc::XPlaneMessage);
-}
-
-// Plugin callbacks, called directly from C
-
-#[allow(non_snake_case)]
-#[no_mangle]
-#[doc(hidden)]
-pub unsafe extern "C" fn XPluginStart(outName: *mut libc::c_char,
-                                      outSig: *mut libc::c_char,
-                                      outDescription: *mut libc::c_char)
-                                      -> libc::c_int {
-    match plugin_start() {
-        Ok(_) => {
-            let info = plugin_info();
-
-            match CString::new(info.name).ok() {
-                Some(name) => libc::strcpy(outName, name.as_ptr()),
-                None => libc::strcpy(outName, b"<invalid>".as_ptr() as *const libc::c_char),
-            };
-            match CString::new(info.signature).ok() {
-                Some(signature) => libc::strcpy(outSig, signature.as_ptr()),
-                None => libc::strcpy(outSig, b"<invalid>".as_ptr() as *const libc::c_char),
-            };
-            match CString::new(info.description).ok() {
-                Some(description) => libc::strcpy(outDescription, description.as_ptr()),
-                None => libc::strcpy(outDescription, b"<invalid>".as_ptr() as *const libc::c_char),
-            };
-
-            // Success
-            1
-        }
-        Err(_) => {
-            // Return failure
-            0
-        }
-    }
-}
-
-#[allow(non_snake_case)]
-#[no_mangle]
-#[doc(hidden)]
-pub unsafe extern "C" fn XPluginStop() {
-    plugin_stop()
-}
-
-#[allow(non_snake_case)]
-#[no_mangle]
-#[doc(hidden)]
-pub unsafe extern "C" fn XPluginEnable() {
-    plugin_enable()
-}
-
-#[allow(non_snake_case)]
-#[no_mangle]
-#[doc(hidden)]
-pub unsafe extern "C" fn XPluginDisable() {
-    plugin_disable()
-}
-
-#[allow(non_snake_case)]
-#[no_mangle]
-#[doc(hidden)]
-pub unsafe extern "C" fn XPluginReceiveMessage(inFrom: libc::c_int,
-                                               inMessage: libc::c_int,
-                                               _: *mut libc::c_void) {
-    if inFrom == ipc::XPLANE_ID {
-        if let Some(message) = ipc::XPlaneMessage::from_i32(inMessage) {
-            plugin_message_from_xplane(message);
-        }
-    } else {
-        let sender = ipc::Plugin::with_id(inFrom);
-        plugin_message_from_plugin(inMessage, sender);
-    }
 }
