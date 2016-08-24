@@ -8,5 +8,4 @@ keywords = ["X-Plane", "plugin"]
 description = "Interfaces to the X-Plane plugin SDK"
 
 [dependencies]
-xplm-sys = "^0.1"
-libc = "^0.2"
+xplm-sys = { path = "../xplm-sys" }

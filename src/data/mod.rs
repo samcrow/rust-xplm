@@ -15,8 +15,6 @@ mod owned;
 /// Allows creation of and access to shared data
 mod shared;
 
-extern crate libc;
-
 use xplm_sys::data_access::*;
 
 use std::ffi::NulError;
@@ -121,42 +119,42 @@ pub trait DataType : Clone {
 
 impl DataType for i32 {
     fn data_type() -> XPLMDataTypeID {
-        xplmType_Int as XPLMDataTypeID
+        XPLMDataTypeID::xplmType_Int
     }
 }
 
 impl DataType for f32 {
     fn data_type() -> XPLMDataTypeID {
-        xplmType_Float as XPLMDataTypeID
+        XPLMDataTypeID::xplmType_Float
     }
 }
 
 impl DataType for f64 {
     fn data_type() -> XPLMDataTypeID {
-        xplmType_Double as XPLMDataTypeID
+        XPLMDataTypeID::xplmType_Double
     }
 }
 
 impl DataType for Vec<f32> {
     fn data_type() -> XPLMDataTypeID {
-        xplmType_FloatArray as XPLMDataTypeID
+        XPLMDataTypeID::xplmType_FloatArray
     }
 }
 
 impl DataType for Vec<i32> {
     fn data_type() -> XPLMDataTypeID {
-        xplmType_IntArray as XPLMDataTypeID
+        XPLMDataTypeID::xplmType_IntArray
     }
 }
 
 impl DataType for Vec<u8> {
     fn data_type() -> XPLMDataTypeID {
-        xplmType_Data as XPLMDataTypeID
+        XPLMDataTypeID::xplmType_Data
     }
 }
 impl DataType for String {
     fn data_type() -> XPLMDataTypeID {
-        xplmType_Data as XPLMDataTypeID
+        XPLMDataTypeID::xplmType_Data
     }
 }
 /// Trait for a read/write or read-only marker
@@ -165,8 +163,10 @@ pub trait DataAccess {
     fn writeable() -> bool;
 }
 /// Marks a dataref that can be read and written
-#[derive(Debug,Clone)]
-pub struct ReadWrite;
+#[derive(Debug)]
+pub enum ReadWrite {
+
+}
 impl DataAccess for ReadWrite {
     fn writeable() -> bool {
         true
@@ -174,8 +174,10 @@ impl DataAccess for ReadWrite {
 }
 
 /// Marks a dataref that can only be read
-#[derive(Debug,Clone)]
-pub struct ReadOnly;
+#[derive(Debug)]
+pub enum ReadOnly {
+
+}
 impl DataAccess for ReadOnly {
     fn writeable() -> bool {
         false

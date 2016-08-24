@@ -11,7 +11,6 @@
 //!
 
 use xplm_sys::processing::*;
-use libc;
 
 use std::mem;
 
@@ -143,7 +142,7 @@ impl FlightLoop {
             Phase::AfterFlightModel => 1,
         };
         params.callbackFunc = Some(global_callback::<C>);
-        params.refcon = callback_ptr as *mut libc::c_void;
+        params.refcon = callback_ptr as *mut ::std::os::raw::c_void;
 
         let loop_id = unsafe { XPLMCreateFlightLoop(&mut params) };
 
@@ -169,11 +168,11 @@ impl Drop for FlightLoop {
 }
 
 /// The global flight loop callback
-unsafe extern "C" fn global_callback<C>(_: ::libc::c_float,
-                                        _: ::libc::c_float,
-                                        _: ::libc::c_int,
-                                        refcon: *mut ::libc::c_void)
-                                        -> ::libc::c_float
+unsafe extern "C" fn global_callback<C>(_: ::std::os::raw::c_float,
+                                        _: ::std::os::raw::c_float,
+                                        _: ::std::os::raw::c_int,
+                                        refcon: *mut ::std::os::raw::c_void)
+                                        -> ::std::os::raw::c_float
     where C: FlightLoopCallback
 {
     let callback = refcon as *mut C;

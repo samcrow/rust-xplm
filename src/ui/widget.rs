@@ -74,7 +74,7 @@ impl Base {
         let delegate_ptr = Box::into_raw(Box::new(delegate));
         // Set the delegate as the widget's refcon
         unsafe {
-            XPSetWidgetProperty(id, xpProperty_Refcon as i32, delegate_ptr as isize);
+            XPSetWidgetProperty(id, XPWidgetPropertyID::xpProperty_Refcon as u32, delegate_ptr as isize);
         }
         // Install the callback
         unsafe {
@@ -201,7 +201,7 @@ impl<T> Widget for T
     }
     fn get_property(&self, property: i32) -> Option<isize> {
         let mut exists: i32 = 0;
-        let result = unsafe { XPGetWidgetProperty(self.widget_id(), property, &mut exists) };
+        let result = unsafe { XPGetWidgetProperty(self.widget_id(), property as u32, &mut exists) };
         if exists == 1 {
             Some(result)
         } else {
@@ -210,7 +210,7 @@ impl<T> Widget for T
     }
     fn set_property(&mut self, property: i32, value: isize) {
         unsafe {
-            XPSetWidgetProperty(self.widget_id(), property, value);
+            XPSetWidgetProperty(self.widget_id(), property as u32, value);
         }
     }
     fn get_descriptor(&self) -> String {
@@ -298,16 +298,16 @@ impl Window {
     }
     /// Sets whether this window should have close buttons
     pub fn set_close_buttons(&mut self, close_buttons: bool) {
-        self.set_property(standard_widgets::xpProperty_MainWindowHasCloseBoxes as i32,
+        self.set_property(standard_widgets::Enum_Unnamed2::xpProperty_MainWindowHasCloseBoxes as i32,
                           close_buttons as isize);
     }
     /// Sets whether this window should be translucent or should be a standard opaque window
     pub fn set_translucent(&mut self, translucent: bool) {
         let property_value = match translucent {
-            true => standard_widgets::xpMainWindowStyle_Translucent,
-            false => standard_widgets::xpMainWindowStyle_MainWindow,
+            true => standard_widgets::Enum_Unnamed1::xpMainWindowStyle_Translucent,
+            false => standard_widgets::Enum_Unnamed1::xpMainWindowStyle_MainWindow,
         };
-        self.set_property(standard_widgets::xpProperty_MainWindowType as i32,
+        self.set_property(standard_widgets::Enum_Unnamed2::xpProperty_MainWindowType as i32,
                           property_value as isize);
     }
 }
@@ -328,7 +328,7 @@ impl WidgetDelegate for DefaultWindowDelegate {
                       _: isize)
                       -> bool {
 
-        if message == standard_widgets::xpMessage_CloseButtonPushed as i32 {
+        if message == standard_widgets::Enum_Unnamed3::xpMessage_CloseButtonPushed as i32 {
             unsafe {
                 XPHideWidget(widget);
             }
@@ -378,11 +378,11 @@ impl Pane {
     /// Sets the type of this pane
     pub fn set_pane_type(&mut self, pane_type: PaneType) {
         let value = match pane_type {
-            PaneType::Pane => standard_widgets::xpSubWindowStyle_SubWindow,
-            PaneType::Screen => standard_widgets::xpSubWindowStyle_Screen,
-            PaneType::List => standard_widgets::xpSubWindowStyle_ListView,
+            PaneType::Pane => standard_widgets::Enum_Unnamed4::xpSubWindowStyle_SubWindow,
+            PaneType::Screen => standard_widgets::Enum_Unnamed4::xpSubWindowStyle_Screen,
+            PaneType::List => standard_widgets::Enum_Unnamed4::xpSubWindowStyle_ListView,
         };
-        self.set_property(standard_widgets::xpProperty_SubWindowType as i32,
+        self.set_property(standard_widgets::Enum_Unnamed5::xpProperty_SubWindowType as i32,
                           value as isize);
     }
 }
@@ -414,10 +414,10 @@ impl Button {
                                                  false,
                                                  ButtonDelegate { listener: listener }))),
         };
-        button.set_property(standard_widgets::xpProperty_ButtonType as i32,
-                            standard_widgets::xpPushButton as isize);
-        button.set_property(standard_widgets::xpProperty_ButtonBehavior as i32,
-                            standard_widgets::xpButtonBehaviorPushButton as isize);
+        button.set_property(standard_widgets::Enum_Unnamed8::xpProperty_ButtonType as i32,
+                            standard_widgets::Enum_Unnamed6::xpPushButton as isize);
+        button.set_property(standard_widgets::Enum_Unnamed8::xpProperty_ButtonBehavior as i32,
+                            standard_widgets::Enum_Unnamed7::xpButtonBehaviorPushButton as isize);
 
         button
     }
@@ -460,7 +460,7 @@ impl<L> WidgetDelegate for ButtonDelegate<L>
                       _: isize)
                       -> bool {
 
-        if message == standard_widgets::xpMsg_PushButtonPressed as i32 {
+        if message == standard_widgets::Enum_Unnamed9::xpMsg_PushButtonPressed as i32 {
             self.listener.button_pressed();
             true
         } else {
@@ -489,18 +489,18 @@ impl CheckBox {
                                                  false,
                                                  CheckBoxDelegate { listener: listener }))),
         };
-        checkbox.set_property(standard_widgets::xpProperty_ButtonType as i32,
-                              standard_widgets::xpRadioButton as isize);
-        checkbox.set_property(standard_widgets::xpProperty_ButtonBehavior as i32,
-                              standard_widgets::xpButtonBehaviorCheckBox as isize);
+        checkbox.set_property(standard_widgets::Enum_Unnamed8::xpProperty_ButtonType as i32,
+                              standard_widgets::Enum_Unnamed6::xpRadioButton as isize);
+        checkbox.set_property(standard_widgets::Enum_Unnamed8::xpProperty_ButtonBehavior as i32,
+                              standard_widgets::Enum_Unnamed7::xpButtonBehaviorCheckBox as isize);
 
         checkbox
     }
     pub fn is_checked(&self) -> bool {
-        Some(1) == self.get_property(standard_widgets::xpProperty_ButtonState as i32)
+        Some(1) == self.get_property(standard_widgets::Enum_Unnamed8::xpProperty_ButtonState as i32)
     }
     pub fn set_checked(&mut self, checked: bool) {
-        self.set_property(standard_widgets::xpProperty_ButtonState as i32,
+        self.set_property(standard_widgets::Enum_Unnamed8::xpProperty_ButtonState as i32,
                           checked as isize);
     }
 }
@@ -545,10 +545,10 @@ impl<L> WidgetDelegate for CheckBoxDelegate<L>
                       _: isize)
                       -> bool {
 
-        if message == standard_widgets::xpMsg_ButtonStateChanged as i32 {
+        if message == standard_widgets::Enum_Unnamed9::xpMsg_ButtonStateChanged as i32 {
             let checked = unsafe {
                 XPGetWidgetProperty(widget,
-                                    standard_widgets::xpProperty_ButtonState as i32,
+                                    standard_widgets::Enum_Unnamed8::xpProperty_ButtonState as u32,
                                     ptr::null_mut())
             };
             self.listener.value_changed(checked == 1);
@@ -575,16 +575,16 @@ fn c_string_or_empty(value: &str) -> CString {
 /// D is tye type of widget delegate that is used for this widget
 extern "C" fn message_handler<D>(message: XPWidgetMessage,
                                  widget: XPWidgetID,
-                                 param1: ::libc::intptr_t,
-                                 param2: ::libc::intptr_t)
-                                 -> ::libc::c_int
+                                 param1: isize,
+                                 param2: isize)
+                                 -> ::std::os::raw::c_int
     where D: WidgetDelegate
 {
     unsafe {
         // The refcon is a pointer to the widget delegate
         let mut exists: i32 = 0;
         let delegate: *mut D = mem::transmute(XPGetWidgetProperty(widget,
-                                                                  xpProperty_Refcon as i32,
+                                                                  XPWidgetPropertyID::xpProperty_Refcon as u32,
                                                                   &mut exists));
         if exists == 1 {
             (*delegate).handle_message(widget, message, param1, param2) as i32

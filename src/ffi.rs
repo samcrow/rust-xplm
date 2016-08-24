@@ -10,8 +10,6 @@
 //! Foreign function interface utilities
 //!
 
-extern crate libc;
-
 /// A fixed-length array of characters that can be passed to C functions and converted into a
 /// String
 #[derive(Debug)]
@@ -32,8 +30,8 @@ impl StringBuffer {
     }
 
     /// Returns a mutable pointer to the data in this buffer
-    pub unsafe fn as_mut_ptr(&mut self) -> *mut libc::c_char {
-        self.bytes.as_mut_ptr() as *mut libc::c_char
+    pub unsafe fn as_mut_ptr(&mut self) -> *mut ::std::os::raw::c_char {
+        self.bytes.as_mut_ptr() as *mut ::std::os::raw::c_char
     }
 
     /// Returns a String containing all bytes in this buffer, up to and not including the first
@@ -54,7 +52,7 @@ impl StringBuffer {
 ///
 /// These types are not normally used directly in plugins.
 pub mod types {
-    pub use libc::c_int;
-    pub use libc::c_char;
-    pub use libc::c_void;
+    pub use ::std::os::raw::c_int;
+    pub use ::std::os::raw::c_char;
+    pub use ::std::os::raw::c_void;
 }

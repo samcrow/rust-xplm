@@ -1,5 +1,4 @@
 
-extern crate libc;
 
 use std::marker::PhantomData;
 use std::ffi::{CString, NulError};
@@ -92,7 +91,7 @@ impl<D, A> Borrowed<D, A>
                 }
                 // Check type
                 let actual_types = XPLMGetDataRefTypes(dataref);
-                if (D::data_type() & actual_types) == 0 {
+                if (D::data_type() as u32 & actual_types as u32) == 0 {
                     return Err(SearchError::WrongDataType);
                 }
                 // OK
@@ -222,7 +221,7 @@ impl<A> Readable<Vec<u8>> for Borrowed<Vec<u8>, A> {
         unsafe {
             values.set_len(length);
             XPLMGetDatab(self.dataref,
-                         values.as_mut_ptr() as *mut libc::c_void,
+                         values.as_mut_ptr() as *mut ::std::os::raw::c_void,
                          0,
                          array_length(length));
         }
@@ -245,7 +244,7 @@ impl ArrayWriteable<u8> for Borrowed<Vec<u8>, ReadWrite> {
     fn set_from_slice(&mut self, value: &[u8]) {
         unsafe {
             XPLMSetDatab(self.dataref,
-                         value.as_ptr() as *mut libc::c_void,
+                         value.as_ptr() as *mut ::std::os::raw::c_void,
                          0,
                          array_length(value.len()));
         }
@@ -260,7 +259,7 @@ impl<A> Readable<String> for Borrowed<String, A> {
         // Copy data in
         unsafe {
             XPLMGetDatab(self.dataref,
-                         buffer.as_mut_ptr() as *mut libc::c_void,
+                         buffer.as_mut_ptr() as *mut ::std::os::raw::c_void,
                          0,
                          array_length(length))
         };
@@ -279,7 +278,7 @@ impl Writeable<String> for Borrowed<String, ReadWrite> {
         match CString::new(value) {
             Ok(value_c) => unsafe {
                 XPLMSetDatab(self.dataref,
-                             value_c.as_ptr() as *mut libc::c_void,
+                             value_c.as_ptr() as *mut ::std::os::raw::c_void,
                              0,
                              array_length(value_c.to_bytes().len()));
             },
@@ -294,7 +293,7 @@ impl StringWriteable for Borrowed<String, ReadWrite> {
         let value_c = try!(CString::new(value));
         unsafe {
             XPLMSetDatab(self.dataref,
-                         value_c.as_ptr() as *mut libc::c_void,
+                         value_c.as_ptr() as *mut ::std::os::raw::c_void,
                          0,
                          array_length(value_c.as_bytes_with_nul().len()))
         };

@@ -240,49 +240,49 @@ pub fn all_navaids() -> NavaidIterator {
 
 /// Returns an iterator over all airports
 pub fn all_airports() -> NavaidIterator {
-    all_navaids_of_type(xplm_Nav_Airport)
+    all_navaids_of_type(XPLMNavType::xplm_Nav_Airport)
 }
 /// Returns an iterator over all NDBs
 pub fn all_ndbs() -> NavaidIterator {
-    all_navaids_of_type(xplm_Nav_NDB)
+    all_navaids_of_type(XPLMNavType::xplm_Nav_NDB)
 }
 /// Returns an iterator over all VORs
 pub fn all_vors() -> NavaidIterator {
-    all_navaids_of_type(xplm_Nav_VOR)
+    all_navaids_of_type(XPLMNavType::xplm_Nav_VOR)
 }
 /// Returns an iterator over all ILS glideslopes
 pub fn all_ils_glideslopes() -> NavaidIterator {
-    all_navaids_of_type(xplm_Nav_GlideSlope)
+    all_navaids_of_type(XPLMNavType::xplm_Nav_GlideSlope)
 }
 /// Returns an iterator over all ILS localizers
 pub fn all_ils_localizers() -> NavaidIterator {
-    all_navaids_of_type(xplm_Nav_ILS)
+    all_navaids_of_type(XPLMNavType::xplm_Nav_ILS)
 }
 /// Returns an iterator over all standalone localizers
 pub fn all_localizers() -> NavaidIterator {
-    all_navaids_of_type(xplm_Nav_Localizer)
+    all_navaids_of_type(XPLMNavType::xplm_Nav_Localizer)
 }
 /// Returns an iterator over all outer markers
 pub fn all_outer_markers() -> NavaidIterator {
-    all_navaids_of_type(xplm_Nav_OuterMarker)
+    all_navaids_of_type(XPLMNavType::xplm_Nav_OuterMarker)
 }
 /// Returns an iterator over all middle markers
 pub fn all_middle_markers() -> NavaidIterator {
-    all_navaids_of_type(xplm_Nav_MiddleMarker)
+    all_navaids_of_type(XPLMNavType::xplm_Nav_MiddleMarker)
 }
 /// Returns an iterator over all inner markers
 pub fn all_inner_markers() -> NavaidIterator {
-    all_navaids_of_type(xplm_Nav_InnerMarker)
+    all_navaids_of_type(XPLMNavType::xplm_Nav_InnerMarker)
 }
 /// Returns an iterator over all fixes
 pub fn all_fixes() -> NavaidIterator {
     // Apparently, there is a bug in XPLMFindFirstNavAidOfType() with fixes:
     // http://www.xsquawkbox.net/xpsdk/mediawiki/XPLMFindFirstNavAidOfType
-    all_navaids_of_type(xplm_Nav_Fix)
+    all_navaids_of_type(XPLMNavType::xplm_Nav_Fix)
 }
 /// Returns an iterator over all DMEs
 pub fn all_dmes() -> NavaidIterator {
-    all_navaids_of_type(xplm_Nav_DME)
+    all_navaids_of_type(XPLMNavType::xplm_Nav_DME)
 }
 
 fn all_navaids_of_type(nav_type: XPLMNavType) -> NavaidIterator {
@@ -341,7 +341,7 @@ impl Iterator for NavaidIterator {
 /// has a known type, returns the navaid and the type.
 #[allow(non_upper_case_globals)]
 fn get_navaid_info(nav_ref: XPLMNavRef) -> Option<(Navaid, XPLMNavType)> {
-    let mut navaid_type: XPLMNavType = xplm_Nav_Unknown;
+    let mut navaid_type: XPLMNavType = XPLMNavType::xplm_Nav_Unknown;
     let mut latitude = 0f32;
     let mut longitude = 0f32;
     let mut altitude = 0f32;
@@ -370,14 +370,14 @@ fn get_navaid_info(nav_ref: XPLMNavRef) -> Option<(Navaid, XPLMNavType)> {
     };
 
     let navaid = match navaid_type {
-        xplm_Nav_Airport => {
+        XPLMNavType::xplm_Nav_Airport => {
             Some(Navaid::Airport(Airport {
                 position: position,
                 code: code.as_string(),
                 name: name.as_string(),
             }))
         }
-        xplm_Nav_NDB => {
+        XPLMNavType::xplm_Nav_NDB => {
             Some(Navaid::NDB(NDB {
                 position: position,
                 frequency: Frequency::kilohertz(frequency as f32),
@@ -385,7 +385,7 @@ fn get_navaid_info(nav_ref: XPLMNavRef) -> Option<(Navaid, XPLMNavType)> {
                 name: name.as_string(),
             }))
         }
-        xplm_Nav_VOR => {
+        XPLMNavType::xplm_Nav_VOR => {
             Some(Navaid::VOR(VOR {
                 position: position,
                 frequency: Frequency::megahertz((frequency as f32) / 100.0),
@@ -393,7 +393,7 @@ fn get_navaid_info(nav_ref: XPLMNavRef) -> Option<(Navaid, XPLMNavType)> {
                 name: name.as_string(),
             }))
         }
-        xplm_Nav_ILS => {
+        XPLMNavType::xplm_Nav_ILS => {
             Some(Navaid::ILSLocalizer(ILSLocalizer {
                 position: position,
                 heading: heading as f64,
@@ -402,7 +402,7 @@ fn get_navaid_info(nav_ref: XPLMNavRef) -> Option<(Navaid, XPLMNavType)> {
                 name: name.as_string(),
             }))
         }
-        xplm_Nav_Localizer => {
+        XPLMNavType::xplm_Nav_Localizer => {
             Some(Navaid::Localizer(Localizer {
                 position: position,
                 heading: heading as f64,
@@ -411,7 +411,7 @@ fn get_navaid_info(nav_ref: XPLMNavRef) -> Option<(Navaid, XPLMNavType)> {
                 name: name.as_string(),
             }))
         }
-        xplm_Nav_GlideSlope => {
+        XPLMNavType::xplm_Nav_GlideSlope => {
             Some(Navaid::Glideslope(Glideslope {
                 position: position,
                 heading: heading as f64,
@@ -420,35 +420,35 @@ fn get_navaid_info(nav_ref: XPLMNavRef) -> Option<(Navaid, XPLMNavType)> {
                 name: name.as_string(),
             }))
         }
-        xplm_Nav_OuterMarker => {
+        XPLMNavType::xplm_Nav_OuterMarker => {
             Some(Navaid::OuterMarker(OuterMarker {
                 position: position,
                 code: code.as_string(),
                 name: name.as_string(),
             }))
         }
-        xplm_Nav_MiddleMarker => {
+        XPLMNavType::xplm_Nav_MiddleMarker => {
             Some(Navaid::MiddleMarker(MiddleMarker {
                 position: position,
                 code: code.as_string(),
                 name: name.as_string(),
             }))
         }
-        xplm_Nav_InnerMarker => {
+        XPLMNavType::xplm_Nav_InnerMarker => {
             Some(Navaid::InnerMarker(InnerMarker {
                 position: position,
                 code: code.as_string(),
                 name: name.as_string(),
             }))
         }
-        xplm_Nav_Fix => {
+        XPLMNavType::xplm_Nav_Fix => {
             Some(Navaid::Fix(Fix {
                 position: position,
                 code: code.as_string(),
                 name: name.as_string(),
             }))
         }
-        xplm_Nav_DME => {
+        XPLMNavType::xplm_Nav_DME => {
             Some(Navaid::DME(DME {
                 position: position,
                 frequency: Frequency::megahertz((frequency as f32) / 100.0),

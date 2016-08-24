@@ -17,7 +17,6 @@
         unused_import_braces, unused_qualifications)]
 
 extern crate xplm_sys;
-extern crate libc;
 
 /// Functionality for reading, writing, and creating datarefs
 pub mod data;

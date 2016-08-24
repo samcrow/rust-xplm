@@ -8,9 +8,8 @@
 // according to those terms.
 
 
+use xplm_sys::defs::XPLMKeyFlags;
 use xplm_sys::display::*;
-use xplm_sys::defs::{XPLMKeyFlags, xplm_ShiftFlag, xplm_OptionAltFlag, xplm_ControlFlag,
-                     xplm_DownFlag, xplm_UpFlag};
 use ui::{Rect, Point, Cursor, MouseEvent, KeyEvent, ModifierKeys, Key};
 
 use std::ptr;
@@ -182,7 +181,7 @@ impl Window {
         }));
         // Set window ID as refcon
         unsafe {
-            XPLMSetWindowRefCon(window_id, data_ptr as *mut ::libc::c_void);
+            XPLMSetWindowRefCon(window_id, data_ptr as *mut ::std::os::raw::c_void);
         }
         // Set pointer to data block in window
         window.borrow_mut().data = data_ptr;
@@ -398,17 +397,17 @@ impl WindowData {
 
 // Global callbacks
 
-unsafe extern "C" fn draw_callback(_: XPLMWindowID, refcon: *mut ::libc::c_void) {
+unsafe extern "C" fn draw_callback(_: XPLMWindowID, refcon: *mut ::std::os::raw::c_void) {
     let data = refcon as *mut WindowData;
     (*data).draw_callback();
 }
 
 unsafe extern "C" fn key_callback(_: XPLMWindowID,
-                                  key: ::libc::c_char,
+                                  key: ::std::os::raw::c_char,
                                   flags: XPLMKeyFlags,
-                                  virtual_key: ::libc::c_char,
-                                  refcon: *mut ::libc::c_void,
-                                  _: ::libc::c_int) {
+                                  virtual_key: ::std::os::raw::c_char,
+                                  refcon: *mut ::std::os::raw::c_void,
+                                  _: ::std::os::raw::c_int) {
     let data = refcon as *mut WindowData;
     let ascii = match key {
         0 => None,
@@ -424,17 +423,16 @@ unsafe extern "C" fn key_callback(_: XPLMWindowID,
 
 #[allow(non_upper_case_globals)]
 unsafe extern "C" fn mouse_click_callback(_: XPLMWindowID,
-                                          x: ::libc::c_int,
-                                          y: ::libc::c_int,
+                                          x: ::std::os::raw::c_int,
+                                          y: ::std::os::raw::c_int,
                                           status: XPLMMouseStatus,
-                                          refcon: *mut ::libc::c_void)
-                                          -> ::libc::c_int {
+                                          refcon: *mut ::std::os::raw::c_void)
+                                          -> ::std::os::raw::c_int {
     let data = refcon as *mut WindowData;
-    let event = match status as u32 {
-        xplm_MouseDown => Some(MouseEvent::Pressed),
-        xplm_MouseDrag => Some(MouseEvent::Dragged),
-        xplm_MouseUp => Some(MouseEvent::Released),
-        _ => None,
+    let event = match status {
+        XPLMMouseStatus::xplm_MouseDown => Some(MouseEvent::Pressed),
+        XPLMMouseStatus::xplm_MouseDrag => Some(MouseEvent::Dragged),
+        XPLMMouseStatus::xplm_MouseUp => Some(MouseEvent::Released),
     };
     if let Some(event) = event {
         (*data).mouse_callback(&Point { x: x, y: y }, event) as i32
@@ -445,9 +443,9 @@ unsafe extern "C" fn mouse_click_callback(_: XPLMWindowID,
 }
 
 unsafe extern "C" fn cursor_callback(_: XPLMWindowID,
-                                     x: ::libc::c_int,
-                                     y: ::libc::c_int,
-                                     refcon: *mut ::libc::c_void)
+                                     x: ::std::os::raw::c_int,
+                                     y: ::std::os::raw::c_int,
+                                     refcon: *mut ::std::os::raw::c_void)
                                      -> XPLMCursorStatus {
     let data = refcon as *mut WindowData;
     let cursor = (*data).cursor_callback(&Point { x: x, y: y });
@@ -455,12 +453,12 @@ unsafe extern "C" fn cursor_callback(_: XPLMWindowID,
 }
 
 unsafe extern "C" fn mouse_wheel_callback(_: XPLMWindowID,
-                                          x: ::libc::c_int,
-                                          y: ::libc::c_int,
-                                          wheel: ::libc::c_int,
-                                          clicks: ::libc::c_int,
-                                          refcon: *mut ::libc::c_void)
-                                          -> ::libc::c_int {
+                                          x: ::std::os::raw::c_int,
+                                          y: ::std::os::raw::c_int,
+                                          wheel: ::std::os::raw::c_int,
+                                          clicks: ::std::os::raw::c_int,
+                                          refcon: *mut ::std::os::raw::c_void)
+                                          -> ::std::os::raw::c_int {
     let data = refcon as *mut WindowData;
     let (dx, dy) = match wheel {
         0 => (0, clicks), // vertical
@@ -472,9 +470,9 @@ unsafe extern "C" fn mouse_wheel_callback(_: XPLMWindowID,
 
 fn cursor_to_xplm_cursor(cursor: Cursor) -> XPLMCursorStatus {
     match cursor {
-        Cursor::Default => xplm_CursorDefault as i32,
-        Cursor::Hidden => xplm_CursorHidden as i32,
-        Cursor::Arrow => xplm_CursorArrow as i32,
+        Cursor::Default => XPLMCursorStatus::xplm_CursorDefault,
+        Cursor::Hidden => XPLMCursorStatus::xplm_CursorHidden,
+        Cursor::Arrow => XPLMCursorStatus::xplm_CursorArrow,
     }
 }
 
@@ -483,18 +481,18 @@ fn cursor_to_xplm_cursor(cursor: Cursor) -> XPLMCursorStatus {
 fn flags_to_modifiers(flags: XPLMKeyFlags) -> ModifierKeys {
     let flags = flags as u32;
     ModifierKeys {
-        shift: (flags & xplm_ShiftFlag) != 0,
-        option: (flags & xplm_OptionAltFlag) != 0,
-        control: (flags & xplm_ControlFlag) != 0,
+        shift: (flags & XPLMKeyFlags::xplm_ShiftFlag as u32) != 0,
+        option: (flags & XPLMKeyFlags::xplm_OptionAltFlag as u32) != 0,
+        control: (flags & XPLMKeyFlags::xplm_ControlFlag as u32) != 0,
     }
 }
 
 /// Converts an XPLMKeyFlags object into a key event
 fn flags_to_event(flags: XPLMKeyFlags) -> Option<KeyEvent> {
     let flags = flags as u32;
-    if (flags & xplm_DownFlag) != 0 {
+    if (flags & XPLMKeyFlags::xplm_DownFlag as u32) != 0 {
         Some(KeyEvent::KeyDown)
-    } else if (flags & xplm_UpFlag) != 0 {
+    } else if (flags & XPLMKeyFlags::xplm_UpFlag as u32) != 0 {
         Some(KeyEvent::KeyUp)
     } else {
         None
@@ -502,7 +500,7 @@ fn flags_to_event(flags: XPLMKeyFlags) -> Option<KeyEvent> {
 }
 
 /// Converts an XPLM virtual key into a Key
-fn vk_to_key(vk: ::libc::c_char) -> Option<Key> {
+fn vk_to_key(vk: ::std::os::raw::c_char) -> Option<Key> {
     match vk as u8 {
         0x08u8 => Some(Key::Back),
         0x09u8 => Some(Key::Tab),

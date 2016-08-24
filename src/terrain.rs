@@ -39,7 +39,7 @@ pub struct Probe {
 impl Probe {
     /// Creates a new terrain probe
     pub fn new() -> Probe {
-        Probe { probe: unsafe { XPLMCreateProbe(xplm_ProbeY as i32) } }
+        Probe { probe: unsafe { XPLMCreateProbe(Enum_Unnamed1::xplm_ProbeY as i32) } }
     }
 
     /// Probes terain at the specified location in local coordinates
@@ -54,8 +54,8 @@ impl Probe {
                                 position.z as f32,
                                 &mut result)
         };
-        match status as u32 {
-            xplm_ProbeHitTerrain => Some(convert_result(&result)),
+        match status {
+            XPLMProbeResult::xplm_ProbeHitTerrain => Some(convert_result(&result)),
             _ => None,
         }
     }

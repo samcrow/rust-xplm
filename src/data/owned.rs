@@ -4,8 +4,6 @@ use super::array_length;
 
 use xplm_sys::data_access::*;
 
-extern crate libc;
-
 use std::cmp::min;
 use std::ffi::{CString, NulError};
 use std::marker::PhantomData;
@@ -41,98 +39,98 @@ impl<D, A> Owned<D, A>
             access_phantom: PhantomData,
         }));
         // Select the correct callbacks based on the data type and writeability
-        let read_i = match D::data_type() as u32 {
-            xplmType_Int => {
-                Some(get_data_i as unsafe extern "C" fn(*mut ::libc::c_void) -> ::libc::c_int)
+        let read_i = match D::data_type() {
+            XPLMDataTypeID::xplmType_Int => {
+                Some(get_data_i as unsafe extern "C" fn(*mut ::std::os::raw::c_void) -> ::std::os::raw::c_int)
             }
             _ => None,
         };
-        let write_i = match (D::data_type() as u32, A::writeable()) {
-            (xplmType_Int, true) => {
-                Some(set_data_i as unsafe extern "C" fn(*mut ::libc::c_void, ::libc::c_int))
+        let write_i = match (D::data_type(), A::writeable()) {
+            (XPLMDataTypeID::xplmType_Int, true) => {
+                Some(set_data_i as unsafe extern "C" fn(*mut ::std::os::raw::c_void, ::std::os::raw::c_int))
             }
             _ => None,
         };
-        let read_f = match D::data_type() as u32 {
-            xplmType_Float => {
-                Some(get_data_f as unsafe extern "C" fn(*mut ::libc::c_void) -> ::libc::c_float)
+        let read_f = match D::data_type() {
+            XPLMDataTypeID::xplmType_Float => {
+                Some(get_data_f as unsafe extern "C" fn(*mut ::std::os::raw::c_void) -> ::std::os::raw::c_float)
             }
             _ => None,
         };
-        let write_f = match (D::data_type() as u32, A::writeable()) {
-            (xplmType_Float, true) => {
-                Some(set_data_f as unsafe extern "C" fn(*mut ::libc::c_void, ::libc::c_float))
+        let write_f = match (D::data_type(), A::writeable()) {
+            (XPLMDataTypeID::xplmType_Float, true) => {
+                Some(set_data_f as unsafe extern "C" fn(*mut ::std::os::raw::c_void, ::std::os::raw::c_float))
             }
             _ => None,
         };
-        let read_d = match D::data_type() as u32 {
-            xplmType_Double => {
-                Some(get_data_d as unsafe extern "C" fn(*mut ::libc::c_void) -> ::libc::c_double)
+        let read_d = match D::data_type() {
+            XPLMDataTypeID::xplmType_Double => {
+                Some(get_data_d as unsafe extern "C" fn(*mut ::std::os::raw::c_void) -> ::std::os::raw::c_double)
             }
             _ => None,
         };
-        let write_d = match (D::data_type() as u32, A::writeable()) {
-            (xplmType_Double, true) => {
-                Some(set_data_d as unsafe extern "C" fn(*mut ::libc::c_void, ::libc::c_double))
+        let write_d = match (D::data_type(), A::writeable()) {
+            (XPLMDataTypeID::xplmType_Double, true) => {
+                Some(set_data_d as unsafe extern "C" fn(*mut ::std::os::raw::c_void, ::std::os::raw::c_double))
             }
             _ => None,
         };
-        let read_vi = match D::data_type() as u32 {
-            xplmType_IntArray => {
-                Some(get_data_vi as unsafe extern "C" fn(*mut ::libc::c_void,
-                                                         *mut ::libc::c_int,
-                                                         ::libc::c_int,
-                                                         ::libc::c_int)
-                                                         -> ::libc::c_int)
+        let read_vi = match D::data_type() {
+            XPLMDataTypeID::xplmType_IntArray => {
+                Some(get_data_vi as unsafe extern "C" fn(*mut ::std::os::raw::c_void,
+                                                         *mut ::std::os::raw::c_int,
+                                                         ::std::os::raw::c_int,
+                                                         ::std::os::raw::c_int)
+                                                         -> ::std::os::raw::c_int)
             }
             _ => None,
         };
-        let write_vi = match (D::data_type() as u32, A::writeable()) {
-            (xplmType_IntArray, true) => {
-                Some(set_data_vi as unsafe extern "C" fn(*mut ::libc::c_void,
-                                                         *mut ::libc::c_int,
-                                                         ::libc::c_int,
-                                                         ::libc::c_int)
+        let write_vi = match (D::data_type(), A::writeable()) {
+            (XPLMDataTypeID::xplmType_IntArray, true) => {
+                Some(set_data_vi as unsafe extern "C" fn(*mut ::std::os::raw::c_void,
+                                                         *mut ::std::os::raw::c_int,
+                                                         ::std::os::raw::c_int,
+                                                         ::std::os::raw::c_int)
                                                         )
             }
             _ => None,
         };
-        let read_vf = match D::data_type() as u32 {
-            xplmType_FloatArray => {
-                Some(get_data_vf as unsafe extern "C" fn(*mut ::libc::c_void,
-                                                         *mut ::libc::c_float,
-                                                         ::libc::c_int,
-                                                         ::libc::c_int)
-                                                         -> ::libc::c_int)
+        let read_vf = match D::data_type() {
+            XPLMDataTypeID::xplmType_FloatArray => {
+                Some(get_data_vf as unsafe extern "C" fn(*mut ::std::os::raw::c_void,
+                                                         *mut ::std::os::raw::c_float,
+                                                         ::std::os::raw::c_int,
+                                                         ::std::os::raw::c_int)
+                                                         -> ::std::os::raw::c_int)
             }
             _ => None,
         };
-        let write_vf = match (D::data_type() as u32, A::writeable()) {
-            (xplmType_FloatArray, true) => {
-                Some(set_data_vf as unsafe extern "C" fn(*mut ::libc::c_void,
-                                                         *mut ::libc::c_float,
-                                                         ::libc::c_int,
-                                                         ::libc::c_int)
+        let write_vf = match (D::data_type(), A::writeable()) {
+            (XPLMDataTypeID::xplmType_FloatArray, true) => {
+                Some(set_data_vf as unsafe extern "C" fn(*mut ::std::os::raw::c_void,
+                                                         *mut ::std::os::raw::c_float,
+                                                         ::std::os::raw::c_int,
+                                                         ::std::os::raw::c_int)
                                                         )
             }
             _ => None,
         };
-        let read_b = match D::data_type() as u32 {
-            xplmType_Data => {
-                Some(get_data_b as unsafe extern "C" fn(*mut ::libc::c_void,
-                                                        *mut ::libc::c_void,
-                                                        ::libc::c_int,
-                                                        ::libc::c_int)
-                                                        -> ::libc::c_int)
+        let read_b = match D::data_type() {
+            XPLMDataTypeID::xplmType_Data => {
+                Some(get_data_b as unsafe extern "C" fn(*mut ::std::os::raw::c_void,
+                                                        *mut ::std::os::raw::c_void,
+                                                        ::std::os::raw::c_int,
+                                                        ::std::os::raw::c_int)
+                                                        -> ::std::os::raw::c_int)
             }
             _ => None,
         };
-        let write_b = match (D::data_type() as u32, A::writeable()) {
-            (xplmType_Data, true) => {
-                Some(set_data_b as unsafe extern "C" fn(*mut ::libc::c_void,
-                                                        *mut ::libc::c_void,
-                                                        ::libc::c_int,
-                                                        ::libc::c_int)
+        let write_b = match (D::data_type(), A::writeable()) {
+            (XPLMDataTypeID::xplmType_Data, true) => {
+                Some(set_data_b as unsafe extern "C" fn(*mut ::std::os::raw::c_void,
+                                                        *mut ::std::os::raw::c_void,
+                                                        ::std::os::raw::c_int,
+                                                        ::std::os::raw::c_int)
                                                        )
             }
             _ => None,
@@ -155,8 +153,8 @@ impl<D, A> Owned<D, A>
                                                    write_vf,
                                                    read_b,
                                                    write_b,
-                                                   inner as *mut ::libc::c_void,
-                                                   inner as *mut ::libc::c_void);
+                                                   inner as *mut ::std::os::raw::c_void,
+                                                   inner as *mut ::std::os::raw::c_void);
             assert!(!dataref.is_null());
             (*inner).dataref = dataref;
         }
@@ -207,75 +205,75 @@ impl<D, A> Drop for InnerOwnedData<D, A> {
 
 
 // Callbacks
-unsafe extern "C" fn get_data_i(refcon: *mut ::libc::c_void) -> ::libc::c_int {
+unsafe extern "C" fn get_data_i(refcon: *mut ::std::os::raw::c_void) -> ::std::os::raw::c_int {
     let data = refcon as *const InnerOwnedData<i32, ReadOnly>;
     (*data).value
 }
-unsafe extern "C" fn set_data_i(refcon: *mut ::libc::c_void, value: ::libc::c_int) {
+unsafe extern "C" fn set_data_i(refcon: *mut ::std::os::raw::c_void, value: ::std::os::raw::c_int) {
     let data = refcon as *mut InnerOwnedData<i32, ReadWrite>;
     (*data).value = value;
 }
-unsafe extern "C" fn get_data_f(refcon: *mut ::libc::c_void) -> ::libc::c_float {
+unsafe extern "C" fn get_data_f(refcon: *mut ::std::os::raw::c_void) -> ::std::os::raw::c_float {
     let data = refcon as *const InnerOwnedData<f32, ReadOnly>;
     (*data).value
 }
-unsafe extern "C" fn set_data_f(refcon: *mut ::libc::c_void, value: ::libc::c_float) {
+unsafe extern "C" fn set_data_f(refcon: *mut ::std::os::raw::c_void, value: ::std::os::raw::c_float) {
     let data = refcon as *mut InnerOwnedData<f32, ReadWrite>;
     (*data).value = value;
 }
-unsafe extern "C" fn get_data_d(refcon: *mut ::libc::c_void) -> ::libc::c_double {
+unsafe extern "C" fn get_data_d(refcon: *mut ::std::os::raw::c_void) -> ::std::os::raw::c_double {
     let data = refcon as *const InnerOwnedData<f64, ReadOnly>;
     (*data).value
 }
-unsafe extern "C" fn set_data_d(refcon: *mut ::libc::c_void, value: ::libc::c_double) {
+unsafe extern "C" fn set_data_d(refcon: *mut ::std::os::raw::c_void, value: ::std::os::raw::c_double) {
     let data = refcon as *mut InnerOwnedData<f64, ReadWrite>;
     (*data).value = value;
 }
-unsafe extern "C" fn get_data_vi(refcon: *mut ::libc::c_void,
-                                 values: *mut ::libc::c_int,
-                                 offset: ::libc::c_int,
-                                 max: ::libc::c_int)
-                                 -> ::libc::c_int {
+unsafe extern "C" fn get_data_vi(refcon: *mut ::std::os::raw::c_void,
+                                 values: *mut ::std::os::raw::c_int,
+                                 offset: ::std::os::raw::c_int,
+                                 max: ::std::os::raw::c_int)
+                                 -> ::std::os::raw::c_int {
     let data = refcon as *const InnerOwnedData<Vec<i32>, ReadOnly>;
     handle_read(&(*data).value, values, offset as usize, max as usize)
 }
-unsafe extern "C" fn set_data_vi(refcon: *mut ::libc::c_void,
-                                 values: *mut ::libc::c_int,
-                                 offset: ::libc::c_int,
-                                 max: ::libc::c_int) {
+unsafe extern "C" fn set_data_vi(refcon: *mut ::std::os::raw::c_void,
+                                 values: *mut ::std::os::raw::c_int,
+                                 offset: ::std::os::raw::c_int,
+                                 max: ::std::os::raw::c_int) {
     let data = refcon as *mut InnerOwnedData<Vec<i32>, ReadWrite>;
     handle_write(&mut (*data).value, values, offset as usize, max as usize);
 }
-unsafe extern "C" fn get_data_vf(refcon: *mut ::libc::c_void,
-                                 values: *mut ::libc::c_float,
-                                 offset: ::libc::c_int,
-                                 max: ::libc::c_int)
-                                 -> ::libc::c_int {
+unsafe extern "C" fn get_data_vf(refcon: *mut ::std::os::raw::c_void,
+                                 values: *mut ::std::os::raw::c_float,
+                                 offset: ::std::os::raw::c_int,
+                                 max: ::std::os::raw::c_int)
+                                 -> ::std::os::raw::c_int {
     let data = refcon as *mut InnerOwnedData<Vec<f32>, ReadOnly>;
     handle_read(&(*data).value, values, offset as usize, max as usize)
 }
-unsafe extern "C" fn set_data_vf(refcon: *mut ::libc::c_void,
-                                 values: *mut ::libc::c_float,
-                                 offset: ::libc::c_int,
-                                 max: ::libc::c_int) {
+unsafe extern "C" fn set_data_vf(refcon: *mut ::std::os::raw::c_void,
+                                 values: *mut ::std::os::raw::c_float,
+                                 offset: ::std::os::raw::c_int,
+                                 max: ::std::os::raw::c_int) {
     let data = refcon as *mut InnerOwnedData<Vec<f32>, ReadWrite>;
     handle_write(&mut (*data).value, values, offset as usize, max as usize);
 }
-unsafe extern "C" fn get_data_b(refcon: *mut ::libc::c_void,
-                                values: *mut ::libc::c_void,
-                                offset: ::libc::c_int,
-                                max: ::libc::c_int)
-                                -> ::libc::c_int {
+unsafe extern "C" fn get_data_b(refcon: *mut ::std::os::raw::c_void,
+                                values: *mut ::std::os::raw::c_void,
+                                offset: ::std::os::raw::c_int,
+                                max: ::std::os::raw::c_int)
+                                -> ::std::os::raw::c_int {
     let data = refcon as *mut InnerOwnedData<Vec<u8>, ReadOnly>;
     handle_read(&(*data).value,
                 values as *mut u8,
                 offset as usize,
                 max as usize)
 }
-unsafe extern "C" fn set_data_b(refcon: *mut ::libc::c_void,
-                                values: *mut ::libc::c_void,
-                                offset: ::libc::c_int,
-                                max: ::libc::c_int) {
+unsafe extern "C" fn set_data_b(refcon: *mut ::std::os::raw::c_void,
+                                values: *mut ::std::os::raw::c_void,
+                                offset: ::std::os::raw::c_int,
+                                max: ::std::os::raw::c_int) {
     let data = refcon as *mut InnerOwnedData<Vec<u8>, ReadWrite>;
     handle_write(&mut (*data).value,
                  values as *const u8,

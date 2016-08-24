@@ -144,7 +144,7 @@ impl<O> Command<O> {
                 XPLMUnregisterCommandHandler(self.command,
                                              Some(global_callback),
                                              BEFORE,
-                                             callback as *mut ::libc::c_void);
+                                             callback as *mut ::std::os::raw::c_void);
             }
             let callback_box = unsafe { Box::from_raw(callback) };
             drop(callback_box);
@@ -180,7 +180,7 @@ impl Command<External> {
     }
 }
 /// If handlers are executed before other handlers
-const BEFORE: ::libc::c_int = 0;
+const BEFORE: ::std::os::raw::c_int = 0;
 
 impl Command<Owned> {
     /// Creates a command
@@ -218,7 +218,7 @@ impl Command<Owned> {
             XPLMRegisterCommandHandler(self.command,
                                        Some(global_callback::<C>),
                                        BEFORE,
-                                       callback_ptr as *mut ::libc::c_void);
+                                       callback_ptr as *mut ::std::os::raw::c_void);
         }
         self.callback = Some(callback_ptr);
         self.global_callback = Some(global_callback::<C>);
@@ -236,16 +236,15 @@ impl<O> Drop for Command<O> {
 #[allow(non_upper_case_globals)]
 unsafe extern "C" fn global_callback<C>(_: XPLMCommandRef,
                                         phase: XPLMCommandPhase,
-                                        refcon: *mut ::libc::c_void)
-                                        -> ::libc::c_int
+                                        refcon: *mut ::std::os::raw::c_void)
+                                        -> ::std::os::raw::c_int
     where C: CommandCallback
 {
     let callback = refcon as *mut C;
-    match phase as u32 {
-        xplm_CommandBegin => (*callback).command_begin(),
-        xplm_CommandContinue => (*callback).command_continue(),
-        xplm_CommandEnd => (*callback).command_end(),
-        _ => println!("Unrecognized command phase {}", phase),
+    match phase {
+        XPLMCommandPhase::xplm_CommandBegin => (*callback).command_begin(),
+        XPLMCommandPhase::xplm_CommandContinue => (*callback).command_continue(),
+        XPLMCommandPhase::xplm_CommandEnd => (*callback).command_end(),
     }
     // Allow other things to handle this command
     1

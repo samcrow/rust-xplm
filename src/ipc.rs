@@ -1,6 +1,5 @@
 //! Functionality for inter-plugin communication
 //!
-extern crate libc;
 
 use xplm_sys::plugin::*;
 use xplm_sys::defs::XPLMPluginID;
@@ -170,7 +169,7 @@ impl Plugin {
     pub fn send_message(&self, message: i32, argument: usize) -> Result<(), SendError> {
         if (message as u32) >= MIN_USER_MESSAGE {
             unsafe {
-                XPLMSendMessageToPlugin(self.id, message, argument as *mut libc::c_void);
+                XPLMSendMessageToPlugin(self.id, message, argument as *mut ::std::os::raw::c_void);
             }
             Ok(())
         } else {

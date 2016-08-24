@@ -62,8 +62,8 @@ impl Feature {
     }
 }
 
-unsafe extern "C" fn feature_enumerator(feature: *const ::libc::c_char,
-                                        refcon: *mut ::libc::c_void) {
+unsafe extern "C" fn feature_enumerator(feature: *const ::std::os::raw::c_char,
+                                        refcon: *mut ::std::os::raw::c_void) {
     let features = refcon as *mut Vec<Feature>;
     let feature_c = CStr::from_ptr(feature);
     (*features).push(Feature { name: feature_c.to_owned() });
