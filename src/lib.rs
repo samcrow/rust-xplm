@@ -32,9 +32,8 @@ pub mod flight_loop;
 pub mod command;
 /// Datarefs
 pub mod data;
-// Error detection
-// Not finished
-// pub mod error;
+/// Error detection
+pub mod error;
 
 /// Writes a message to the X-Plane log.txt file
 ///

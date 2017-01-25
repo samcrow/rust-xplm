@@ -1,5 +1,5 @@
 
-use xplm_sys::utilities::XPLMSetErrorCallback;
+use xplm_sys::XPLMSetErrorCallback;
 use std::os::raw::c_char;
 use std::ffi::CStr;
 
