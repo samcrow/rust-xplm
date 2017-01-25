@@ -6,7 +6,6 @@ use std::os::raw::{c_void, c_int};
 use std::ops::DerefMut;
 
 use xplm_sys::*;
-use super::internal::run_or_abort;
 
 /// A command created by X-Plane or another plugin, that can be triggered
 #[derive(Debug)]
@@ -172,20 +171,18 @@ unsafe extern "C" fn command_handler<H: CommandHandler>(_: XPLMCommandRef,
                                                         phase: XPLMCommandPhase,
                                                         refcon: *mut c_void)
                                                         -> c_int {
-    run_or_abort("command handler callback", || {
-        let data = refcon as *mut OwnedCommandData;
-        let handler: *mut CommandHandler = (*data).handler.deref_mut();
-        let handler = handler as *mut H;
-        if phase == xplm_CommandBegin as i32 {
-            (*handler).command_begin();
-        } else if phase == xplm_CommandContinue as i32 {
-            (*handler).command_continue();
-        } else if phase == xplm_CommandEnd as i32 {
-            (*handler).command_end();
-        }
-        // Prevent other components from handling this equivalent
-        0
-    })
+    let data = refcon as *mut OwnedCommandData;
+    let handler: *mut CommandHandler = (*data).handler.deref_mut();
+    let handler = handler as *mut H;
+    if phase == xplm_CommandBegin as i32 {
+        (*handler).command_begin();
+    } else if phase == xplm_CommandContinue as i32 {
+        (*handler).command_continue();
+    } else if phase == xplm_CommandEnd as i32 {
+        (*handler).command_end();
+    }
+    // Prevent other components from handling this equivalent
+    0
 }
 
 

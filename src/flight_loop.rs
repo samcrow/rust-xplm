@@ -48,8 +48,6 @@ use std::f32;
 use std::mem;
 use std::fmt;
 
-use super::internal::run_or_abort;
-
 /// Tracks a flight loop callback, which can be called by X-Plane periodically for calculations
 ///
 #[derive(Debug)]
@@ -250,23 +248,21 @@ unsafe extern "C" fn flight_loop_callback<C: FlightLoopCallback>(since_last_call
                                                                  counter: c_int,
                                                                  refcon: *mut c_void)
                                                                  -> c_float {
-    run_or_abort("flight loop callback", || {
-        // Get the loop data
-        let loop_data = refcon as *mut LoopData;
-        // Create a state
-        let mut state = LoopState {
-            since_call: secs_to_duration(since_last_call),
-            since_loop: secs_to_duration(since_loop),
-            counter: counter,
-            result: (*loop_data).loop_result.as_mut().unwrap(),
-        };
-        let callback_ptr: *mut FlightLoopCallback = (*loop_data).callback.as_mut();
-        let callback = callback_ptr as *mut C;
-        (*callback).flight_loop(&mut state);
+    // Get the loop data
+    let loop_data = refcon as *mut LoopData;
+    // Create a state
+    let mut state = LoopState {
+        since_call: secs_to_duration(since_last_call),
+        since_loop: secs_to_duration(since_loop),
+        counter: counter,
+        result: (*loop_data).loop_result.as_mut().unwrap(),
+    };
+    let callback_ptr: *mut FlightLoopCallback = (*loop_data).callback.as_mut();
+    let callback = callback_ptr as *mut C;
+    (*callback).flight_loop(&mut state);
 
-        // Return the next loop time
-        f32::from(state.result.clone())
-    })
+    // Return the next loop time
+    f32::from(state.result.clone())
 }
 
 fn secs_to_duration(time: f32) -> Duration {

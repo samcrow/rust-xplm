@@ -8,6 +8,13 @@ keywords = ["X-Plane", "plugin"]
 description = "High-level interfaces to the X-Plane plugin SDK"
 readme = "README.md"
 
+# Abort on panics, to avoid unwinding into X-Plane (undefined behavior)
+# Plugins must include this section in their Cargo.toml files.
+[profile.dev]
+panic = "abort"
+[profile.release]
+panic = "abort"
+
 [dependencies]
 lazy_static = "^0.2.1"
 quick-error = "^1.1.0"

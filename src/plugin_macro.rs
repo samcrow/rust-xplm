@@ -24,65 +24,50 @@ macro_rules! xplane_plugin {
             outSig: *mut ::std::os::raw::c_char,
             outDescription: *mut ::std::os::raw::c_char) -> ::std::os::raw::c_int
         {
-            let init = || {
-                // Create the plugin, temporarily, on the stack
-                let plugin_option = PluginType::start();
+            // Create the plugin, temporarily, on the stack
+            let plugin_option = PluginType::start();
 
-                match plugin_option {
-                    Ok(plugin) => {
-                        // Allocate storage
-                        PLUGIN = Box::into_raw(Box::new(plugin));
+            match plugin_option {
+                Ok(plugin) => {
+                    // Allocate storage
+                    PLUGIN = Box::into_raw(Box::new(plugin));
 
-                        let info = (*PLUGIN).info();
-                        ::xplm::internal::copy_to_c_buffer(info.name, outName);
-                        ::xplm::internal::copy_to_c_buffer(info.signature, outSig);
-                        ::xplm::internal::copy_to_c_buffer(info.description, outDescription);
-                        // Success
-                        1
-                    },
-                    Err(e) => {
-                        let message = format!("Plugin initialization failed: {}\n", e);
-                        ::xplm::debug(&message);
-                        // Return failure
-                        0
-                    },
-                }
-            };
-            match ::std::panic::catch_unwind(init) {
-                Ok(result) => result,
-                Err(_) => {
-                    ::xplm::debug("Plugin start panicked, disabling plugin\n");
+                    let info = (*PLUGIN).info();
+                    ::xplm::internal::copy_to_c_buffer(info.name, outName);
+                    ::xplm::internal::copy_to_c_buffer(info.signature, outSig);
+                    ::xplm::internal::copy_to_c_buffer(info.description, outDescription);
+                    // Success
+                    1
+                },
+                Err(e) => {
+                    let message = format!("Plugin initialization failed: {}\n", e);
+                    ::xplm::debug(&message);
+                    // Return failure
                     0
-                }
+                },
             }
         }
 
         #[allow(non_snake_case)]
         #[no_mangle]
         pub unsafe extern "C" fn XPluginStop() {
-            ::xplm::internal::run_or_abort("XPluginStop", ||{
-                (*PLUGIN).stop();
-                // Free plugin
-                let plugin_box = Box::from_raw(PLUGIN);
-                PLUGIN = ::std::ptr::null_mut();
-                drop(plugin_box);
-            })
+            (*PLUGIN).stop();
+            // Free plugin
+            let plugin_box = Box::from_raw(PLUGIN);
+            PLUGIN = ::std::ptr::null_mut();
+            drop(plugin_box);
         }
 
         #[allow(non_snake_case)]
         #[no_mangle]
         pub unsafe extern "C" fn XPluginEnable() {
-            ::xplm::internal::run_or_abort("XPluginEnable", ||{
-                (*PLUGIN).enable();
-            })
+            (*PLUGIN).enable();
         }
 
         #[allow(non_snake_case)]
         #[no_mangle]
         pub unsafe extern "C" fn XPluginDisable() {
-            ::xplm::internal::run_or_abort("XPluginDisable", || {
-                (*PLUGIN).disable();
-            })
+            (*PLUGIN).disable();
         }
 
         #[allow(non_snake_case)]
