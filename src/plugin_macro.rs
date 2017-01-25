@@ -34,9 +34,9 @@ macro_rules! xplane_plugin {
                         PLUGIN = Box::into_raw(Box::new(plugin));
 
                         let info = (*PLUGIN).info();
-                        ::xplm::internal::rstrcpy(outName, &info.name);
-                        ::xplm::internal::rstrcpy(outSig, &info.signature);
-                        ::xplm::internal::rstrcpy(outDescription, &info.description);
+                        ::xplm::internal::copy_to_c_buffer(info.name, outName);
+                        ::xplm::internal::copy_to_c_buffer(info.signature, outSig);
+                        ::xplm::internal::copy_to_c_buffer(info.description, outDescription);
                         // Success
                         1
                     },

@@ -7,17 +7,17 @@ use std::fmt::Display;
 
 use xplm_sys;
 
-/// Copies bytes from a str into a C memory location
-pub unsafe fn rstrcpy(dest: *mut ::std::os::raw::c_char, src: &str) {
-    match CString::new(src) {
-        Ok(src_c) => {
-            ptr::copy_nonoverlapping(src_c.as_ptr(), dest, src_c.to_bytes_with_nul().len());
-        }
-        Err(_) => {
-            let message = b"invalid\0";
-            ptr::copy_nonoverlapping(message.as_ptr() as *const c_char, dest, message.len());
-        }
-    }
+/// Copies up to 256 bytes (including null termination) to
+/// the provided destination. If the provided source string is too long, it will be
+/// truncated.
+pub unsafe fn copy_to_c_buffer(mut src: String, dest: *mut c_char) {
+    // Truncate to 255 bytes (256 including the null terminator)
+    src.truncate(255);
+    let src_c = CString::new(src)
+        .unwrap_or(CString::new("<invalid>").unwrap());
+    let src_c_length = src_c.to_bytes_with_nul().len();
+    debug_assert!(src_c_length <= 256);
+    ptr::copy_nonoverlapping(src_c.as_ptr(), dest, src_c_length);
 }
 
 
