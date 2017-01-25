@@ -1,196 +1,201 @@
-// Copyright (c) 2015 rust-xplm developers
-// Licensed under the Apache License, Version 2.0
-// <LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0> or the MIT
-// license <LICENSE-MIT or http://opensource.org/licenses/MIT>,
-// at your option. All files in the project carrying such
-// notice may not be copied, modified, or distributed except
-// according to those terms.
 
+use xplm_sys::*;
+use std::string::FromUtf8Error;
+use std::ffi::{CString, NulError};
+use ffi::StringBuffer;
 
-/// Provides access to existing datarefs
-mod borrowed;
-/// Allows creation of datarefs
-mod owned;
-/// Allows creation of and access to shared data
-mod shared;
+/// Datarefs created by X-Plane or other plugins
+pub mod borrowed;
+/// Datarefs created by this plugin
+pub mod owned;
 
-use xplm_sys::data_access::*;
-
-use std::ffi::NulError;
-use std::fmt;
-use std::error::Error;
-
-// Use types
-pub use self::borrowed::Borrowed;
-pub use self::owned::Owned;
-pub use self::shared::Shared;
-
-/// A trait for objects that can be read to get a value
-pub trait Readable<T> {
-    /// Returns the value stored in this object
-    fn get(&self) -> T;
-}
-
-/// A trait for objects in which a value can be stored
-pub trait Writeable<T> {
-    /// Sets the value in this object
-    fn set(&mut self, value: T);
-}
-/// A trait for objects in which an array of values can be stored
-pub trait ArrayReadable<T> : Readable<Vec<T>> {
-    /// Returns the number of values in this array
-    fn len(&self) -> usize;
-}
-
-/// A trait for objects that can be written like arrays
-pub trait ArrayWriteable<T> : ArrayReadable<T> + Writeable<Vec<T>> {
-    ///
-    /// Sets the values in this array with the values from a slice.
-    ///
-    /// If the slice has more than `i32::max_value()`` elements, only
-    /// `i32::max_value()` elements will be set.
-    ///
-    /// If the slice has more elements than this array, the extra values will
-    /// be ignored.
-    ///
-    /// If the slice has fewer elements than this array, the extra elements
-    /// in this array will not be changed.
-    ///
-    fn set_from_slice(&mut self, value: &[T]);
-}
-
-///
-/// A trait for objects that can be read as Strings
-///
-pub trait StringReadable : Readable<String> {
-    /// Returns the length of this string value in bytes
-    fn len(&self) -> usize;
-}
-///
-/// A trait for objects that can be written as Strings
-///
-pub trait StringWriteable : Writeable<String> + StringReadable {
-    /// Sets the values in this array from a string slice
-    /// If the string contains one or more null bytes, an error
-    /// is returned.
-    fn set_string(&mut self, value: &str) -> Result<(), NulError>;
-}
-
-/// Possible errors encountered when finding a dataref
-#[derive(Debug, Clone)]
-pub enum SearchError {
-    /// Indicates that the provided name contains one or more null bytes
-    /// Includes the NulError to provide more details
-    InvalidName(NulError),
-    /// Indicates that no dataref with the specified name was found
-    NotFound,
-    /// Indicates that the requested data type and the dataref's type
-    /// do not match
-    WrongDataType,
-    /// Indicates that the wrong DataAccess was requested, which usually
-    /// means that a ReadWrite DataRef object was used with a read-only dataref
-    WrongDataAccess,
-}
-
-impl fmt::Display for SearchError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.description())
-    }
-}
-
-impl Error for SearchError {
-    fn description(&self) -> &str {
-        match self {
-            &SearchError::InvalidName(_) => "Invalid name",
-            &SearchError::NotFound => "Not found",
-            &SearchError::WrongDataType => "Wrong data type",
-            &SearchError::WrongDataAccess => "Wrong data access",
-        }
-    }
-}
-
-
-/// Trait for types that have associated type IDs in X-Plane
-pub trait DataType : Clone {
-    /// Returns the XPLMDataTypeID for this type
-    fn data_type() -> XPLMDataTypeID;
-}
-
-impl DataType for i32 {
-    fn data_type() -> XPLMDataTypeID {
-        XPLMDataTypeID::xplmType_Int
-    }
-}
-
-impl DataType for f32 {
-    fn data_type() -> XPLMDataTypeID {
-        XPLMDataTypeID::xplmType_Float
-    }
-}
-
-impl DataType for f64 {
-    fn data_type() -> XPLMDataTypeID {
-        XPLMDataTypeID::xplmType_Double
-    }
-}
-
-impl DataType for Vec<f32> {
-    fn data_type() -> XPLMDataTypeID {
-        XPLMDataTypeID::xplmType_FloatArray
-    }
-}
-
-impl DataType for Vec<i32> {
-    fn data_type() -> XPLMDataTypeID {
-        XPLMDataTypeID::xplmType_IntArray
-    }
-}
-
-impl DataType for Vec<u8> {
-    fn data_type() -> XPLMDataTypeID {
-        XPLMDataTypeID::xplmType_Data
-    }
-}
-impl DataType for String {
-    fn data_type() -> XPLMDataTypeID {
-        XPLMDataTypeID::xplmType_Data
-    }
-}
-/// Trait for a read/write or read-only marker
-pub trait DataAccess {
-    /// Returns true if the dataref should be writeable
-    fn writeable() -> bool;
-}
-/// Marks a dataref that can be read and written
-#[derive(Debug)]
-pub enum ReadWrite {
-
-}
-impl DataAccess for ReadWrite {
-    fn writeable() -> bool {
-        true
-    }
-}
-
-/// Marks a dataref that can only be read
-#[derive(Debug)]
+/// Marks a dataref as readable
 pub enum ReadOnly {
 
 }
-impl DataAccess for ReadOnly {
+
+/// Marks a dataref as writeable
+pub enum ReadWrite {
+
+}
+
+/// Marker for data access types
+pub trait Access {
+    /// Returns true if this access allows the dataref to be written
+    fn writeable() -> bool;
+}
+
+impl Access for ReadOnly {
     fn writeable() -> bool {
         false
     }
 }
 
-/// Fits a length into an i32.
-/// If the provided value is greater than i32::max_value, returns i32::max_value().
-/// Otherwise, returns the value as an i32.
-fn array_length(length: usize) -> i32 {
-    if length > (i32::max_value() as usize) {
-        i32::max_value()
-    } else {
-        length as i32
+impl Access for ReadWrite {
+    fn writeable() -> bool {
+        true
     }
 }
+
+/// Trait for data accessors that can be read
+pub trait DataRead<T> {
+    /// Reads a value
+    fn get(&self) -> T;
+}
+
+/// Trait for writable data accessors
+pub trait DataReadWrite<T>: DataRead<T> {
+    /// Writes a value
+    fn set(&mut self, value: T);
+}
+
+/// Trait for readable array data accessors
+pub trait ArrayRead<T: ArrayType + ?Sized> {
+    /// Reads values
+    ///
+    /// Values are stored in the provided slice. If the dataref is larger than the provided slice,
+    /// values beyond the bounds of the slice are ignored.
+    ///
+    /// If the dataref is smaller than the provided slice, the extra values in the slice will not
+    /// be modified.
+    ///
+    /// The maximum number of values in an array dataref is i32::MAX.
+    ///
+    /// This function returns the number of values that were read.
+    fn get(&self, dest: &mut [T::Element]) -> usize;
+
+    /// Returns the length of the data array
+    fn len(&self) -> usize;
+
+    /// Returns all values in this accessor as a Vec
+    fn as_vec(&self) -> Vec<T::Element>
+        where T::Element: Default + Clone
+    {
+        let mut values = vec![T::Element::default(); self.len()];
+        self.get(&mut values);
+        values
+    }
+}
+
+/// Trait for array accessors that can be read and written
+pub trait ArrayReadWrite<T: ArrayType + ?Sized>: ArrayRead<T> {
+    /// Writes values
+    ///
+    /// Values are taken from the provided slice. If the dataref is larger than the provided slice,
+    /// values beyond the bounds of the slice are not changed.
+    ///
+    /// If the dataref is smaller than the provided slice, the values beyond the dataref bounds
+    /// will be ignored.
+    fn set(&mut self, values: &[T::Element]);
+}
+
+/// Trait for data accessors that can be read as strings
+pub trait StringRead {
+    /// Reads the value of this dataref and appends it to the provided string
+    ///
+    /// Returns an error if the dataref is not valid UTF-8.
+    ///
+    /// If the provided string is not empty, the value of the dataref will be appended to it.
+    fn get_to_string(&self, out: &mut String) -> Result<(), FromUtf8Error>;
+
+    /// Reads the value of this dataref as a string and returns it
+    fn get_as_string(&self) -> Result<String, FromUtf8Error>;
+}
+
+/// Trait for data accessors that can be written as strings
+pub trait StringReadWrite: StringRead {
+    /// Sets the value of this dataref from a string
+    ///
+    /// Returns an error if the string contains a null byte
+    fn set_as_string(&mut self, value: &str) -> Result<(), NulError>;
+}
+
+impl<T> StringRead for T
+    where T: ArrayRead<[u8]>
+{
+    fn get_to_string(&self, out: &mut String) -> Result<(), FromUtf8Error> {
+        let mut buffer = StringBuffer::new(self.len());
+        self.get(buffer.as_bytes_mut());
+        let value_string = try!(buffer.into_string());
+        out.push_str(&value_string);
+        Ok(())
+    }
+    fn get_as_string(&self) -> Result<String, FromUtf8Error> {
+        let mut buffer = StringBuffer::new(self.len());
+        self.get(buffer.as_bytes_mut());
+        buffer.into_string()
+    }
+}
+
+impl<T> StringReadWrite for T
+    where T: ArrayReadWrite<[u8]>
+{
+    fn set_as_string(&mut self, value: &str) -> Result<(), NulError> {
+        let name_c = try!(CString::new(value));
+        self.set(name_c.as_bytes_with_nul());
+        Ok(())
+    }
+}
+
+/// Marker for types that can be used with datarefs
+pub trait DataType {
+    /// The type that should be used to store data of this type
+    /// For basic types, this is usually Self. For [T] types, this is Vec<T>.
+    #[doc(hidden)]
+    type Storage: Sized;
+    /// Returns the X-Plane data type corresponding with this type
+    #[doc(hidden)]
+    fn sim_type() -> XPLMDataTypeID;
+    /// Creates an instance of a storage type from an instance of self
+    #[doc(hidden)]
+    fn to_storage(&self) -> Self::Storage;
+}
+
+/// Marker for types that are arrays
+pub trait ArrayType: DataType {
+    /// The type of the array element
+    type Element;
+}
+
+macro_rules! impl_type {
+    ($native_type:ty as $sim_type:ident) => {
+        impl DataType for $native_type {
+            type Storage = Self;
+            fn sim_type() -> XPLMDataTypeID {
+                $sim_type as XPLMDataTypeID
+            }
+            fn to_storage(&self) -> Self::Storage {
+                self.clone()
+            }
+        }
+    };
+    ([$native_type:ty]: array as $sim_type:ident) => {
+        impl DataType for [$native_type] {
+            type Storage = Vec<$native_type>;
+            fn sim_type() -> XPLMDataTypeID {
+                $sim_type as XPLMDataTypeID
+            }
+            fn to_storage(&self) -> Self::Storage {
+                self.to_vec()
+            }
+        }
+        impl ArrayType for [$native_type] {
+            type Element = $native_type;
+        }
+    }
+}
+
+impl_type!(bool as xplmType_Int);
+impl_type!(u8 as xplmType_Int);
+impl_type!(i8 as xplmType_Int);
+impl_type!(u16 as xplmType_Int);
+impl_type!(i16 as xplmType_Int);
+impl_type!(u32 as xplmType_Int);
+impl_type!(i32 as xplmType_Int);
+impl_type!(f32 as xplmType_Float);
+impl_type!(f64 as xplmType_Double);
+impl_type!([i32]: array as xplmType_IntArray);
+impl_type!([u32]: array as xplmType_IntArray);
+impl_type!([f32]: array as xplmType_FloatArray);
+impl_type!([u8]: array as xplmType_Data);
+impl_type!([i8]: array as xplmType_Data);
