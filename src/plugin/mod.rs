@@ -1,4 +1,7 @@
 
+/// Accessing and communicating with other plugins
+pub mod management;
+
 /// Information about a plugin
 pub struct PluginInfo {
     /// The plugin name

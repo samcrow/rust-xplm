@@ -24,6 +24,8 @@ macro_rules! xplane_plugin {
             outSig: *mut ::std::os::raw::c_char,
             outDescription: *mut ::std::os::raw::c_char) -> ::std::os::raw::c_int
         {
+            // XPLM initialization
+            ::xplm::internal::xplm_init();
             // Create the plugin, temporarily, on the stack
             let plugin_option = PluginType::start();
 

@@ -18,7 +18,19 @@ panic = "abort"
 [dependencies]
 lazy_static = "^0.2.1"
 quick-error = "^1.1.0"
-xplm-sys = "^0.2.1"
+
+# Path conversion for Mac OS before SDK 2.1
+[target.'cfg(all(target_os = "macos", not(feature = "xplm210")))'.dependencies]
+hfs_paths = "^0.1.0"
+
+[dependencies.xplm-sys]
+version = "^0.2.1"
+default-features = false
+
+[features]
+xplm200 = ["xplm-sys/xplm200"]
+xplm210 = ["xplm-sys/xplm210"]
+default = ["xplm200", "xplm210"]
 
 [[example]]
 name = "dataref_test"

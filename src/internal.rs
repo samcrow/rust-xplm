@@ -14,3 +14,8 @@ pub unsafe fn copy_to_c_buffer(mut src: String, dest: *mut c_char) {
     debug_assert!(src_c_length <= 256);
     ptr::copy_nonoverlapping(src_c.as_ptr(), dest, src_c_length);
 }
+
+/// Performs initialization required for the XPLM crate to work correctly
+pub fn xplm_init() {
+    super::paths::path_init();
+}
