@@ -46,6 +46,8 @@ pub mod error;
 /// SDK feature management
 #[cfg(feature = "xplm200")]
 pub mod feature;
+/// User interface menus
+pub mod menu;
 
 /// Writes a message to the X-Plane log.txt file
 ///
