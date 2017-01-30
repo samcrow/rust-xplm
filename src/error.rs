@@ -26,6 +26,6 @@ unsafe extern "C" fn error_handler(message: *const c_char) {
                 None => {}
             }
         }
-        Err(_) => super::debug("[xplm] Error handler called with an invalid message")
+        Err(_) => super::debug("[xplm] Error handler called with an invalid message"),
     }
 }

@@ -20,14 +20,15 @@ pub fn plugin_with_signature(signature: &str) -> Option<Plugin> {
                 None
             }
         }
-        Err(_) => None
+        Err(_) => None,
     }
 }
 
 /// Returns the plugin that is currently running
 pub fn this_plugin() -> Plugin {
     let plugin_id = unsafe { xplm_sys::XPLMGetMyID() };
-    assert!(plugin_id != xplm_sys::XPLM_NO_PLUGIN_ID, "XPLMGetMyId() returned no plugin ID");
+    assert!(plugin_id != xplm_sys::XPLM_NO_PLUGIN_ID,
+            "XPLMGetMyId() returned no plugin ID");
     Plugin(plugin_id)
 }
 
@@ -72,9 +73,7 @@ impl Iterator for Plugins {
     }
 }
 
-impl ExactSizeIterator for Plugins {
-
-}
+impl ExactSizeIterator for Plugins {}
 
 
 /// Another plugin running in X-Plane (or this plugin)
@@ -131,9 +130,13 @@ impl Plugin {
     /// Enables or disables the plugin
     pub fn set_enabled(&self, enabled: bool) {
         if enabled {
-            unsafe { xplm_sys::XPLMEnablePlugin(self.0); }
+            unsafe {
+                xplm_sys::XPLMEnablePlugin(self.0);
+            }
         } else {
-            unsafe { xplm_sys::XPLMDisablePlugin(self.0); }
+            unsafe {
+                xplm_sys::XPLMDisablePlugin(self.0);
+            }
         }
     }
 }

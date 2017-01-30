@@ -14,9 +14,7 @@ pub fn path_init() {
 
 // When SDK 2.1 is not available, does nothing
 #[cfg(not(feature = "xplm210"))]
-pub fn path_init() {
-
-}
+pub fn path_init() {}
 
 /// Converts an HFS path into a standard Unix-type path with / as a directory separator
 ///

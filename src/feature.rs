@@ -52,7 +52,7 @@ pub fn find_feature<S: Into<String>>(name: S) -> Option<Feature> {
                 None
             }
         }
-        Err(_) => None
+        Err(_) => None,
     }
 }
 
