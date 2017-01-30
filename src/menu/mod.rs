@@ -393,19 +393,22 @@ pub struct CheckItem {
     checked: Cell<bool>,
     /// Information about the menu this item is part of
     in_menu: Cell<Option<InMenu>>,
+    /// The check handler
+    handler: Box<RefCell<CheckHandler>>,
 }
 
 impl CheckItem {
     /// Creates a new item
     ///
     /// Returns an error if the name contains a null byte
-    pub fn new<S: Into<String>>(name: S, checked: bool) -> Result<Self, NulError> {
+    pub fn new<S: Into<String>, H: CheckHandler>(name: S, checked: bool, handler: H) -> Result<Self, NulError> {
         let name = name.into();
         check_c_string(&name)?;
         Ok(CheckItem {
             name: RefCell::new(name),
             checked: Cell::new(checked),
             in_menu: Cell::new(None),
+            handler: Box::new(RefCell::new(handler)),
         })
     }
     /// Returns true if this item is checked
@@ -495,7 +498,10 @@ impl CheckItem {
 
     fn handle_click(&self) {
         // Invert check
-        self.set_checked(!self.checked());
+        let checked = !self.checked();
+        self.set_checked(checked);
+        let mut borrow = self.handler.borrow_mut();
+        borrow.item_checked(self, checked);
     }
 }
 /// Removes this menu from X-Plane, to prevent the menu handler from running and accessing
@@ -508,6 +514,17 @@ impl Drop for CheckItem {
     }
 }
 
+/// Trait for things that can respond to check state changes
+pub trait CheckHandler: 'static {
+    /// Called when the user checks or unchecks an item
+    fn item_checked(&mut self, item: &Item, checked: bool);
+}
+
+impl<F> CheckHandler for F where F: FnMut(&Item, bool) + 'static {
+    fn item_checked(&mut self, item: &Item, checked: bool) {
+        self(item, checked)
+    }
+}
 
 /// Maps true->checked and false->unchecked
 fn check_state(checked: bool) -> xplm_sys::XPLMMenuCheck {
