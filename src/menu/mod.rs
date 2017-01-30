@@ -1,3 +1,4 @@
+use std::fmt;
 use xplm_sys;
 use std::rc::Rc;
 use std::cell::{Cell, RefCell};
@@ -23,8 +24,9 @@ impl Item {
     fn add_to_menu(&self, parent_id: xplm_sys::XPLMMenuID) {
         match *self {
             Item::Submenu(ref menu) => menu.add_to_menu(parent_id),
-            Item::Action(ref action) => action.add_to_menu(parent_id),
-            Item::Check(ref check) => check.add_to_menu(parent_id),
+            // Pass the address of this Item as a reference for the callback
+            Item::Action(ref action) => action.add_to_menu(parent_id, self),
+            Item::Check(ref check) => check.add_to_menu(parent_id, self),
             Item::Separator => Separator.add_to_menu(parent_id),
         }
     }
@@ -48,9 +50,13 @@ impl Item {
         }
     }
     /// Called when the user clicks on this menu item
-    ///
-    /// The default implementation does nothing.
-    fn handle_click(&self) {}
+    fn handle_click(&self) {
+        match *self {
+            Item::Action(ref action) => action.handle_click(),
+            Item::Check(ref check) => check.handle_click(),
+            _ => {}
+        }
+    }
 }
 
 impl From<Rc<Menu>> for Item {
@@ -262,7 +268,6 @@ impl Separator {
 
 
 /// An item that can be clicked on to perform an action
-#[derive(Debug)]
 pub struct ActionItem {
     /// The text displayed for this item
     ///
@@ -270,20 +275,24 @@ pub struct ActionItem {
     name: RefCell<String>,
     /// Information about the menu this item is part of
     in_menu: Cell<Option<InMenu>>,
+    /// The item click handler
+    handler: Box<RefCell<MenuClickHandler>>,
 }
 
 impl ActionItem {
     /// Creates a new item
     ///
     /// Returns an error if the name contains a null byte
-    pub fn new<S: Into<String>>(name: S) -> Result<Self, NulError> {
+    pub fn new<S: Into<String>, H: MenuClickHandler>(name: S, handler: H) -> Result<Self, NulError> {
         let name = name.into();
         check_c_string(&name)?;
         Ok(ActionItem {
             name: RefCell::new(name),
             in_menu: Cell::new(None),
+            handler: Box::new(RefCell::new(handler)),
         })
     }
+
     /// Returns the name of this item
     pub fn name(&self) -> String {
         let borrow = self.name.borrow();
@@ -311,13 +320,11 @@ impl ActionItem {
 
 
 impl ActionItem {
-    fn add_to_menu(&self, parent_id: xplm_sys::XPLMMenuID) {
+    fn add_to_menu(&self, parent_id: xplm_sys::XPLMMenuID, enclosing_item: *const Item) {
         let name_c = CString::new(self.name()).unwrap();
         let index = unsafe {
-            // Safety note: This item must be in a Box or Rc for this to work safely
-            let self_ptr: *const Self = self;
             let index =
-                xplm_sys::XPLMAppendMenuItem(parent_id, name_c.as_ptr(), self_ptr as *mut _, 0);
+                xplm_sys::XPLMAppendMenuItem(parent_id, name_c.as_ptr(), enclosing_item as *mut _, 0);
             // Ensure item is not checkable
             xplm_sys::XPLMCheckMenuItem(parent_id, index, xplm_sys::xplm_Menu_NoCheck as c_int);
             index
@@ -334,6 +341,11 @@ impl ActionItem {
     fn remove_from_menu(&self, parent_id: xplm_sys::XPLMMenuID, index_in_parent: c_int) {
         unsafe { xplm_sys::XPLMRemoveMenuItem(parent_id, index_in_parent as c_int) }
     }
+
+    fn handle_click(&self) {
+        let mut borrow = self.handler.borrow_mut();
+        borrow.item_clicked(&self);
+    }
 }
 
 /// Removes this menu from X-Plane, to prevent the menu handler from running and accessing
@@ -346,14 +358,23 @@ impl Drop for ActionItem {
     }
 }
 
+impl fmt::Debug for ActionItem {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_struct("ActionItem")
+            .field("name", &self.name)
+            .field("in_menu", &self.in_menu)
+            .finish()
+    }
+}
+
 /// Trait for things that can respond when the user clicks on a menu item
-pub trait MenuAction {
+pub trait MenuClickHandler: 'static {
     /// Called when the user clicks on a menu item. The clicked item is passed.
     fn item_clicked(&mut self, item: &ActionItem);
 }
 
-impl<F> MenuAction for F
-    where F: FnMut(&ActionItem)
+impl<F> MenuClickHandler for F
+    where F: FnMut(&ActionItem) + 'static
 {
     fn item_clicked(&mut self, item: &ActionItem) {
         self(item)
@@ -450,13 +471,10 @@ impl CheckItem {
 
 
 impl CheckItem {
-    fn add_to_menu(&self, parent_id: xplm_sys::XPLMMenuID) {
+    fn add_to_menu(&self, parent_id: xplm_sys::XPLMMenuID, enclosing_item: *const Item) {
         let name_c = CString::new(self.name()).unwrap();
         let index = unsafe {
-            // Safety note: This item must be in a Box or Rc for this to work safely
-            let self_ptr: *const Self = self;
-            let index =
-                xplm_sys::XPLMAppendMenuItem(parent_id, name_c.as_ptr(), self_ptr as *mut _, 0);
+            let index = xplm_sys::XPLMAppendMenuItem(parent_id, name_c.as_ptr(), enclosing_item as *mut _, 0);
             // Configure check
             let check_state = check_state(self.checked.get());
             xplm_sys::XPLMCheckMenuItem(parent_id, index, check_state);
@@ -473,6 +491,11 @@ impl CheckItem {
     }
     fn remove_from_menu(&self, parent_id: xplm_sys::XPLMMenuID, index_in_parent: c_int) {
         unsafe { xplm_sys::XPLMRemoveMenuItem(parent_id, index_in_parent as c_int) }
+    }
+
+    fn handle_click(&self) {
+        // Invert check
+        self.set_checked(!self.checked());
     }
 }
 /// Removes this menu from X-Plane, to prevent the menu handler from running and accessing
