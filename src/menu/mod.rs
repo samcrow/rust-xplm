@@ -383,7 +383,6 @@ impl<F> MenuClickHandler for F
 
 
 /// An item with a checkbox that can be checked or unchecked
-#[derive(Debug)]
 pub struct CheckItem {
     /// The text displayed for this item
     ///
@@ -514,14 +513,24 @@ impl Drop for CheckItem {
     }
 }
 
+impl fmt::Debug for CheckItem {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_struct("CheckItem")
+            .field("name", &self.name)
+            .field("checked", &self.checked)
+            .field("in_menu", &self.in_menu)
+            .finish()
+    }
+}
+
 /// Trait for things that can respond to check state changes
 pub trait CheckHandler: 'static {
     /// Called when the user checks or unchecks an item
-    fn item_checked(&mut self, item: &Item, checked: bool);
+    fn item_checked(&mut self, item: &CheckItem, checked: bool);
 }
 
-impl<F> CheckHandler for F where F: FnMut(&Item, bool) + 'static {
-    fn item_checked(&mut self, item: &Item, checked: bool) {
+impl<F> CheckHandler for F where F: FnMut(&CheckItem, bool) + 'static {
+    fn item_checked(&mut self, item: &CheckItem, checked: bool) {
         self(item, checked)
     }
 }
