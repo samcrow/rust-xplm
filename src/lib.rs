@@ -55,12 +55,12 @@ pub mod draw;
 /// Writes a message to the X-Plane log.txt file
 ///
 /// No line terminator is added.
-pub fn debug(message: &str) {
+pub fn debug<S: Into<String>>(message: S) {
     use xplm_sys::XPLMDebugString;
-    match CString::new(message) {
+    match CString::new(message.into()) {
         Ok(message_c) => unsafe { XPLMDebugString(message_c.as_ptr()) },
         Err(_) => unsafe {
-            XPLMDebugString(b"[xplm] Invalid debug message\n\0".as_ptr() as *const i8)
+            XPLMDebugString(b"[xplm] Invalid debug message\n\0".as_ptr() as *const _)
         },
     }
 }
