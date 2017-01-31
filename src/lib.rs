@@ -48,6 +48,8 @@ pub mod error;
 pub mod feature;
 /// User interface menus
 pub mod menu;
+/// Low-level drawing
+pub mod draw;
 
 /// Writes a message to the X-Plane log.txt file
 ///
