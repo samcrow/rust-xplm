@@ -47,6 +47,7 @@ pub mod error;
 #[cfg(feature = "xplm200")]
 pub mod feature;
 /// User interface menus
+#[cfg(feature = "xplm200")]
 pub mod menu;
 /// Low-level drawing
 pub mod draw;
