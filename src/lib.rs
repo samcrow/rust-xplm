@@ -1,6 +1,5 @@
 
-#![deny(missing_docs,
-        trivial_casts)]
+#![deny(trivial_casts)]
 
 //! Bindings to the X-Plane plugin SDK
 //!
@@ -49,8 +48,12 @@ pub mod feature;
 /// User interface menus
 #[cfg(feature = "xplm200")]
 pub mod menu;
-/// Low-level drawing
+/// Low-level drawing callbacks
 pub mod draw;
+/// Relatively low-level windows
+pub mod window;
+/// 2D user interface geometry
+pub mod geometry;
 
 /// Writes a message to the X-Plane log.txt file
 ///
