@@ -2,8 +2,9 @@
 //!
 //! User interface geometry
 //!
-//! The 2D coordinate system in X-Plane has its origin in the upper left corner of the window.
-//! Its units are pixels.
+//! The 2D coordinate system in X-Plane has its origin in the lower left corner of the window.
+//! Its units are pixels. [More information about X-Plane's coordinate systems is available here]
+//! (http://www.xsquawkbox.net/xpsdk/mediawiki/ScreenCoordinates)
 //!
 
 /// A 2-dimensional rectangle
@@ -60,12 +61,12 @@ impl<N> Rect<N> {
 
     /// Determines whether this rectangle contains a point
     ///
-    /// For this calculation, the top and left edges are inside the rectangle, while the
-    /// bottom and right edges are outside.
+    /// For this calculation, the bottom and left edges are inside the rectangle, while the
+    /// top and right edges are outside.
     pub fn contains(&self, point: Point<N>) -> bool where N: PartialOrd {
         let (x, y) = point.into();
         x >= self.left && x < self.right
-        && y >= self.top && y < self.bottom
+        && y >= self.bottom && y < self.top
     }
 }
 
