@@ -1,6 +1,5 @@
 
-use super::{DataType, Access, ReadOnly, ReadWrite, DataRead, DataReadWrite, ArrayRead,
-            ArrayReadWrite};
+use super::{DataType, Access, ReadOnly, DataRead, DataReadWrite, ArrayRead, ArrayReadWrite};
 use xplm_sys::*;
 use std::marker::PhantomData;
 use std::ffi::{CString, NulError};
@@ -10,6 +9,9 @@ use std::cmp;
 use std::i32;
 
 /// A dataref owned by this plugin
+///
+/// The access parameter of this type determines whether X-Plane and other plugins can write
+/// this dataref. Owned datarefs can always be written by this plugin.
 pub struct OwnedData<T: DataType + ?Sized, A = ReadOnly> {
     /// The dataref handle
     id: XPLMDataRef,
@@ -173,7 +175,7 @@ macro_rules! impl_read_write {
                 *self.value
             }
         }
-        impl DataReadWrite<$native_type> for OwnedData<$native_type, ReadWrite> {
+        impl<A> DataReadWrite<$native_type> for OwnedData<$native_type, A> {
             fn set(&mut self, value: $native_type) {
                 *self.value = value;
             }
@@ -192,7 +194,7 @@ macro_rules! impl_read_write {
                 self.value.len()
             }
         }
-        impl ArrayReadWrite<[$native_type]> for OwnedData<[$native_type], ReadWrite> {
+        impl<A> ArrayReadWrite<[$native_type]> for OwnedData<[$native_type], A> {
             fn set(&mut self, values: &[$native_type]) {
                 let copy_length = cmp::min(values.len(), self.value.len());
                 let src_sub = &values[..copy_length];
