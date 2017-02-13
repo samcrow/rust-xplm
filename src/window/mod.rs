@@ -135,7 +135,7 @@ impl Window {
             let mut right = 0;
             let mut bottom = 0;
             xplm_sys::XPLMGetWindowGeometry(self.id, &mut left, &mut top, &mut right, &mut bottom);
-            Rect::from_left_top_bottom_right(left, top, bottom, right)
+            Rect::from_left_top_right_bottom(left, top, right, bottom)
         }
     }
     /// Sets the geometry of this window
@@ -158,6 +158,14 @@ impl Window {
     pub fn set_visible(&self, visible: bool) {
         unsafe {
             xplm_sys::XPLMSetWindowIsVisible(self.id, visible as _);
+        }
+    }
+}
+
+impl Drop for Window {
+    fn drop(&mut self) {
+        unsafe {
+            xplm_sys::XPLMDestroyWindow(self.id);
         }
     }
 }

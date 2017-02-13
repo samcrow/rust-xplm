@@ -42,8 +42,7 @@ macro_rules! xplane_plugin {
                     1
                 },
                 Err(e) => {
-                    let message = format!("Plugin initialization failed: {}\n", e);
-                    ::xplm::debug(&message);
+                    ::xplm::debug(format!("Plugin initialization failed: {}\n", e));
                     // Return failure
                     0
                 },

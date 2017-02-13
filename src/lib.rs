@@ -67,3 +67,16 @@ pub fn debug<S: Into<String>>(message: S) {
         },
     }
 }
+
+/// Attempts to locate a symbol. If it exists, returns a pointer to it
+pub fn find_symbol<S: Into<String>>(name: S) -> *mut std::os::raw::c_void {
+    use std::ptr;
+    match std::ffi::CString::new(name.into()) {
+        Ok(name_c) => {
+            unsafe {
+                xplm_sys::XPLMFindSymbol(name_c.as_ptr())
+            }
+        }
+        Err(_) => ptr::null_mut()
+    }
+}

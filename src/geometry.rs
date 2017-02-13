@@ -21,8 +21,8 @@ pub struct Rect<N> {
 }
 
 impl<N> Rect<N> {
-    /// Creates a rectangle from left, top, bottom, and right coordinates
-    pub fn from_left_top_bottom_right(left: N, top: N, bottom: N, right: N) -> Self {
+    /// Creates a rectangle from left, top, right, and bottom coordinates
+    pub fn from_left_top_right_bottom(left: N, top: N, right: N, bottom: N) -> Self {
         Rect {
             top: top,
             bottom: bottom,
