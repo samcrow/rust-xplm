@@ -1,7 +1,7 @@
 [package]
 authors = ["Sam Crow <samcrow@uw.edu>"]
 name = "xplm"
-version = "0.2.1"
+version = "0.2.2"
 license = "MIT/Apache-2.0"
 repository = "https://github.com/samcrow/rust-xplm"
 keywords = ["X-Plane", "plugin"]
