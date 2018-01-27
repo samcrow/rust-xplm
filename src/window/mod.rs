@@ -107,7 +107,7 @@ impl Window {
         let window_ptr: *mut Window = &mut *window_box;
 
         let mut window_info = xplm_sys::XPLMCreateWindow_t {
-            structSize: mem::size_of::<xplm_sys::XPLMCreateWindow_t>() as c_int,
+            structSize: mem::size_of::<xplm_sys::XPLMCreateWindow_t>() as _,
             left: geometry.left(),
             top: geometry.top(),
             right: geometry.right(),
@@ -119,6 +119,9 @@ impl Window {
             handleCursorFunc: Some(window_cursor),
             handleMouseWheelFunc: Some(window_scroll),
             refcon: window_ptr as *mut _,
+            decorateAsFloatingWindow: 0,
+            layer: xplm_sys::xplm_WindowLayerFloatingWindows as _,
+            handleRightClickFunc: None,
         };
 
         let window_id = unsafe { xplm_sys::XPLMCreateWindowEx(&mut window_info) };
@@ -142,11 +145,13 @@ impl Window {
     pub fn set_geometry<R: Into<Rect<i32>>>(&self, geometry: R) {
         let geometry = geometry.into();
         unsafe {
-            xplm_sys::XPLMSetWindowGeometry(self.id,
-                                            geometry.left(),
-                                            geometry.top(),
-                                            geometry.right(),
-                                            geometry.bottom());
+            xplm_sys::XPLMSetWindowGeometry(
+                self.id,
+                geometry.left(),
+                geometry.top(),
+                geometry.right(),
+                geometry.bottom(),
+            );
         }
     }
 
@@ -177,12 +182,14 @@ unsafe extern "C" fn window_draw(_window: xplm_sys::XPLMWindowID, refcon: *mut c
 }
 
 /// Keyboard callback
-unsafe extern "C" fn window_key(_window: xplm_sys::XPLMWindowID,
-                                key: c_char,
-                                flags: xplm_sys::XPLMKeyFlags,
-                                virtual_key: c_char,
-                                refcon: *mut c_void,
-                                losing_focus: c_int) {
+unsafe extern "C" fn window_key(
+    _window: xplm_sys::XPLMWindowID,
+    key: c_char,
+    flags: xplm_sys::XPLMKeyFlags,
+    virtual_key: c_char,
+    refcon: *mut c_void,
+    losing_focus: c_int,
+) {
     let window = refcon as *mut Window;
     if losing_focus == 0 {
         match KeyEvent::from_xplm(key, flags, virtual_key) {
@@ -194,12 +201,13 @@ unsafe extern "C" fn window_key(_window: xplm_sys::XPLMWindowID,
 }
 
 /// Mouse callback
-unsafe extern "C" fn window_mouse(_window: xplm_sys::XPLMWindowID,
-                                  x: c_int,
-                                  y: c_int,
-                                  status: xplm_sys::XPLMMouseStatus,
-                                  refcon: *mut c_void)
-                                  -> c_int {
+unsafe extern "C" fn window_mouse(
+    _window: xplm_sys::XPLMWindowID,
+    x: c_int,
+    y: c_int,
+    status: xplm_sys::XPLMMouseStatus,
+    refcon: *mut c_void,
+) -> c_int {
     let window = refcon as *mut Window;
     if let Some(action) = MouseAction::from_xplm(status) {
         let position = Point::from((x, y));
@@ -213,24 +221,26 @@ unsafe extern "C" fn window_mouse(_window: xplm_sys::XPLMWindowID,
 }
 
 /// Cursor callback
-unsafe extern "C" fn window_cursor(_window: xplm_sys::XPLMWindowID,
-                                   x: c_int,
-                                   y: c_int,
-                                   refcon: *mut c_void)
-                                   -> xplm_sys::XPLMCursorStatus {
+unsafe extern "C" fn window_cursor(
+    _window: xplm_sys::XPLMWindowID,
+    x: c_int,
+    y: c_int,
+    refcon: *mut c_void,
+) -> xplm_sys::XPLMCursorStatus {
     let window = refcon as *mut Window;
     let cursor = (*window).delegate.cursor(&*window, Point::from((x, y)));
     cursor.as_xplm()
 }
 
 /// Scroll callback
-unsafe extern "C" fn window_scroll(_window: xplm_sys::XPLMWindowID,
-                                   x: c_int,
-                                   y: c_int,
-                                   wheel: c_int,
-                                   clicks: c_int,
-                                   refcon: *mut c_void)
-                                   -> c_int {
+unsafe extern "C" fn window_scroll(
+    _window: xplm_sys::XPLMWindowID,
+    x: c_int,
+    y: c_int,
+    wheel: c_int,
+    clicks: c_int,
+    refcon: *mut c_void,
+) -> c_int {
     let window = refcon as *mut Window;
 
     let position = Point::from((x, y));
@@ -532,10 +542,11 @@ pub struct KeyEvent {
 
 impl KeyEvent {
     /// Creates a key event from XPLM key information
-    fn from_xplm(key: c_char,
-                 flags: xplm_sys::XPLMKeyFlags,
-                 virtual_key: c_char)
-                 -> Result<Self, KeyEventError> {
+    fn from_xplm(
+        key: c_char,
+        flags: xplm_sys::XPLMKeyFlags,
+        virtual_key: c_char,
+    ) -> Result<Self, KeyEventError> {
         let basic_char = match key as u8 {
             // Accept printable characters, including spaces and tabs
             b'\t' | b' '...b'~' => Some(key as u8 as char),

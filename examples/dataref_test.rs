@@ -18,27 +18,35 @@ struct DatarefPlugin {
 
 impl DatarefPlugin {
     fn test_datarefs(&mut self) {
-        xplm::debug(&format!("has joystick: {}\n", self.has_joystick.get()));
-        xplm::debug(&format!("earth mu: {}\n", self.earth_mu.get()));
-        xplm::debug(&format!("date: {}\n", self.date.get()));
-        xplm::debug(&format!("simulator build: {}\n", self.sim_build_string.get_as_string().unwrap_or("unknown".into())));
-        xplm::debug(&format!("latitude: {}\n", self.latitude.get()));
-        xplm::debug(&format!("joystick axis values: {:?}\n", self.joystick_axis_values.as_vec()));
-        xplm::debug(&format!("battery on: {:?}\n", self.battery_on.as_vec()));
+        xplm::debug(format!("has joystick: {}\n", self.has_joystick.get()));
+        xplm::debug(format!("earth mu: {}\n", self.earth_mu.get()));
+        xplm::debug(format!("date: {}\n", self.date.get()));
+        xplm::debug(format!(
+            "simulator build: {}\n",
+            self.sim_build_string.get_as_string().unwrap_or(
+                "unknown".into(),
+            )
+        ));
+        xplm::debug(format!("latitude: {}\n", self.latitude.get()));
+        xplm::debug(format!(
+            "joystick axis values: {:?}\n",
+            self.joystick_axis_values.as_vec()
+        ));
+        xplm::debug(format!("battery on: {:?}\n", self.battery_on.as_vec()));
     }
 }
 
 impl Plugin for DatarefPlugin {
-    type StartErr = FindError;
-    fn start() -> Result<Self, Self::StartErr> {
+    type Error = FindError;
+    fn start() -> Result<Self, Self::Error> {
         let mut plugin = DatarefPlugin {
-            has_joystick: try!(DataRef::find("sim/joystick/has_joystick")),
-            earth_mu: try!(DataRef::find("sim/physics/earth_mu")),
-            date: try!(try!(DataRef::find("sim/time/local_date_days")).writeable()),
-            sim_build_string: try!(DataRef::find("sim/version/sim_build_string")),
-            latitude: try!(DataRef::find("sim/flightmodel/position/latitude")),
-            joystick_axis_values: try!(DataRef::find("sim/joystick/joystick_axis_values")),
-            battery_on: try!(try!(DataRef::find("sim/cockpit2/electrical/battery_on")).writeable()),
+            has_joystick: DataRef::find("sim/joystick/has_joystick")?,
+            earth_mu: DataRef::find("sim/physics/earth_mu")?,
+            date: DataRef::find("sim/time/local_date_days")?.writeable()?,
+            sim_build_string: DataRef::find("sim/version/sim_build_string")?,
+            latitude: DataRef::find("sim/flightmodel/position/latitude")?,
+            joystick_axis_values: DataRef::find("sim/joystick/joystick_axis_values")?,
+            battery_on: DataRef::find("sim/cockpit2/electrical/battery_on")?.writeable()?,
         };
         plugin.test_datarefs();
         Ok(plugin)
@@ -52,20 +60,14 @@ impl Plugin for DatarefPlugin {
         }
     }
 
-    fn enable(&mut self) {
+    fn enable(&mut self) -> Result<(), Self::Error> {
         self.test_datarefs();
+        Ok(())
     }
     fn disable(&mut self) {
-        self.test_datarefs();
-    }
-    fn stop(&mut self) {
         self.test_datarefs();
     }
 }
 
 xplane_plugin!(DatarefPlugin);
 
-// This main function temporarily allows the example to compile.
-// A pull request ( https://github.com/rust-lang/cargo/pull/3556 ) that allows examples to be
-// non-binary will be released sometime.
-fn main() {}

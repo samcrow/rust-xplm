@@ -69,7 +69,8 @@ pub trait ArrayRead<T: ArrayType + ?Sized> {
 
     /// Returns all values in this accessor as a Vec
     fn as_vec(&self) -> Vec<T::Element>
-        where T::Element: Default + Clone
+    where
+        T::Element: Default + Clone,
     {
         let mut values = vec![T::Element::default(); self.len()];
         self.get(&mut values);
@@ -111,7 +112,8 @@ pub trait StringReadWrite: StringRead {
 }
 
 impl<T> StringRead for T
-    where T: ArrayRead<[u8]>
+where
+    T: ArrayRead<[u8]>,
 {
     fn get_to_string(&self, out: &mut String) -> Result<(), FromUtf8Error> {
         let mut buffer = StringBuffer::new(self.len());
@@ -128,7 +130,8 @@ impl<T> StringRead for T
 }
 
 impl<T> StringReadWrite for T
-    where T: ArrayReadWrite<[u8]>
+where
+    T: ArrayReadWrite<[u8]>,
 {
     fn set_as_string(&mut self, value: &str) -> Result<(), NulError> {
         let name_c = try!(CString::new(value));

@@ -6,14 +6,11 @@ use xplm::plugin::{Plugin, PluginInfo};
 struct TestPlugin;
 
 impl Plugin for TestPlugin {
-    type StartErr = TestPluginError;
-    fn start() -> Result<Self, Self::StartErr> {
+    type Error = TestPluginError;
+    fn start() -> Result<Self, Self::Error> {
         Ok(TestPlugin)
     }
-    fn enable(&mut self) {}
-    fn disable(&mut self) {}
 
-    fn stop(&mut self) {}
     fn info(&self) -> PluginInfo {
         PluginInfo {
             name: "Test Plugin".into(),
@@ -24,20 +21,18 @@ impl Plugin for TestPlugin {
 }
 
 #[derive(Debug)]
-struct TestPluginError;
+enum TestPluginError {}
 
 impl ::std::fmt::Display for TestPluginError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "TestPluginError")
+    fn fmt(&self, _: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match *self {}
     }
 }
 
 impl ::std::error::Error for TestPluginError {
     fn description(&self) -> &str {
-        "TestPluginError"
+        match *self {}
     }
 }
 
 xplane_plugin!(TestPlugin);
-
-fn main() {}

@@ -27,7 +27,8 @@ pub struct OwnedData<T: DataType + ?Sized, A = ReadOnly> {
 impl<T: DataType + ?Sized, A: Access> OwnedData<T, A> {
     /// Creates a new dataref with the provided name containing the default value of T
     pub fn create(name: &str) -> Result<Self, CreateError>
-        where T: Default
+    where
+        T: Default,
     {
         Self::create_with_value(name, &T::default())
     }
@@ -44,23 +45,25 @@ impl<T: DataType + ?Sized, A: Access> OwnedData<T, A> {
             let value_ptr: *mut T::Storage = value_box.as_mut();
 
             let id = unsafe {
-                XPLMRegisterDataAccessor(name_c.as_ptr(),
-                                         T::sim_type(),
-                                         Self::writeable(),
-                                         Self::int_read(),
-                                         Self::int_write(),
-                                         Self::float_read(),
-                                         Self::float_write(),
-                                         Self::double_read(),
-                                         Self::double_write(),
-                                         Self::int_array_read(),
-                                         Self::int_array_write(),
-                                         Self::float_array_read(),
-                                         Self::float_array_write(),
-                                         Self::byte_array_read(),
-                                         Self::byte_array_write(),
-                                         value_ptr as *mut c_void,
-                                         value_ptr as *mut c_void)
+                XPLMRegisterDataAccessor(
+                    name_c.as_ptr(),
+                    T::sim_type(),
+                    Self::writeable(),
+                    Self::int_read(),
+                    Self::int_write(),
+                    Self::float_read(),
+                    Self::float_write(),
+                    Self::double_read(),
+                    Self::double_write(),
+                    Self::int_array_read(),
+                    Self::int_array_write(),
+                    Self::float_array_read(),
+                    Self::float_array_write(),
+                    Self::byte_array_read(),
+                    Self::byte_array_write(),
+                    value_ptr as *mut c_void,
+                    value_ptr as *mut c_void,
+                )
             };
             assert!(id != ptr::null_mut());
             Ok(OwnedData {
@@ -278,53 +281,62 @@ unsafe extern "C" fn double_write(refcon: *mut c_void, value: f64) {
 
 /// Integer array read callback
 /// T is the actual data type
-unsafe extern "C" fn int_array_read(refcon: *mut c_void,
-                                    values: *mut c_int,
-                                    offset: c_int,
-                                    max: c_int)
-                                    -> c_int {
+unsafe extern "C" fn int_array_read(
+    refcon: *mut c_void,
+    values: *mut c_int,
+    offset: c_int,
+    max: c_int,
+) -> c_int {
     array_read::<i32>(refcon, values, offset, max)
 }
 
 /// Integer array write callback
-unsafe extern "C" fn int_array_write(refcon: *mut c_void,
-                                     values: *mut c_int,
-                                     offset: c_int,
-                                     max: c_int) {
+unsafe extern "C" fn int_array_write(
+    refcon: *mut c_void,
+    values: *mut c_int,
+    offset: c_int,
+    max: c_int,
+) {
     array_write::<i32>(refcon, values, offset, max);
 }
 
 /// Float array read callback
-unsafe extern "C" fn float_array_read(refcon: *mut c_void,
-                                      values: *mut f32,
-                                      offset: c_int,
-                                      max: c_int)
-                                      -> c_int {
+unsafe extern "C" fn float_array_read(
+    refcon: *mut c_void,
+    values: *mut f32,
+    offset: c_int,
+    max: c_int,
+) -> c_int {
     array_read::<f32>(refcon, values, offset, max)
 }
 
 /// Float array write callback
-unsafe extern "C" fn float_array_write(refcon: *mut c_void,
-                                       values: *mut f32,
-                                       offset: c_int,
-                                       max: c_int) {
+unsafe extern "C" fn float_array_write(
+    refcon: *mut c_void,
+    values: *mut f32,
+    offset: c_int,
+    max: c_int,
+) {
     array_write::<f32>(refcon, values, offset, max);
 }
 
 /// Byte array read callback
-unsafe extern "C" fn byte_array_read(refcon: *mut c_void,
-                                     values: *mut c_void,
-                                     offset: c_int,
-                                     max: c_int)
-                                     -> c_int {
+unsafe extern "C" fn byte_array_read(
+    refcon: *mut c_void,
+    values: *mut c_void,
+    offset: c_int,
+    max: c_int,
+) -> c_int {
     array_read::<u8>(refcon, values as *mut u8, offset, max)
 }
 
 /// Byte array write callback
-unsafe extern "C" fn byte_array_write(refcon: *mut c_void,
-                                      values: *mut c_void,
-                                      offset: c_int,
-                                      max: c_int) {
+unsafe extern "C" fn byte_array_write(
+    refcon: *mut c_void,
+    values: *mut c_void,
+    offset: c_int,
+    max: c_int,
+) {
     array_write::<u8>(refcon, values as *const u8, offset, max);
 }
 
@@ -332,11 +344,12 @@ unsafe extern "C" fn byte_array_write(refcon: *mut c_void,
 /// Otherwise, reads up to max elements from this dataref starting at offset offset and copies them
 /// into values.
 #[inline]
-unsafe fn array_read<T: Copy>(refcon: *mut c_void,
-                              values: *mut T,
-                              offset: c_int,
-                              max: c_int)
-                              -> c_int {
+unsafe fn array_read<T: Copy>(
+    refcon: *mut c_void,
+    values: *mut T,
+    offset: c_int,
+    max: c_int,
+) -> c_int {
     let offset = offset as usize;
     let max = max as usize;
     let dataref_content = refcon as *const Vec<T>;

@@ -4,10 +4,6 @@ use std::ptr;
 use std::ffi::{CStr, CString};
 use xplm_sys;
 
-use super::super::paths;
-
-/// Export path conversion errors
-pub use paths::PathError;
 
 /// Looks for a plugin with the provided signature and returns it if it exists
 pub fn plugin_with_signature(signature: &str) -> Option<Plugin> {
@@ -27,8 +23,11 @@ pub fn plugin_with_signature(signature: &str) -> Option<Plugin> {
 /// Returns the plugin that is currently running
 pub fn this_plugin() -> Plugin {
     let plugin_id = unsafe { xplm_sys::XPLMGetMyID() };
-    assert!(plugin_id != xplm_sys::XPLM_NO_PLUGIN_ID,
-            "XPLMGetMyId() returned no plugin ID");
+    assert_ne!(
+        plugin_id,
+        xplm_sys::XPLM_NO_PLUGIN_ID,
+        "XPLMGetMyId() returned no plugin ID"
+    );
     Plugin(plugin_id)
 }
 
@@ -83,43 +82,51 @@ impl Plugin {
     /// Returns the name of this plugin
     pub fn name(&self) -> String {
         read_to_buffer(|buffer| unsafe {
-            xplm_sys::XPLMGetPluginInfo(self.0,
-                                        buffer,
-                                        ptr::null_mut(),
-                                        ptr::null_mut(),
-                                        ptr::null_mut())
+            xplm_sys::XPLMGetPluginInfo(
+                self.0,
+                buffer,
+                ptr::null_mut(),
+                ptr::null_mut(),
+                ptr::null_mut(),
+            )
         })
     }
     /// Returns the signature of this plugin
     pub fn signature(&self) -> String {
         read_to_buffer(|buffer| unsafe {
-            xplm_sys::XPLMGetPluginInfo(self.0,
-                                        ptr::null_mut(),
-                                        ptr::null_mut(),
-                                        buffer,
-                                        ptr::null_mut())
+            xplm_sys::XPLMGetPluginInfo(
+                self.0,
+                ptr::null_mut(),
+                ptr::null_mut(),
+                buffer,
+                ptr::null_mut(),
+            )
         })
     }
     /// Returns the description of this plugin
     pub fn description(&self) -> String {
         read_to_buffer(|buffer| unsafe {
-            xplm_sys::XPLMGetPluginInfo(self.0,
-                                        ptr::null_mut(),
-                                        ptr::null_mut(),
-                                        ptr::null_mut(),
-                                        buffer)
+            xplm_sys::XPLMGetPluginInfo(
+                self.0,
+                ptr::null_mut(),
+                ptr::null_mut(),
+                ptr::null_mut(),
+                buffer,
+            )
         })
     }
     /// Returns the absolute path to this plugin
-    pub fn path(&self) -> Result<PathBuf, PathError> {
+    pub fn path(&self) -> PathBuf {
         let os_path = read_to_buffer(|buffer| unsafe {
-            xplm_sys::XPLMGetPluginInfo(self.0,
-                                        ptr::null_mut(),
-                                        buffer,
-                                        ptr::null_mut(),
-                                        ptr::null_mut())
+            xplm_sys::XPLMGetPluginInfo(
+                self.0,
+                ptr::null_mut(),
+                buffer,
+                ptr::null_mut(),
+                ptr::null_mut(),
+            )
         });
-        paths::convert_path(&os_path)
+        PathBuf::from(os_path)
     }
 
     /// Returns true if this plugin is enabled

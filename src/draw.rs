@@ -7,7 +7,10 @@ pub trait DrawCallback: 'static {
     fn draw(&mut self);
 }
 
-impl<F> DrawCallback for F where F: 'static + FnMut() {
+impl<F> DrawCallback for F
+where
+    F: 'static + FnMut(),
+{
     fn draw(&mut self) {
         self()
     }
@@ -32,7 +35,12 @@ impl Draw {
         let callback_box = Box::new(callback);
         let callback_ptr: *const _ = &*callback_box;
         let status = unsafe {
-            xplm_sys::XPLMRegisterDrawCallback(Some(draw_callback::<C>), xplm_phase, 0, callback_ptr as *mut _)
+            xplm_sys::XPLMRegisterDrawCallback(
+                Some(draw_callback::<C>),
+                xplm_phase,
+                0,
+                callback_ptr as *mut _,
+            )
         };
         if status == 1 {
             Ok(Draw {
@@ -60,7 +68,11 @@ impl Drop for Draw {
 /// The draw callback provided to X-Plane
 ///
 /// This is instantiated separately for each callback type.
-unsafe extern "C" fn draw_callback<C: DrawCallback>(_phase: xplm_sys::XPLMDrawingPhase, _before: c_int, refcon: *mut c_void) -> c_int {
+unsafe extern "C" fn draw_callback<C: DrawCallback>(
+    _phase: xplm_sys::XPLMDrawingPhase,
+    _before: c_int,
+    refcon: *mut c_void,
+) -> c_int {
     let callback_ptr = refcon as *mut C;
     (*callback_ptr).draw();
     // Always allow X-Plane to draw
@@ -85,13 +97,10 @@ pub enum Phase {
     /// After X-Plane draws user interface windows
     AfterWindows,
     /// After X-Plane draws 3D content in the local map window
-    #[cfg(feature = "xplm200")]
     AfterLocalMap3D,
     /// After X-Plane draws 2D content in the local map window
-    #[cfg(feature = "xplm200")]
     AfterLocalMap2D,
     /// After X-Plane draws 2D content in the local map profile view
-    #[cfg(feature = "xplm200")]
     AfterLocalMapProfile,
 }
 
@@ -107,11 +116,8 @@ impl Phase {
             AfterPanel => xplm_sys::xplm_Phase_Panel,
             AfterGauges => xplm_sys::xplm_Phase_Gauges,
             AfterWindows => xplm_sys::xplm_Phase_Window,
-            #[cfg(feature = "xplm200")]
             AfterLocalMap2D => xplm_sys::xplm_Phase_LocalMap2D,
-            #[cfg(feature = "xplm200")]
             AfterLocalMap3D => xplm_sys::xplm_Phase_LocalMap3D,
-            #[cfg(feature = "xplm200")]
             AfterLocalMapProfile => xplm_sys::xplm_Phase_LocalMapProfile,
         };
         phase as xplm_sys::XPLMDrawingPhase
@@ -132,7 +138,7 @@ quick_error! {
 
 
 /// Stores various flags that can be enabled or disabled
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub struct GraphicsState {
     /// Enable status of fog
     ///
@@ -157,13 +163,15 @@ pub struct GraphicsState {
 /// Sets the graphics state
 pub fn set_state(state: &GraphicsState) {
     unsafe {
-        xplm_sys::XPLMSetGraphicsState(state.fog as i32,
-                             state.textures,
-                             state.lighting as i32,
-                             state.alpha_testing as i32,
-                             state.alpha_blending as i32,
-                             state.depth_testing as i32,
-                             state.depth_writing as i32);
+        xplm_sys::XPLMSetGraphicsState(
+            state.fog as i32,
+            state.textures,
+            state.lighting as i32,
+            state.alpha_testing as i32,
+            state.alpha_blending as i32,
+            state.depth_testing as i32,
+            state.depth_writing as i32,
+        );
     }
 }
 

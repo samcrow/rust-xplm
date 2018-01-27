@@ -2,6 +2,11 @@
 /// Accessing and communicating with other plugins
 pub mod management;
 
+/// Items used by the xplane_plugin! macro, which must be public
+#[doc(hidden)]
+pub mod internal;
+
+
 /// Information about a plugin
 pub struct PluginInfo {
     /// The plugin name
@@ -14,22 +19,27 @@ pub struct PluginInfo {
 
 /// The trait that all plugins should implement
 pub trait Plugin: Sized {
-    /// The error type that a plugin may encounter when starting up
-    type StartErr: ::std::error::Error;
+    /// The error type that a plugin may encounter when starting up or enabling
+    type Error: ::std::error::Error;
 
     /// Called when X-Plane loads this plugin
+    ///
     /// On success, returns a plugin object
-    fn start() -> Result<Self, Self::StartErr>;
+    fn start() -> Result<Self, Self::Error>;
     /// Called when the plugin is enabled
-    fn enable(&mut self);
+    ///
+    /// If this function returns an Err, the plugin will remain disabled.
+    ///
+    /// The default implementation returns Ok(()).
+    fn enable(&mut self) -> Result<(), Self::Error> {
+        Ok(())
+    }
     /// Called when the plugin is disabled
-    fn disable(&mut self);
+    ///
+    /// The default implementation does nothing.
+    fn disable(&mut self) {}
 
     /// Returns information on this plugin
     fn info(&self) -> PluginInfo;
-
-    /// Called when the plugin is stopped
-    ///
-    /// The plugin will be dropped after this function is called.
-    fn stop(&mut self);
 }
+

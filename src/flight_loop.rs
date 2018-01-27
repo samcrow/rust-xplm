@@ -160,7 +160,8 @@ pub trait FlightLoopCallback: 'static {
 
 /// Closures can be used as FlightLoopCallbacks
 impl<F> FlightLoopCallback for F
-    where F: 'static + FnMut(&mut LoopState)
+where
+    F: 'static + FnMut(&mut LoopState),
 {
     fn flight_loop(&mut self, state: &mut LoopState) {
         self(state)
@@ -243,11 +244,12 @@ impl From<LoopResult> for f32 {
 /// The flight loop callback that X-Plane calls
 ///
 /// This expands to a separate callback for every type C.
-unsafe extern "C" fn flight_loop_callback<C: FlightLoopCallback>(since_last_call: c_float,
-                                                                 since_loop: c_float,
-                                                                 counter: c_int,
-                                                                 refcon: *mut c_void)
-                                                                 -> c_float {
+unsafe extern "C" fn flight_loop_callback<C: FlightLoopCallback>(
+    since_last_call: c_float,
+    since_loop: c_float,
+    counter: c_int,
+    refcon: *mut c_void,
+) -> c_float {
     // Get the loop data
     let loop_data = refcon as *mut LoopData;
     // Create a state

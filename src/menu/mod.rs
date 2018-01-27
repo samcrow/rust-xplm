@@ -135,8 +135,9 @@ impl Menu {
     /// The child argument may be a Menu, ActionItem, CheckItem, or Separator,
     /// or an Rc containing one of these types.
     pub fn add_child<R, C>(&self, child: R)
-        where R: Into<Rc<C>>,
-              Rc<C>: Into<Item>
+    where
+        R: Into<Rc<C>>,
+        Rc<C>: Into<Item>,
     {
         let mut borrow = self.children.borrow_mut();
         borrow.push(Box::new(child.into().into()));
@@ -150,7 +151,12 @@ impl Menu {
     /// Removes this menu from the plugins menu
     pub fn remove_from_plugins_menu(&self) {
         let plugins_menu = unsafe { xplm_sys::XPLMFindPluginsMenu() };
-        if let MenuState::InMenu { id: _id, parent, index_in_parent } = self.state.get() {
+        if let MenuState::InMenu {
+            id: _id,
+            parent,
+            index_in_parent,
+        } = self.state.get()
+        {
             if parent == plugins_menu {
                 self.remove_from_menu(plugins_menu, index_in_parent);
             }
@@ -185,11 +191,13 @@ impl Menu {
             };
 
             let menu_id = unsafe {
-                xplm_sys::XPLMCreateMenu(name_c.as_ptr(),
-                                         parent_id,
-                                         index,
-                                         Some(menu_handler),
-                                         ptr::null_mut())
+                xplm_sys::XPLMCreateMenu(
+                    name_c.as_ptr(),
+                    parent_id,
+                    index,
+                    Some(menu_handler),
+                    ptr::null_mut(),
+                )
             };
             self.state.set(MenuState::InMenu {
                 id: menu_id,
@@ -207,13 +215,23 @@ impl Menu {
     }
     fn update_index(&self, index_in_parent: c_int) {
         let mut state = self.state.get();
-        if let MenuState::InMenu { id: _, parent: _, index_in_parent: ref mut index } = state {
+        if let MenuState::InMenu {
+            id: _,
+            parent: _,
+            index_in_parent: ref mut index,
+        } = state
+        {
             *index = index_in_parent;
         }
         self.state.set(state);
     }
     fn remove_from_menu(&self, _parent_id: xplm_sys::XPLMMenuID, index_in_parent: c_int) {
-        if let MenuState::InMenu { id, parent, index_in_parent: _index } = self.state.get() {
+        if let MenuState::InMenu {
+            id,
+            parent,
+            index_in_parent: _index,
+        } = self.state.get()
+        {
             // Remove children
             {
                 let borrow = self.children.borrow();
@@ -240,7 +258,12 @@ impl Menu {
 /// a dangling pointer
 impl Drop for Menu {
     fn drop(&mut self) {
-        if let MenuState::InMenu { id: _id, parent, index_in_parent } = self.state.get() {
+        if let MenuState::InMenu {
+            id: _id,
+            parent,
+            index_in_parent,
+        } = self.state.get()
+        {
             self.remove_from_menu(parent, index_in_parent);
         }
     }
@@ -283,7 +306,10 @@ impl ActionItem {
     /// Creates a new item
     ///
     /// Returns an error if the name contains a null byte
-    pub fn new<S: Into<String>, H: MenuClickHandler>(name: S, handler: H) -> Result<Self, NulError> {
+    pub fn new<S: Into<String>, H: MenuClickHandler>(
+        name: S,
+        handler: H,
+    ) -> Result<Self, NulError> {
         let name = name.into();
         check_c_string(&name)?;
         Ok(ActionItem {
@@ -308,10 +334,12 @@ impl ActionItem {
         borrow.push_str(name);
         if let Some(in_menu) = self.in_menu.get() {
             unsafe {
-                xplm_sys::XPLMSetMenuItemName(in_menu.parent,
-                                              in_menu.index as c_int,
-                                              name_c.as_ptr(),
-                                              0);
+                xplm_sys::XPLMSetMenuItemName(
+                    in_menu.parent,
+                    in_menu.index as c_int,
+                    name_c.as_ptr(),
+                    0,
+                );
             }
         }
         Ok(())
@@ -323,8 +351,12 @@ impl ActionItem {
     fn add_to_menu(&self, parent_id: xplm_sys::XPLMMenuID, enclosing_item: *const Item) {
         let name_c = CString::new(self.name()).unwrap();
         let index = unsafe {
-            let index =
-                xplm_sys::XPLMAppendMenuItem(parent_id, name_c.as_ptr(), enclosing_item as *mut _, 0);
+            let index = xplm_sys::XPLMAppendMenuItem(
+                parent_id,
+                name_c.as_ptr(),
+                enclosing_item as *mut _,
+                0,
+            );
             // Ensure item is not checkable
             xplm_sys::XPLMCheckMenuItem(parent_id, index, xplm_sys::xplm_Menu_NoCheck as c_int);
             index
@@ -374,7 +406,8 @@ pub trait MenuClickHandler: 'static {
 }
 
 impl<F> MenuClickHandler for F
-    where F: FnMut(&ActionItem) + 'static
+where
+    F: FnMut(&ActionItem) + 'static,
 {
     fn item_clicked(&mut self, item: &ActionItem) {
         self(item)
@@ -400,7 +433,11 @@ impl CheckItem {
     /// Creates a new item
     ///
     /// Returns an error if the name contains a null byte
-    pub fn new<S: Into<String>, H: CheckHandler>(name: S, checked: bool, handler: H) -> Result<Self, NulError> {
+    pub fn new<S: Into<String>, H: CheckHandler>(
+        name: S,
+        checked: bool,
+        handler: H,
+    ) -> Result<Self, NulError> {
         let name = name.into();
         check_c_string(&name)?;
         Ok(CheckItem {
@@ -416,19 +453,22 @@ impl CheckItem {
             // Update from X-Plane
             unsafe {
                 let mut check_state = xplm_sys::xplm_Menu_NoCheck as xplm_sys::XPLMMenuCheck;
-                xplm_sys::XPLMCheckMenuItemState(in_menu.parent,
-                                                 in_menu.index as c_int,
-                                                 &mut check_state);
+                xplm_sys::XPLMCheckMenuItemState(
+                    in_menu.parent,
+                    in_menu.index as c_int,
+                    &mut check_state,
+                );
                 if check_state == xplm_sys::xplm_Menu_NoCheck as xplm_sys::XPLMMenuCheck {
                     self.checked.set(false);
                 } else if check_state == xplm_sys::xplm_Menu_Checked as xplm_sys::XPLMMenuCheck {
                     self.checked.set(true);
                 } else {
                     // Unexpected state, correct
-                    xplm_sys::XPLMCheckMenuItem(in_menu.parent,
-                                                in_menu.index as c_int,
-                                                xplm_sys::xplm_Menu_NoCheck as
-                                                xplm_sys::XPLMMenuCheck);
+                    xplm_sys::XPLMCheckMenuItem(
+                        in_menu.parent,
+                        in_menu.index as c_int,
+                        xplm_sys::xplm_Menu_NoCheck as xplm_sys::XPLMMenuCheck,
+                    );
                     self.checked.set(false);
                 }
             }
@@ -440,9 +480,11 @@ impl CheckItem {
         self.checked.set(checked);
         if let Some(in_menu) = self.in_menu.get() {
             unsafe {
-                xplm_sys::XPLMCheckMenuItem(in_menu.parent,
-                                            in_menu.index as c_int,
-                                            check_state(checked));
+                xplm_sys::XPLMCheckMenuItem(
+                    in_menu.parent,
+                    in_menu.index as c_int,
+                    check_state(checked),
+                );
             }
         }
     }
@@ -461,10 +503,12 @@ impl CheckItem {
         borrow.push_str(name);
         if let Some(in_menu) = self.in_menu.get() {
             unsafe {
-                xplm_sys::XPLMSetMenuItemName(in_menu.parent,
-                                              in_menu.index as c_int,
-                                              name_c.as_ptr(),
-                                              0);
+                xplm_sys::XPLMSetMenuItemName(
+                    in_menu.parent,
+                    in_menu.index as c_int,
+                    name_c.as_ptr(),
+                    0,
+                );
             }
         }
         Ok(())
@@ -476,7 +520,12 @@ impl CheckItem {
     fn add_to_menu(&self, parent_id: xplm_sys::XPLMMenuID, enclosing_item: *const Item) {
         let name_c = CString::new(self.name()).unwrap();
         let index = unsafe {
-            let index = xplm_sys::XPLMAppendMenuItem(parent_id, name_c.as_ptr(), enclosing_item as *mut _, 0);
+            let index = xplm_sys::XPLMAppendMenuItem(
+                parent_id,
+                name_c.as_ptr(),
+                enclosing_item as *mut _,
+                0,
+            );
             // Configure check
             let check_state = check_state(self.checked.get());
             xplm_sys::XPLMCheckMenuItem(parent_id, index, check_state);
@@ -529,7 +578,10 @@ pub trait CheckHandler: 'static {
     fn item_checked(&mut self, item: &CheckItem, checked: bool);
 }
 
-impl<F> CheckHandler for F where F: FnMut(&CheckItem, bool) + 'static {
+impl<F> CheckHandler for F
+where
+    F: FnMut(&CheckItem, bool) + 'static,
+{
     fn item_checked(&mut self, item: &CheckItem, checked: bool) {
         self(item, checked)
     }

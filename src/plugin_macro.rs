@@ -11,73 +11,49 @@
 ///
 #[macro_export]
 macro_rules! xplane_plugin {
+
     ($plugin_type: ty) => {
-        type PluginType = $plugin_type;
-        type PluginPtr = *mut PluginType;
         // The plugin
-        static mut PLUGIN: PluginPtr = 0 as PluginPtr;
+        static mut PLUGIN: ::xplm::plugin::internal::PluginData<$plugin_type> = ::xplm::plugin::internal::PluginData {
+            plugin: 0 as *mut _,
+            panicked: false,
+        };
 
         #[allow(non_snake_case)]
         #[no_mangle]
         pub unsafe extern "C" fn XPluginStart(
-            outName: *mut ::std::os::raw::c_char,
-            outSig: *mut ::std::os::raw::c_char,
-            outDescription: *mut ::std::os::raw::c_char) -> ::std::os::raw::c_int
+            name: *mut ::std::os::raw::c_char,
+            signature: *mut ::std::os::raw::c_char,
+            description: *mut ::std::os::raw::c_char) -> ::std::os::raw::c_int
         {
-            // XPLM initialization
-            ::xplm::internal::xplm_init();
-            // Create the plugin, temporarily, on the stack
-            let plugin_option = PluginType::start();
-
-            match plugin_option {
-                Ok(plugin) => {
-                    // Allocate storage
-                    PLUGIN = Box::into_raw(Box::new(plugin));
-
-                    let info = (*PLUGIN).info();
-                    ::xplm::internal::copy_to_c_buffer(info.name, outName);
-                    ::xplm::internal::copy_to_c_buffer(info.signature, outSig);
-                    ::xplm::internal::copy_to_c_buffer(info.description, outDescription);
-                    // Success
-                    1
-                },
-                Err(e) => {
-                    ::xplm::debug(format!("Plugin initialization failed: {}\n", e));
-                    // Return failure
-                    0
-                },
-            }
+            ::xplm::plugin::internal::xplugin_start(&mut PLUGIN, name, signature, description)
         }
 
         #[allow(non_snake_case)]
         #[no_mangle]
         pub unsafe extern "C" fn XPluginStop() {
-            (*PLUGIN).stop();
-            // Free plugin
-            let plugin_box = Box::from_raw(PLUGIN);
-            PLUGIN = ::std::ptr::null_mut();
-            drop(plugin_box);
+            ::xplm::plugin::internal::xplugin_stop(&mut PLUGIN)
         }
 
         #[allow(non_snake_case)]
         #[no_mangle]
-        pub unsafe extern "C" fn XPluginEnable() {
-            (*PLUGIN).enable();
+        pub unsafe extern "C" fn XPluginEnable() -> ::std::os::raw::c_int {
+            ::xplm::plugin::internal::xplugin_enable(&mut PLUGIN)
         }
 
         #[allow(non_snake_case)]
         #[no_mangle]
         pub unsafe extern "C" fn XPluginDisable() {
-            (*PLUGIN).disable();
+            ::xplm::plugin::internal::xplugin_disable(&mut PLUGIN)
         }
 
         #[allow(non_snake_case)]
         #[allow(unused_variables)]
         #[no_mangle]
         pub unsafe extern "C" fn XPluginReceiveMessage(
-            inFrom: ::std::os::raw::c_int,
-            inMessage: ::std::os::raw::c_int,
-            inParam: *mut ::std::os::raw::c_void)
+            from: ::std::os::raw::c_int,
+            message: ::std::os::raw::c_int,
+            param: *mut ::std::os::raw::c_void)
         {
             // Nothing
         }

@@ -109,17 +109,20 @@ impl OwnedCommand {
     /// Creates a new command with a provided name and description
     ///
     /// Returns an error if a matching command already exists.
-    pub fn new<H: CommandHandler>(name: &str,
-                                  description: &str,
-                                  handler: H)
-                                  -> Result<Self, CommandCreateError> {
+    pub fn new<H: CommandHandler>(
+        name: &str,
+        description: &str,
+        handler: H,
+    ) -> Result<Self, CommandCreateError> {
         let mut data = Box::new(try!(OwnedCommandData::new(name, description, handler)));
         let data_ptr: *mut OwnedCommandData = data.deref_mut();
         unsafe {
-            XPLMRegisterCommandHandler(data.id,
-                                       Some(command_handler::<H>),
-                                       1,
-                                       data_ptr as *mut c_void);
+            XPLMRegisterCommandHandler(
+                data.id,
+                Some(command_handler::<H>),
+                1,
+                data_ptr as *mut c_void,
+            );
         }
         Ok(OwnedCommand {
             data: data,
@@ -146,10 +149,11 @@ struct OwnedCommandData {
 }
 
 impl OwnedCommandData {
-    pub fn new<H: CommandHandler>(name: &str,
-                                  description: &str,
-                                  handler: H)
-                                  -> Result<Self, CommandCreateError> {
+    pub fn new<H: CommandHandler>(
+        name: &str,
+        description: &str,
+        handler: H,
+    ) -> Result<Self, CommandCreateError> {
         let name_c = try!(CString::new(name));
         let description_c = try!(CString::new(description));
         let existing = unsafe { XPLMFindCommand(name_c.as_ptr()) };
@@ -167,10 +171,11 @@ impl OwnedCommandData {
 }
 
 /// Command handler callback
-unsafe extern "C" fn command_handler<H: CommandHandler>(_: XPLMCommandRef,
-                                                        phase: XPLMCommandPhase,
-                                                        refcon: *mut c_void)
-                                                        -> c_int {
+unsafe extern "C" fn command_handler<H: CommandHandler>(
+    _: XPLMCommandRef,
+    phase: XPLMCommandPhase,
+    refcon: *mut c_void,
+) -> c_int {
     let data = refcon as *mut OwnedCommandData;
     let handler: *mut CommandHandler = (*data).handler.deref_mut();
     let handler = handler as *mut H;

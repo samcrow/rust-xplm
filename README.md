@@ -5,11 +5,12 @@
 
 This library provides convenient Rust interfaces to the [X-Plane plugin APIs](http://www.xsquawkbox.net/xpsdk/mediawiki/Main_Page).
 
-With this library, X-Plane plugins can be easily developed in Rust.
+With this library, X-Plane plugins can be easily developed in Rust. Because this library uses SDK version 3.0,
+plugins created with this library support X-Plane 11.10 or later.
 
 ## Status
 
-Version 2.0 of this library is incomplete.
+This library is incomplete. GUI components need a good API design.
 
 ## License
 

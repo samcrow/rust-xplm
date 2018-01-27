@@ -63,10 +63,12 @@ impl<N> Rect<N> {
     ///
     /// For this calculation, the bottom and left edges are inside the rectangle, while the
     /// top and right edges are outside.
-    pub fn contains(&self, point: Point<N>) -> bool where N: PartialOrd {
-        let (x, y) = point.into();
-        x >= self.left && x < self.right
-        && y >= self.bottom && y < self.top
+    pub fn contains(&self, point: Point<N>) -> bool
+    where
+        N: PartialOrd,
+    {
+        let (x, y) = point.into_xy();
+        x >= self.left && x < self.right && y >= self.bottom && y < self.top
     }
 }
 
@@ -97,10 +99,7 @@ pub struct Point<N> {
 impl<N> Point<N> {
     /// Creates a point from X and Y coordinates
     pub fn from_xy(x: N, y: N) -> Self {
-        Point {
-            x: x,
-            y: y,
-        }
+        Point { x: x, y: y }
     }
     pub fn set_x(&mut self, x: N) {
         self.x = x;
@@ -126,12 +125,5 @@ impl<N> From<(N, N)> for Point<N> {
     /// Converts an (x, y) pair into a point
     fn from((x, y): (N, N)) -> Self {
         Point::from_xy(x, y)
-    }
-}
-
-impl<N> Into<(N, N)> for Point<N> {
-    /// Converts a point into an (x, y) pair
-    fn into(self) -> (N, N) {
-        (self.x, self.y)
     }
 }

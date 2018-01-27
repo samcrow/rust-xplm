@@ -1,36 +1,19 @@
 [package]
 authors = ["Sam Crow <samcrow@uw.edu>"]
 name = "xplm"
-version = "0.2.2"
+version = "0.3.0"
 license = "MIT/Apache-2.0"
 repository = "https://github.com/samcrow/rust-xplm"
 keywords = ["X-Plane", "plugin"]
 description = "High-level interfaces to the X-Plane plugin SDK"
 readme = "README.md"
 
-# Abort on panics, to avoid unwinding into X-Plane (undefined behavior)
-# Plugins must include this section in their Cargo.toml files.
-[profile.dev]
-panic = "abort"
-[profile.release]
-panic = "abort"
-
 [dependencies]
-lazy_static = "^0.2.1"
 quick-error = "^1.1.0"
+xplm-sys = "^0.3.1"
 
-# Path conversion for Mac OS before SDK 2.1
-[target.'cfg(all(target_os = "macos", not(feature = "xplm210")))'.dependencies]
-hfs_paths = "^0.1.0"
-
-[dependencies.xplm-sys]
-version = "^0.2.1"
-default-features = false
-
-[features]
-xplm200 = ["xplm-sys/xplm200"]
-xplm210 = ["xplm-sys/xplm210"]
-default = ["xplm200", "xplm210"]
+[profile.release]
+lto = true
 
 [[example]]
 name = "dataref_test"
