@@ -99,6 +99,11 @@ impl FlightLoop {
         let seconds_f = (time.as_secs() as f32) + (1e-9_f32 * time.subsec_nanos() as f32);
         self.data.set_interval(LoopResult::Seconds(seconds_f));
     }
+    
+    /// Deactivates the flight loop
+    pub fn deactivate(&mut self) {
+        self.data.set_interval(LoopResult::Deactivate);
+    }
 }
 
 /// Data stored as part of a FlightLoop and used as a refcon
