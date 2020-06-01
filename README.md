@@ -3,7 +3,7 @@
 
 ## Purpose
 
-This library provides convenient Rust interfaces to the [X-Plane plugin APIs](http://www.xsquawkbox.net/xpsdk/mediawiki/Main_Page).
+This library provides convenient Rust interfaces to the [X-Plane plugin APIs](https://developer.x-plane.com/sdk/).
 
 With this library, X-Plane plugins can be easily developed in Rust. Because this library uses SDK version 3.0,
 plugins created with this library support X-Plane 11.10 or later.

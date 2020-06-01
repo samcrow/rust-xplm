@@ -1,7 +1,7 @@
 [package]
 authors = ["Sam Crow <samcrow@uw.edu>"]
 name = "xplm"
-version = "0.3.0"
+version = "0.3.1"
 license = "MIT/Apache-2.0"
 repository = "https://github.com/samcrow/rust-xplm"
 keywords = ["X-Plane", "plugin"]
@@ -9,8 +9,8 @@ description = "High-level interfaces to the X-Plane plugin SDK"
 readme = "README.md"
 
 [dependencies]
-quick-error = "^1.1.0"
-xplm-sys = "^0.3.1"
+quick-error = "^1.2.3"
+xplm-sys = "^0.4.0"
 
 [profile.release]
 lto = true

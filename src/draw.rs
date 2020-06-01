@@ -82,15 +82,8 @@ unsafe extern "C" fn draw_callback<C: DrawCallback>(
 /// Phases in which drawing can occur
 #[derive(Debug, Copy, Clone)]
 pub enum Phase {
-    /// After X-Plane draws terrain and water
-    AfterTerrain,
-    /// After X-Plane draws airports
-    AfterAirports,
-    /// After X-Plane draws scenery objects
-    AfterObjects,
-    /// After X-Plane draws aircraft
-    AfterAircraft,
-    /// After X-Plane draws the cockpit panel
+    // TODO: Some phases have been removed because they were removed from the upstream X-Plane SDK.
+    // The replacements should be added back in.
     AfterPanel,
     /// After X-Plane draws panel gauges
     AfterGauges,
@@ -109,10 +102,6 @@ impl Phase {
     fn to_xplm(&self) -> xplm_sys::XPLMDrawingPhase {
         use self::Phase::*;
         let phase = match *self {
-            AfterTerrain => xplm_sys::xplm_Phase_Terrain,
-            AfterAirports => xplm_sys::xplm_Phase_Airports,
-            AfterObjects => xplm_sys::xplm_Phase_Objects,
-            AfterAircraft => xplm_sys::xplm_Phase_Airplanes,
             AfterPanel => xplm_sys::xplm_Phase_Panel,
             AfterGauges => xplm_sys::xplm_Phase_Gauges,
             AfterWindows => xplm_sys::xplm_Phase_Window,
