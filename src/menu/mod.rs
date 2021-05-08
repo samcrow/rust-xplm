@@ -600,8 +600,8 @@ struct InMenu {
 impl InMenu {
     pub fn new(parent: xplm_sys::XPLMMenuID, index: c_int) -> Self {
         InMenu {
-            parent: parent,
-            index: index,
+            parent,
+            index,
         }
     }
 }

@@ -45,7 +45,7 @@ impl Draw {
         if status == 1 {
             Ok(Draw {
                 _callback: callback_box,
-                phase: phase,
+                phase,
                 callback_ptr: callback_ptr as *mut _,
                 c_callback: Some(draw_callback::<C>),
             })

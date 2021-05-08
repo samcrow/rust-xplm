@@ -49,7 +49,7 @@ where
                 copy_to_c_buffer(info.signature, signature);
                 copy_to_c_buffer(info.description, description);
 
-                let mut plugin_box = Box::new(plugin);
+                let plugin_box = Box::new(plugin);
                 data.plugin = Box::into_raw(plugin_box);
                 1
             }
@@ -81,7 +81,7 @@ where
             data.plugin = ptr::null_mut();
             drop(plugin);
         }));
-        if let Err(_) = unwind {
+        if unwind.is_err() {
             eprintln!("Panic in XPluginStop");
             data.panicked = true;
         }
@@ -127,7 +127,7 @@ where
         let unwind = panic::catch_unwind(AssertUnwindSafe(|| {
             (*data.plugin).disable();
         }));
-        if let Err(_) = unwind {
+        if unwind.is_err() {
             eprintln!("Panic in XPluginDisable");
             data.panicked = true;
         }

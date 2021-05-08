@@ -72,7 +72,7 @@ impl FlightLoop {
             refcon: data_ptr as *mut c_void,
         };
         data.loop_id = unsafe { Some(xplm_sys::XPLMCreateFlightLoop(&mut config)) };
-        FlightLoop { data: data }
+        FlightLoop { data }
     }
 
     /// Schedules the flight loop callback to be executed in the next flight loop
@@ -191,14 +191,14 @@ pub struct LoopState<'a> {
 impl<'a> LoopState<'a> {
     /// Returns the duration since the last time this callback was called
     pub fn since_last_call(&self) -> Duration {
-        self.since_call.clone()
+        self.since_call
     }
     /// Returns the duration since the last flight loop
     ///
     /// If this callback is not called every flight loop, this may be different from the
     /// value returned from `time_since_last_call`.
     pub fn since_last_loop(&self) -> Duration {
-        self.since_loop.clone()
+        self.since_loop
     }
     /// Returns the value of a counter that increments every time the callback is called
     pub fn counter(&self) -> i32 {
@@ -260,7 +260,7 @@ unsafe extern "C" fn flight_loop_callback<C: FlightLoopCallback>(
     let mut state = LoopState {
         since_call: secs_to_duration(since_last_call),
         since_loop: secs_to_duration(since_loop),
-        counter: counter,
+        counter,
         result: (*loop_data).loop_result.as_mut().unwrap(),
     };
     let callback_ptr: *mut dyn FlightLoopCallback = (*loop_data).callback.as_mut();

@@ -19,10 +19,11 @@ pub fn set_error_handler(handler: fn(&str)) {
 unsafe extern "C" fn error_handler(message: *const c_char) {
     let message_cs = CStr::from_ptr(message);
     match message_cs.to_str() {
-        Ok(message_str) => match HANDLER {
-            Some(handler) => handler(message_str),
-            None => {}
-        },
+        Ok(message_str) => {
+            if let Some(handler) = HANDLER {
+                handler(message_str)
+            }
+        }
         Err(_) => super::debug("[xplm] Error handler called with an invalid message"),
     }
 }

@@ -35,42 +35,44 @@ impl<T: DataType + ?Sized, A: Access> OwnedData<T, A> {
     /// Creates a new dataref with the provided name and value
     pub fn create_with_value(name: &str, value: &T) -> Result<Self, CreateError> {
         let name_c = CString::new(name)?;
-        let existing = unsafe { XPLMFindDataRef(name_c.as_ptr()) };
-        if existing != ptr::null_mut() {
-            Err(CreateError::Exists)
-        } else {
-            let value = value.to_storage();
-            let mut value_box = Box::new(value);
-            let value_ptr: *mut T::Storage = value_box.as_mut();
 
-            let id = unsafe {
-                XPLMRegisterDataAccessor(
-                    name_c.as_ptr(),
-                    T::sim_type(),
-                    Self::writeable(),
-                    Self::int_read(),
-                    Self::int_write(),
-                    Self::float_read(),
-                    Self::float_write(),
-                    Self::double_read(),
-                    Self::double_write(),
-                    Self::int_array_read(),
-                    Self::int_array_write(),
-                    Self::float_array_read(),
-                    Self::float_array_write(),
-                    Self::byte_array_read(),
-                    Self::byte_array_write(),
-                    value_ptr as *mut c_void,
-                    value_ptr as *mut c_void,
-                )
-            };
-            assert!(id != ptr::null_mut());
-            Ok(OwnedData {
-                id: id,
-                value: value_box,
-                access_phantom: PhantomData,
-            })
+        let existing = unsafe { XPLMFindDataRef(name_c.as_ptr()) };
+        if !existing.is_null() {
+            return Err(CreateError::Exists);
         }
+
+        let value = value.to_storage();
+        let mut value_box = Box::new(value);
+        let value_ptr: *mut T::Storage = value_box.as_mut();
+
+        let id = unsafe {
+            XPLMRegisterDataAccessor(
+                name_c.as_ptr(),
+                T::sim_type(),
+                Self::writeable(),
+                Self::int_read(),
+                Self::int_write(),
+                Self::float_read(),
+                Self::float_write(),
+                Self::double_read(),
+                Self::double_write(),
+                Self::int_array_read(),
+                Self::int_array_write(),
+                Self::float_array_read(),
+                Self::float_array_write(),
+                Self::byte_array_read(),
+                Self::byte_array_write(),
+                value_ptr as *mut c_void,
+                value_ptr as *mut c_void,
+            )
+        };
+
+        assert!(!id.is_null());
+        Ok(OwnedData {
+            id,
+            value: value_box,
+            access_phantom: PhantomData,
+        })
     }
 
     /// Returns 1 if this dataref should be writeable by other plugins and X-Plane
@@ -364,7 +366,7 @@ unsafe fn array_read<T: Copy>(
         if offset >= dataref_length {
             return 0;
         }
-        let dataref_offset = (*dataref_content).as_ptr().offset(offset as isize);
+        let dataref_offset = (*dataref_content).as_ptr().add(offset);
         let copy_length = cmp::min(max, dataref_length - offset);
         ptr::copy_nonoverlapping(dataref_offset, values, copy_length);
         copy_length as c_int
@@ -382,7 +384,7 @@ unsafe fn array_write<T: Copy>(refcon: *mut c_void, values: *const T, offset: c_
     if offset >= dataref_length {
         return;
     }
-    let dataref_offset = (*dataref_content).as_mut_ptr().offset(offset as isize);
+    let dataref_offset = (*dataref_content).as_mut_ptr().add(offset);
     let copy_length = cmp::min(max, dataref_length - offset);
     ptr::copy_nonoverlapping(values, dataref_offset, copy_length);
 }

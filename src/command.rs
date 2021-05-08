@@ -2,7 +2,6 @@ use std::ffi::CString;
 use std::ffi::NulError;
 use std::ops::DerefMut;
 use std::os::raw::{c_int, c_void};
-use std::ptr;
 
 use xplm_sys::*;
 
@@ -20,7 +19,7 @@ impl Command {
     pub fn find(name: &str) -> Result<Self, CommandFindError> {
         let name_c = CString::new(name)?;
         let command_ref = unsafe { XPLMFindCommand(name_c.as_ptr()) };
-        if command_ref != ptr::null_mut() {
+        if !command_ref.is_null() {
             Ok(Command { id: command_ref })
         } else {
             Err(CommandFindError::NotFound)
@@ -124,7 +123,7 @@ impl OwnedCommand {
             );
         }
         Ok(OwnedCommand {
-            data: data,
+            data,
             callback: Some(command_handler::<H>),
         })
     }
@@ -155,17 +154,18 @@ impl OwnedCommandData {
     ) -> Result<Self, CommandCreateError> {
         let name_c = CString::new(name)?;
         let description_c = CString::new(description)?;
+
         let existing = unsafe { XPLMFindCommand(name_c.as_ptr()) };
-        if existing == ptr::null_mut() {
-            // Command does not exist, proceed
-            let command_id = unsafe { XPLMCreateCommand(name_c.as_ptr(), description_c.as_ptr()) };
-            Ok(OwnedCommandData {
-                id: command_id,
-                handler: Box::new(handler),
-            })
-        } else {
-            Err(CommandCreateError::Exists)
+        if !existing.is_null() {
+            return Err(CommandCreateError::Exists);
         }
+
+        // Command does not exist, proceed
+        let command_id = unsafe { XPLMCreateCommand(name_c.as_ptr(), description_c.as_ptr()) };
+        Ok(OwnedCommandData {
+            id: command_id,
+            handler: Box::new(handler),
+        })
     }
 }
 

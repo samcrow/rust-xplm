@@ -1,6 +1,5 @@
 use super::{ArrayRead, ArrayReadWrite, DataRead, DataReadWrite, DataType, ReadOnly, ReadWrite};
 use std::ffi::{CString, NulError};
-use std::i32;
 use std::marker::PhantomData;
 use std::os::raw::c_void;
 use std::ptr;
@@ -15,7 +14,7 @@ pub struct DataRef<T: ?Sized, A = ReadOnly> {
     /// The dataref handle
     id: XPLMDataRef,
     /// Type phantom data
-    type_phantom: PhantomData<*const T>,
+    type_phantom: PhantomData<T>,
     /// Data access phantom data
     access_phantom: PhantomData<A>,
 }
@@ -27,20 +26,21 @@ impl<T: DataType + ?Sized> DataRef<T, ReadOnly> {
     pub fn find(name: &str) -> Result<Self, FindError> {
         let name_c = CString::new(name)?;
         let expected_type = T::sim_type();
+
         let dataref = unsafe { XPLMFindDataRef(name_c.as_ptr()) };
-        if dataref != ptr::null_mut() {
-            let actual_type = unsafe { XPLMGetDataRefTypes(dataref) };
-            if actual_type & expected_type != 0 {
-                Ok(DataRef {
-                    id: dataref,
-                    type_phantom: PhantomData,
-                    access_phantom: PhantomData,
-                })
-            } else {
-                Err(FindError::WrongType)
-            }
+        if dataref.is_null() {
+            return Err(FindError::NotFound);
+        }
+
+        let actual_type = unsafe { XPLMGetDataRefTypes(dataref) };
+        if actual_type & expected_type != 0 {
+            Ok(DataRef {
+                id: dataref,
+                type_phantom: PhantomData,
+                access_phantom: PhantomData,
+            })
         } else {
-            Err(FindError::NotFound)
+            Err(FindError::WrongType)
         }
     }
 

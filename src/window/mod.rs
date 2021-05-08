@@ -573,12 +573,12 @@ impl KeyEvent {
         };
 
         Ok(KeyEvent {
-            basic_char: basic_char,
-            key: key,
-            action: action,
-            control_pressed: control_pressed,
-            option_pressed: option_pressed,
-            shift_pressed: shift_pressed,
+            basic_char,
+            key,
+            action,
+            control_pressed,
+            option_pressed,
+            shift_pressed,
         })
     }
     /// Returns the character corresponding to the key associated with this event, if one exists
@@ -663,8 +663,8 @@ impl MouseEvent {
     /// Creates a new event
     fn new(position: Point<i32>, action: MouseAction) -> Self {
         MouseEvent {
-            position: position,
-            action: action,
+            position,
+            action,
         }
     }
     /// Returns the position of the mouse, in global coordinates relative to the X-Plane
@@ -693,9 +693,9 @@ impl ScrollEvent {
     /// Creates a new event
     fn new(position: Point<i32>, scroll_x: i32, scroll_y: i32) -> Self {
         ScrollEvent {
-            position: position,
-            scroll_x: scroll_x,
-            scroll_y: scroll_y,
+            position,
+            scroll_x,
+            scroll_y,
         }
     }
     /// Returns the position of the mouse, in global coordinates relative to the X-Plane
