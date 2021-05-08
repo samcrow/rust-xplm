@@ -118,7 +118,7 @@ where
     fn get_to_string(&self, out: &mut String) -> Result<(), FromUtf8Error> {
         let mut buffer = StringBuffer::new(self.len());
         self.get(buffer.as_bytes_mut());
-        let value_string = try!(buffer.into_string());
+        let value_string = buffer.into_string()?;
         out.push_str(&value_string);
         Ok(())
     }
@@ -134,7 +134,7 @@ where
     T: ArrayReadWrite<[u8]>,
 {
     fn set_as_string(&mut self, value: &str) -> Result<(), NulError> {
-        let name_c = try!(CString::new(value));
+        let name_c = CString::new(value)?;
         self.set(name_c.as_bytes_with_nul());
         Ok(())
     }

@@ -113,7 +113,7 @@ struct LoopData {
     /// The loop ID
     loop_id: Option<xplm_sys::XPLMFlightLoopID>,
     /// The callback (stored here but not used)
-    callback: Box<FlightLoopCallback>,
+    callback: Box<dyn FlightLoopCallback>,
 }
 
 impl fmt::Debug for LoopData {
@@ -264,7 +264,7 @@ unsafe extern "C" fn flight_loop_callback<C: FlightLoopCallback>(
         counter: counter,
         result: (*loop_data).loop_result.as_mut().unwrap(),
     };
-    let callback_ptr: *mut FlightLoopCallback = (*loop_data).callback.as_mut();
+    let callback_ptr: *mut dyn FlightLoopCallback = (*loop_data).callback.as_mut();
     let callback = callback_ptr as *mut C;
     (*callback).flight_loop(&mut state);
 

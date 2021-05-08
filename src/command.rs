@@ -19,7 +19,7 @@ impl Command {
     ///
     /// The command should have already been created by X-Plane or another plugin.
     pub fn find(name: &str) -> Result<Self, CommandFindError> {
-        let name_c = try!(CString::new(name));
+        let name_c = CString::new(name)?;
         let command_ref = unsafe { XPLMFindCommand(name_c.as_ptr()) };
         if command_ref != ptr::null_mut() {
             Ok(Command { id: command_ref })
@@ -114,7 +114,7 @@ impl OwnedCommand {
         description: &str,
         handler: H,
     ) -> Result<Self, CommandCreateError> {
-        let mut data = Box::new(try!(OwnedCommandData::new(name, description, handler)));
+        let mut data = Box::new(OwnedCommandData::new(name, description, handler)?);
         let data_ptr: *mut OwnedCommandData = data.deref_mut();
         unsafe {
             XPLMRegisterCommandHandler(
@@ -145,7 +145,7 @@ struct OwnedCommandData {
     /// The command reference
     id: XPLMCommandRef,
     /// The handler
-    handler: Box<CommandHandler>,
+    handler: Box<dyn CommandHandler>,
 }
 
 impl OwnedCommandData {
@@ -154,8 +154,8 @@ impl OwnedCommandData {
         description: &str,
         handler: H,
     ) -> Result<Self, CommandCreateError> {
-        let name_c = try!(CString::new(name));
-        let description_c = try!(CString::new(description));
+        let name_c = CString::new(name)?;
+        let description_c = CString::new(description)?;
         let existing = unsafe { XPLMFindCommand(name_c.as_ptr()) };
         if existing == ptr::null_mut() {
             // Command does not exist, proceed
@@ -177,7 +177,7 @@ unsafe extern "C" fn command_handler<H: CommandHandler>(
     refcon: *mut c_void,
 ) -> c_int {
     let data = refcon as *mut OwnedCommandData;
-    let handler: *mut CommandHandler = (*data).handler.deref_mut();
+    let handler: *mut dyn CommandHandler = (*data).handler.deref_mut();
     let handler = handler as *mut H;
     if phase == xplm_CommandBegin as i32 {
         (*handler).command_begin();

@@ -19,7 +19,7 @@ where
 /// Sets up a draw callback
 pub struct Draw {
     /// The callback to execute
-    _callback: Box<DrawCallback>,
+    _callback: Box<dyn DrawCallback>,
     /// The draw phase (used when unregistering)
     phase: Phase,
     /// The callback pointer (used when unregistering)

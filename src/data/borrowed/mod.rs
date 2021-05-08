@@ -28,7 +28,7 @@ impl<T: DataType + ?Sized> DataRef<T, ReadOnly> {
     ///
     /// Returns an error if the dataref does not exist or has the wrong type
     pub fn find(name: &str) -> Result<Self, FindError> {
-        let name_c = try!(CString::new(name));
+        let name_c = CString::new(name)?;
         let expected_type = T::sim_type();
         let dataref = unsafe { XPLMFindDataRef(name_c.as_ptr()) };
         if dataref != ptr::null_mut() {

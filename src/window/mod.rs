@@ -90,7 +90,7 @@ pub struct Window {
     /// The window ID
     id: xplm_sys::XPLMWindowID,
     /// The delegate
-    delegate: Box<WindowDelegate>,
+    delegate: Box<dyn WindowDelegate>,
 }
 
 impl Window {
@@ -549,7 +549,7 @@ impl KeyEvent {
     ) -> Result<Self, KeyEventError> {
         let basic_char = match key as u8 {
             // Accept printable characters, including spaces and tabs
-            b'\t' | b' '...b'~' => Some(key as u8 as char),
+            b'\t' | b' '..=b'~' => Some(key as u8 as char),
             _ => None,
         };
         let action = if flags & xplm_sys::xplm_DownFlag as ::xplm_sys::XPLMKeyFlags != 0 {

@@ -299,7 +299,7 @@ pub struct ActionItem {
     /// Information about the menu this item is part of
     in_menu: Cell<Option<InMenu>>,
     /// The item click handler
-    handler: Box<RefCell<MenuClickHandler>>,
+    handler: Box<RefCell<dyn MenuClickHandler>>,
 }
 
 impl ActionItem {
@@ -426,7 +426,7 @@ pub struct CheckItem {
     /// Information about the menu this item is part of
     in_menu: Cell<Option<InMenu>>,
     /// The check handler
-    handler: Box<RefCell<CheckHandler>>,
+    handler: Box<RefCell<dyn CheckHandler>>,
 }
 
 impl CheckItem {

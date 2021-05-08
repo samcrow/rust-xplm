@@ -35,7 +35,7 @@ impl<T: DataType + ?Sized, A: Access> OwnedData<T, A> {
 
     /// Creates a new dataref with the provided name and value
     pub fn create_with_value(name: &str, value: &T) -> Result<Self, CreateError> {
-        let name_c = try!(CString::new(name));
+        let name_c = CString::new(name)?;
         let existing = unsafe { XPLMFindDataRef(name_c.as_ptr()) };
         if existing != ptr::null_mut() {
             Err(CreateError::Exists)
