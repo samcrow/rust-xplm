@@ -10,11 +10,11 @@
 //! Foreign function interface utilities
 //!
 
-use std::os::raw::c_char;
 use std::iter;
+use std::os::raw::c_char;
 use std::str;
-use std::string::FromUtf8Error;
 use std::str::Utf8Error;
+use std::string::FromUtf8Error;
 
 /// A fixed-length array of characters that can be passed to C functions and converted into a
 /// String
@@ -29,7 +29,9 @@ impl StringBuffer {
     /// Creates a new StringBuffer with the provided length in bytes. All bytes in the string are
     /// set to null bytes (`\0`).
     pub fn new(length: usize) -> StringBuffer {
-        StringBuffer { bytes: iter::repeat(b'\0').take(length).collect() }
+        StringBuffer {
+            bytes: iter::repeat(b'\0').take(length).collect(),
+        }
     }
 
     /// Returns a mutable pointer to the data in this buffer

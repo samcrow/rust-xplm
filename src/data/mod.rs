@@ -1,8 +1,7 @@
-
-use xplm_sys::*;
-use std::string::FromUtf8Error;
-use std::ffi::{CString, NulError};
 use ffi::StringBuffer;
+use std::ffi::{CString, NulError};
+use std::string::FromUtf8Error;
+use xplm_sys::*;
 
 /// Datarefs created by X-Plane or other plugins
 pub mod borrowed;
@@ -10,14 +9,10 @@ pub mod borrowed;
 pub mod owned;
 
 /// Marks a dataref as readable
-pub enum ReadOnly {
-
-}
+pub enum ReadOnly {}
 
 /// Marks a dataref as writeable
-pub enum ReadWrite {
-
-}
+pub enum ReadWrite {}
 
 /// Marker for data access types
 pub trait Access {
@@ -185,7 +180,7 @@ macro_rules! impl_type {
         impl ArrayType for [$native_type] {
             type Element = $native_type;
         }
-    }
+    };
 }
 
 impl_type!(bool as xplmType_Int);

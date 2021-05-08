@@ -1,11 +1,9 @@
-
 /// Accessing and communicating with other plugins
 pub mod management;
 
 /// Items used by the xplane_plugin! macro, which must be public
 #[doc(hidden)]
 pub mod internal;
-
 
 /// Information about a plugin
 pub struct PluginInfo {
@@ -42,4 +40,3 @@ pub trait Plugin: Sized {
     /// Returns information on this plugin
     fn info(&self) -> PluginInfo;
 }
-

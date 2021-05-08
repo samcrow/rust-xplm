@@ -1,13 +1,10 @@
-
-
-
-use super::{DataType, ReadOnly, ReadWrite, DataRead, DataReadWrite, ArrayRead, ArrayReadWrite};
-use xplm_sys::*;
-use std::marker::PhantomData;
+use super::{ArrayRead, ArrayReadWrite, DataRead, DataReadWrite, DataType, ReadOnly, ReadWrite};
 use std::ffi::{CString, NulError};
+use std::i32;
+use std::marker::PhantomData;
 use std::os::raw::c_void;
 use std::ptr;
-use std::i32;
+use xplm_sys::*;
 
 /// A dataref created by X-Plane or another plugin
 ///
@@ -109,9 +106,7 @@ macro_rules! dataref_type {
                 copy_count as usize
             }
             fn len(&self) -> usize {
-                let size = unsafe {
-                    $read_fn(self.id, ptr::null_mut(), 0, 0)
-                };
+                let size = unsafe { $read_fn(self.id, ptr::null_mut(), 0, 0) };
                 size as usize
             }
         }
@@ -125,7 +120,7 @@ macro_rules! dataref_type {
                 }
             }
         }
-    }
+    };
 }
 
 dataref_type! {
@@ -279,8 +274,6 @@ quick_error! {
         }
     }
 }
-
-
 
 #[cfg(test)]
 mod tests {

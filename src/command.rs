@@ -1,9 +1,8 @@
-
-use std::ptr;
-use std::ffi::NulError;
 use std::ffi::CString;
-use std::os::raw::{c_void, c_int};
+use std::ffi::NulError;
 use std::ops::DerefMut;
+use std::os::raw::{c_int, c_void};
+use std::ptr;
 
 use xplm_sys::*;
 
@@ -189,7 +188,6 @@ unsafe extern "C" fn command_handler<H: CommandHandler>(
     // Prevent other components from handling this equivalent
     0
 }
-
 
 quick_error! {
     /// Errors that can occur when creating a command

@@ -1,12 +1,11 @@
-
-use super::{DataType, Access, ReadOnly, DataRead, DataReadWrite, ArrayRead, ArrayReadWrite};
-use xplm_sys::*;
-use std::marker::PhantomData;
-use std::ffi::{CString, NulError};
-use std::os::raw::{c_void, c_int};
-use std::ptr;
+use super::{Access, ArrayRead, ArrayReadWrite, DataRead, DataReadWrite, DataType, ReadOnly};
 use std::cmp;
+use std::ffi::{CString, NulError};
 use std::i32;
+use std::marker::PhantomData;
+use std::os::raw::{c_int, c_void};
+use std::ptr;
+use xplm_sys::*;
 
 /// A dataref owned by this plugin
 ///
@@ -76,7 +75,11 @@ impl<T: DataType + ?Sized, A: Access> OwnedData<T, A> {
 
     /// Returns 1 if this dataref should be writeable by other plugins and X-Plane
     fn writeable() -> i32 {
-        if A::writeable() { 1 } else { 0 }
+        if A::writeable() {
+            1
+        } else {
+            0
+        }
     }
     fn int_read() -> XPLMGetDatai_f {
         if T::sim_type() & xplmType_Int as i32 != 0 {

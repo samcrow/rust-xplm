@@ -1,4 +1,3 @@
-
 use super::feature;
 
 /// Enables native paths

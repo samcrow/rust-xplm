@@ -1,4 +1,3 @@
-
 #[macro_use(xplane_plugin)]
 extern crate xplm;
 use xplm::plugin::{Plugin, PluginInfo};

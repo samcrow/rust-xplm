@@ -1,13 +1,11 @@
-
+use std::mem;
 use std::ops::Deref;
 use std::os::raw::*;
-use std::mem;
 use std::ptr;
 
 use xplm_sys;
 
-use super::geometry::{Rect, Point};
-
+use super::geometry::{Point, Rect};
 
 /// Cursor states that windows can apply
 #[derive(Debug, Clone)]
@@ -196,7 +194,6 @@ unsafe extern "C" fn window_key(
             Ok(event) => (*window).delegate.keyboard_event(&*window, event),
             Err(e) => super::debug(format!("Invalid key event received: {}", e)),
         }
-
     }
 }
 
@@ -213,7 +210,11 @@ unsafe extern "C" fn window_mouse(
         let position = Point::from((x, y));
         let event = MouseEvent::new(position, action);
         let propagate = (*window).delegate.mouse_event(&*window, event);
-        if propagate { 0 } else { 1 }
+        if propagate {
+            0
+        } else {
+            1
+        }
     } else {
         // Propagate
         0
@@ -254,7 +255,11 @@ unsafe extern "C" fn window_scroll(
     let event = ScrollEvent::new(position, dx, dy);
 
     let propagate = (*window).delegate.scroll_event(&*window, event);
-    if propagate { 0 } else { 1 }
+    if propagate {
+        0
+    } else {
+        1
+    }
 }
 
 /// Key actions
@@ -619,7 +624,6 @@ quick_error! {
         }
     }
 }
-
 
 /// Actions that the mouse/cursor can perform
 #[derive(Debug, Clone)]

@@ -1,4 +1,3 @@
-
 //! # Flight loop callbacks
 //!
 //! X-Plane can call plugin code at timed intervals or when it runs its flight model.
@@ -41,12 +40,12 @@
 
 use xplm_sys;
 
+use std::f32;
+use std::fmt;
+use std::mem;
 use std::ops::DerefMut;
 use std::os::raw::*;
 use std::time::Duration;
-use std::f32;
-use std::mem;
-use std::fmt;
 
 /// Tracks a flight loop callback, which can be called by X-Plane periodically for calculations
 ///
@@ -99,7 +98,7 @@ impl FlightLoop {
         let seconds_f = (time.as_secs() as f32) + (1e-9_f32 * time.subsec_nanos() as f32);
         self.data.set_interval(LoopResult::Seconds(seconds_f));
     }
-    
+
     /// Deactivates the flight loop
     pub fn deactivate(&mut self) {
         self.data.set_interval(LoopResult::Deactivate);
