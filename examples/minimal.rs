@@ -16,7 +16,7 @@ impl Plugin for MinimalPlugin {
     fn info(&self) -> PluginInfo {
         PluginInfo {
             name: String::from("Minimal Rust Plugin"),
-            signature: String::from("org.samcrow.rustplugin.test"),
+            signature: String::from("org.samcrow.xplm.examples.minimal"),
             description: String::from("A plugin written in Rust"),
         }
     }

@@ -20,5 +20,5 @@ name = "minimal"
 crate-type = ["cdylib"]
 
 [[example]]
-name = "dataref_test"
+name = "dataref"
 crate-type = ["cdylib"]

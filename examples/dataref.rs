@@ -1,11 +1,11 @@
-#[macro_use(xplane_plugin)]
 extern crate xplm;
-use xplm::plugin::{Plugin, PluginInfo};
 
 use xplm::data::borrowed::{DataRef, FindError};
 use xplm::data::{ArrayRead, DataRead, ReadOnly, ReadWrite, StringRead};
+use xplm::plugin::{Plugin, PluginInfo};
+use xplm::{debugln, xplane_plugin};
 
-struct DatarefPlugin {
+struct DataRefPlugin {
     has_joystick: DataRef<bool, ReadOnly>,
     earth_mu: DataRef<f32, ReadOnly>,
     date: DataRef<i32, ReadWrite>,
@@ -15,30 +15,30 @@ struct DatarefPlugin {
     battery_on: DataRef<[i32], ReadWrite>,
 }
 
-impl DatarefPlugin {
+impl DataRefPlugin {
     fn test_datarefs(&mut self) {
-        xplm::debug(format!("has joystick: {}\n", self.has_joystick.get()));
-        xplm::debug(format!("earth mu: {}\n", self.earth_mu.get()));
-        xplm::debug(format!("date: {}\n", self.date.get()));
-        xplm::debug(format!(
-            "simulator build: {}\n",
+        debugln!("Has joystick: {}", self.has_joystick.get());
+        debugln!("Earth mu: {}", self.earth_mu.get());
+        debugln!("Date: {}", self.date.get());
+        debugln!(
+            "Simulator build: {}",
             self.sim_build_string
                 .get_as_string()
-                .unwrap_or("unknown".into(),)
-        ));
-        xplm::debug(format!("latitude: {}\n", self.latitude.get()));
-        xplm::debug(format!(
-            "joystick axis values: {:?}\n",
+                .unwrap_or(String::from("Unknown"))
+        );
+        debugln!("Latitude: {}", self.latitude.get());
+        debugln!(
+            "Joystick axis values: {:?}",
             self.joystick_axis_values.as_vec()
-        ));
-        xplm::debug(format!("battery on: {:?}\n", self.battery_on.as_vec()));
+        );
+        debugln!("Battery on: {:?}", self.battery_on.as_vec());
     }
 }
 
-impl Plugin for DatarefPlugin {
+impl Plugin for DataRefPlugin {
     type Error = FindError;
     fn start() -> Result<Self, Self::Error> {
-        let mut plugin = DatarefPlugin {
+        let plugin = DataRefPlugin {
             has_joystick: DataRef::find("sim/joystick/has_joystick")?,
             earth_mu: DataRef::find("sim/physics/earth_mu")?,
             date: DataRef::find("sim/time/local_date_days")?.writeable()?,
@@ -47,25 +47,21 @@ impl Plugin for DatarefPlugin {
             joystick_axis_values: DataRef::find("sim/joystick/joystick_axis_values")?,
             battery_on: DataRef::find("sim/cockpit2/electrical/battery_on")?.writeable()?,
         };
-        plugin.test_datarefs();
         Ok(plugin)
-    }
-
-    fn info(&self) -> PluginInfo {
-        PluginInfo {
-            name: "Dataref test".into(),
-            signature: "org.samcrow.xplm.examples.datareftest".into(),
-            description: "Tests the dataref features of xplm".into(),
-        }
     }
 
     fn enable(&mut self) -> Result<(), Self::Error> {
         self.test_datarefs();
         Ok(())
     }
-    fn disable(&mut self) {
-        self.test_datarefs();
+
+    fn info(&self) -> PluginInfo {
+        PluginInfo {
+            name: String::from("Dataref Test"),
+            signature: String::from("org.samcrow.xplm.examples.dataref"),
+            description: String::from("Tests the DataRef features of xplm"),
+        }
     }
 }
 
-xplane_plugin!(DatarefPlugin);
+xplane_plugin!(DataRefPlugin);
