@@ -192,7 +192,7 @@ unsafe extern "C" fn window_key(
     if losing_focus == 0 {
         match KeyEvent::from_xplm(key, flags, virtual_key) {
             Ok(event) => (*window).delegate.keyboard_event(&*window, event),
-            Err(e) => super::debug(format!("Invalid key event received: {:?}\n", e)),
+            Err(e) => super::debugln!("Invalid key event received: {:?}", e),
         }
     }
 }

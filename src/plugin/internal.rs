@@ -3,7 +3,7 @@ use std::panic;
 use std::panic::AssertUnwindSafe;
 use std::ptr;
 
-use super::super::debug;
+use super::super::debugln;
 use super::super::internal::copy_to_c_buffer;
 
 use super::Plugin;
@@ -54,7 +54,7 @@ where
                 1
             }
             Err(e) => {
-                debug(format!("Plugin failed to start: {}", e));
+                debugln!("Plugin failed to start: {}", e);
                 data.plugin = ptr::null_mut();
                 0
             }
@@ -86,7 +86,7 @@ where
             data.panicked = true;
         }
     } else {
-        debug("Warning: A plugin that panicked cannot be stopped. It may leak resources.");
+        debugln!("Warning: A plugin that panicked cannot be stopped. It may leak resources.");
     }
 }
 
@@ -101,7 +101,7 @@ where
         let unwind = panic::catch_unwind(AssertUnwindSafe(|| match (*data.plugin).enable() {
             Ok(_) => 1,
             Err(e) => {
-                debug(format!("Plugin failed to enable: {}", e));
+                debugln!("Plugin failed to enable: {}", e);
                 0
             }
         }));
