@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+* Changed from the `quick-error` crate to the more maintained derive macro `thiserror` crate
+* Implemented the `debug!` and `debugln!` macros (same usage as `print!`/`println!`)
+* Marked the `debug()` function as deprecated and changed all usages over to the new macros
+* Renamed the examples and adjusted their code
+* Shortened the minimal example (easier to understand for newcomers)
+* Updated the README again, mainly the example and status
+
+  
 * README badges for easy access to the docs etc.
 * Flatten the module structure: e.g. `plugin/mod.rs` into `plugin.rs`  
 * Some refactoring for readability
