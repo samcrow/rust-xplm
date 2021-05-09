@@ -16,9 +16,9 @@ thiserror = "1.0.24"
 lto = true
 
 [[example]]
-name = "dataref_test"
+name = "minimal"
 crate-type = ["cdylib"]
 
 [[example]]
-name = "basic_plugin"
+name = "dataref_test"
 crate-type = ["cdylib"]
