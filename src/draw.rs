@@ -113,16 +113,12 @@ impl Phase {
     }
 }
 
-quick_error! {
-    /// Errors that may occur when creating a draw callback
-    #[derive(Debug)]
-    pub enum Error {
-        /// X-Plane does not support the provided phase
-        UnsupportedPhase(phase: Phase) {
-            description("unsupported draw phase")
-            display("Unsupported phase {:?}", phase)
-        }
-    }
+/// Errors that can occur when creating a draw callback
+#[derive(thiserror::Error, Debug)]
+pub enum Error {
+    /// X-Plane does not support the provided phase
+    #[error("Unsupported draw phase: {0:?}")]
+    UnsupportedPhase(Phase)
 }
 
 /// Stores various flags that can be enabled or disabled

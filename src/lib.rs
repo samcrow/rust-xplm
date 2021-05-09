@@ -1,11 +1,8 @@
 #![deny(trivial_casts)]
 
 //! Bindings to the X-Plane plugin SDK
-//!
 
 extern crate xplm_sys;
-#[macro_use]
-extern crate quick_error;
 
 use std::ffi::CString;
 

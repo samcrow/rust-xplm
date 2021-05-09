@@ -228,21 +228,16 @@ impl_read_write!(for array [f32]);
 impl_read_write!(for array [u8]);
 impl_read_write!(for array [i8]);
 
-quick_error! {
-    /// Errors that can occur when creating datarefs
-    #[derive(Debug)]
-    pub enum CreateError {
-        /// The provided dataref name contained a null byte
-        Null(err: NulError) {
-            description("Null byte in dataref name")
-            cause(err)
-            from()
-        }
-        /// The dataref already exists
-        Exists {
-            description("Dataref already exists")
-        }
-    }
+/// Errors that can occur when creating a DataRef
+#[derive(thiserror::Error, Debug)]
+pub enum CreateError {
+    /// The provided DataRef name contained a null byte
+    #[error("Null byte in dataref name")]
+    Null(#[from] NulError),
+
+    /// The DataRef exists already
+    #[error("DataRef already exists")]
+    Exists,
 }
 
 // Read/write callbacks

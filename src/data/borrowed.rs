@@ -250,29 +250,24 @@ fn array_size(size: usize) -> i32 {
     }
 }
 
-quick_error! {
-    /// Errors that can occur when finding datarefs
-    #[derive(Debug)]
-    pub enum FindError {
-        /// The provided dataref name contained a null byte
-        Null(err: NulError) {
-            description("Null byte in dataref name")
-            cause(err)
-            from()
-        }
-        /// The dataref was not found
-        NotFound {
-            description("Dataref not found")
-        }
-        /// The dataref was found, but it is not writable
-        NotWritable {
-            description("Dataref not writable")
-        }
-        /// The dataref was found, but it does not have the correct type
-        WrongType {
-            description("Incorrect dataref type")
-        }
-    }
+/// Errors that can occur when finding DataRefs
+#[derive(thiserror::Error, Debug)]
+pub enum FindError {
+    /// The provided DataRef name contained a null byte
+    #[error("Null byte in DataRef name")]
+    Null(#[from] NulError),
+
+    /// The DataRef could not be found
+    #[error("DataRef not found")]
+    NotFound,
+
+    /// The DataRef is not writable
+    #[error("DataRef not writable")]
+    NotWritable,
+
+    /// The DataRef does not have the correct type
+    #[error("Incorrect DataRef type")]
+    WrongType,
 }
 
 #[cfg(test)]
