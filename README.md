@@ -17,12 +17,12 @@ supports X-Plane version 11.10 or later.
 The library is still in an incomplete state. As a result some parts of the SDK may only be sparsely covered or missing
 completely.
 
--[x] Compiles and is callable from X-Plane
--[x] Debug logging to the console / log file
--[x] DataRef reading and writing
--[x] Commands
--[ ] GUI - Needs further work
--[ ] Drawing - Needs further work
+- [x] Compiles and is callable from X-Plane
+- [x] Debug logging to the console / log file
+- [x] DataRef reading and writing
+- [x] Commands
+- [ ] GUI - Needs further work
+- [ ] Drawing - Needs further work
 
 ## Example
 
