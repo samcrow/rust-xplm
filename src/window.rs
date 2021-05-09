@@ -1,13 +1,11 @@
-
+use std::mem;
 use std::ops::Deref;
 use std::os::raw::*;
-use std::mem;
 use std::ptr;
 
 use xplm_sys;
 
-use super::geometry::{Rect, Point};
-
+use super::geometry::{Point, Rect};
 
 /// Cursor states that windows can apply
 #[derive(Debug, Clone)]
@@ -90,7 +88,7 @@ pub struct Window {
     /// The window ID
     id: xplm_sys::XPLMWindowID,
     /// The delegate
-    delegate: Box<WindowDelegate>,
+    delegate: Box<dyn WindowDelegate>,
 }
 
 impl Window {
@@ -196,7 +194,6 @@ unsafe extern "C" fn window_key(
             Ok(event) => (*window).delegate.keyboard_event(&*window, event),
             Err(e) => super::debug(format!("Invalid key event received: {}", e)),
         }
-
     }
 }
 
@@ -213,7 +210,11 @@ unsafe extern "C" fn window_mouse(
         let position = Point::from((x, y));
         let event = MouseEvent::new(position, action);
         let propagate = (*window).delegate.mouse_event(&*window, event);
-        if propagate { 0 } else { 1 }
+        if propagate {
+            0
+        } else {
+            1
+        }
     } else {
         // Propagate
         0
@@ -254,7 +255,11 @@ unsafe extern "C" fn window_scroll(
     let event = ScrollEvent::new(position, dx, dy);
 
     let propagate = (*window).delegate.scroll_event(&*window, event);
-    if propagate { 0 } else { 1 }
+    if propagate {
+        0
+    } else {
+        1
+    }
 }
 
 /// Key actions
@@ -549,7 +554,7 @@ impl KeyEvent {
     ) -> Result<Self, KeyEventError> {
         let basic_char = match key as u8 {
             // Accept printable characters, including spaces and tabs
-            b'\t' | b' '...b'~' => Some(key as u8 as char),
+            b'\t' | b' '..=b'~' => Some(key as u8 as char),
             _ => None,
         };
         let action = if flags & xplm_sys::xplm_DownFlag as ::xplm_sys::XPLMKeyFlags != 0 {
@@ -568,12 +573,12 @@ impl KeyEvent {
         };
 
         Ok(KeyEvent {
-            basic_char: basic_char,
-            key: key,
-            action: action,
-            control_pressed: control_pressed,
-            option_pressed: option_pressed,
-            shift_pressed: shift_pressed,
+            basic_char,
+            key,
+            action,
+            control_pressed,
+            option_pressed,
+            shift_pressed,
         })
     }
     /// Returns the character corresponding to the key associated with this event, if one exists
@@ -620,7 +625,6 @@ quick_error! {
     }
 }
 
-
 /// Actions that the mouse/cursor can perform
 #[derive(Debug, Clone)]
 pub enum MouseAction {
@@ -659,8 +663,8 @@ impl MouseEvent {
     /// Creates a new event
     fn new(position: Point<i32>, action: MouseAction) -> Self {
         MouseEvent {
-            position: position,
-            action: action,
+            position,
+            action,
         }
     }
     /// Returns the position of the mouse, in global coordinates relative to the X-Plane
@@ -689,9 +693,9 @@ impl ScrollEvent {
     /// Creates a new event
     fn new(position: Point<i32>, scroll_x: i32, scroll_y: i32) -> Self {
         ScrollEvent {
-            position: position,
-            scroll_x: scroll_x,
-            scroll_y: scroll_y,
+            position,
+            scroll_x,
+            scroll_y,
         }
     }
     /// Returns the position of the mouse, in global coordinates relative to the X-Plane

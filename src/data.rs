@@ -1,8 +1,7 @@
-
-use xplm_sys::*;
-use std::string::FromUtf8Error;
-use std::ffi::{CString, NulError};
 use ffi::StringBuffer;
+use std::ffi::{CString, NulError};
+use std::string::FromUtf8Error;
+use xplm_sys::*;
 
 /// Datarefs created by X-Plane or other plugins
 pub mod borrowed;
@@ -10,14 +9,10 @@ pub mod borrowed;
 pub mod owned;
 
 /// Marks a dataref as readable
-pub enum ReadOnly {
-
-}
+pub enum ReadOnly {}
 
 /// Marks a dataref as writeable
-pub enum ReadWrite {
-
-}
+pub enum ReadWrite {}
 
 /// Marker for data access types
 pub trait Access {
@@ -118,7 +113,7 @@ where
     fn get_to_string(&self, out: &mut String) -> Result<(), FromUtf8Error> {
         let mut buffer = StringBuffer::new(self.len());
         self.get(buffer.as_bytes_mut());
-        let value_string = try!(buffer.into_string());
+        let value_string = buffer.into_string()?;
         out.push_str(&value_string);
         Ok(())
     }
@@ -134,7 +129,7 @@ where
     T: ArrayReadWrite<[u8]>,
 {
     fn set_as_string(&mut self, value: &str) -> Result<(), NulError> {
-        let name_c = try!(CString::new(value));
+        let name_c = CString::new(value)?;
         self.set(name_c.as_bytes_with_nul());
         Ok(())
     }
@@ -185,7 +180,7 @@ macro_rules! impl_type {
         impl ArrayType for [$native_type] {
             type Element = $native_type;
         }
-    }
+    };
 }
 
 impl_type!(bool as xplmType_Int);

@@ -1,13 +1,9 @@
-
-
-
-use super::{DataType, ReadOnly, ReadWrite, DataRead, DataReadWrite, ArrayRead, ArrayReadWrite};
-use xplm_sys::*;
-use std::marker::PhantomData;
+use super::{ArrayRead, ArrayReadWrite, DataRead, DataReadWrite, DataType, ReadOnly, ReadWrite};
 use std::ffi::{CString, NulError};
+use std::marker::PhantomData;
 use std::os::raw::c_void;
 use std::ptr;
-use std::i32;
+use xplm_sys::*;
 
 /// A dataref created by X-Plane or another plugin
 ///
@@ -18,7 +14,7 @@ pub struct DataRef<T: ?Sized, A = ReadOnly> {
     /// The dataref handle
     id: XPLMDataRef,
     /// Type phantom data
-    type_phantom: PhantomData<*const T>,
+    type_phantom: PhantomData<T>,
     /// Data access phantom data
     access_phantom: PhantomData<A>,
 }
@@ -28,22 +24,23 @@ impl<T: DataType + ?Sized> DataRef<T, ReadOnly> {
     ///
     /// Returns an error if the dataref does not exist or has the wrong type
     pub fn find(name: &str) -> Result<Self, FindError> {
-        let name_c = try!(CString::new(name));
+        let name_c = CString::new(name)?;
         let expected_type = T::sim_type();
+
         let dataref = unsafe { XPLMFindDataRef(name_c.as_ptr()) };
-        if dataref != ptr::null_mut() {
-            let actual_type = unsafe { XPLMGetDataRefTypes(dataref) };
-            if actual_type & expected_type != 0 {
-                Ok(DataRef {
-                    id: dataref,
-                    type_phantom: PhantomData,
-                    access_phantom: PhantomData,
-                })
-            } else {
-                Err(FindError::WrongType)
-            }
+        if dataref.is_null() {
+            return Err(FindError::NotFound);
+        }
+
+        let actual_type = unsafe { XPLMGetDataRefTypes(dataref) };
+        if actual_type & expected_type != 0 {
+            Ok(DataRef {
+                id: dataref,
+                type_phantom: PhantomData,
+                access_phantom: PhantomData,
+            })
         } else {
-            Err(FindError::NotFound)
+            Err(FindError::WrongType)
         }
     }
 
@@ -109,9 +106,7 @@ macro_rules! dataref_type {
                 copy_count as usize
             }
             fn len(&self) -> usize {
-                let size = unsafe {
-                    $read_fn(self.id, ptr::null_mut(), 0, 0)
-                };
+                let size = unsafe { $read_fn(self.id, ptr::null_mut(), 0, 0) };
                 size as usize
             }
         }
@@ -125,7 +120,7 @@ macro_rules! dataref_type {
                 }
             }
         }
-    }
+    };
 }
 
 dataref_type! {
@@ -279,8 +274,6 @@ quick_error! {
         }
     }
 }
-
-
 
 #[cfg(test)]
 mod tests {

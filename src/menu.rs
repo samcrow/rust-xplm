@@ -1,10 +1,10 @@
-use std::fmt;
-use xplm_sys;
-use std::rc::Rc;
 use std::cell::{Cell, RefCell};
+use std::ffi::{CString, NulError};
+use std::fmt;
 use std::os::raw::*;
 use std::ptr;
-use std::ffi::{CString, NulError};
+use std::rc::Rc;
+use xplm_sys;
 
 /// Something that can be added to a menu
 #[derive(Debug, Clone)]
@@ -79,7 +79,6 @@ impl From<Rc<Separator>> for Item {
         Item::Separator
     }
 }
-
 
 /// A menu, which contains zero or more items
 ///
@@ -180,7 +179,6 @@ enum MenuState {
     },
 }
 
-
 impl Menu {
     fn add_to_menu(&self, parent_id: xplm_sys::XPLMMenuID) {
         if let MenuState::Free = self.state.get() {
@@ -253,7 +251,6 @@ impl Menu {
     }
 }
 
-
 /// Removes this menu from X-Plane, to prevent the menu handler from running and accessing
 /// a dangling pointer
 impl Drop for Menu {
@@ -273,7 +270,6 @@ impl Drop for Menu {
 #[derive(Debug)]
 pub struct Separator;
 
-
 impl Separator {
     fn add_to_menu(&self, parent_id: xplm_sys::XPLMMenuID) {
         // API note: XPLMAppendMenuItem returns the index of the appended item.
@@ -289,7 +285,6 @@ impl Separator {
     }
 }
 
-
 /// An item that can be clicked on to perform an action
 pub struct ActionItem {
     /// The text displayed for this item
@@ -299,7 +294,7 @@ pub struct ActionItem {
     /// Information about the menu this item is part of
     in_menu: Cell<Option<InMenu>>,
     /// The item click handler
-    handler: Box<RefCell<MenuClickHandler>>,
+    handler: Box<RefCell<dyn MenuClickHandler>>,
 }
 
 impl ActionItem {
@@ -345,7 +340,6 @@ impl ActionItem {
         Ok(())
     }
 }
-
 
 impl ActionItem {
     fn add_to_menu(&self, parent_id: xplm_sys::XPLMMenuID, enclosing_item: *const Item) {
@@ -414,7 +408,6 @@ where
     }
 }
 
-
 /// An item with a checkbox that can be checked or unchecked
 pub struct CheckItem {
     /// The text displayed for this item
@@ -426,7 +419,7 @@ pub struct CheckItem {
     /// Information about the menu this item is part of
     in_menu: Cell<Option<InMenu>>,
     /// The check handler
-    handler: Box<RefCell<CheckHandler>>,
+    handler: Box<RefCell<dyn CheckHandler>>,
 }
 
 impl CheckItem {
@@ -514,7 +507,6 @@ impl CheckItem {
         Ok(())
     }
 }
-
 
 impl CheckItem {
     fn add_to_menu(&self, parent_id: xplm_sys::XPLMMenuID, enclosing_item: *const Item) {
@@ -608,8 +600,8 @@ struct InMenu {
 impl InMenu {
     pub fn new(parent: xplm_sys::XPLMMenuID, index: c_int) -> Self {
         InMenu {
-            parent: parent,
-            index: index,
+            parent,
+            index,
         }
     }
 }

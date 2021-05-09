@@ -47,7 +47,9 @@ pub fn find_feature<S: Into<String>>(name: S) -> Option<Feature> {
             if has_feature == 1 {
                 // Convert name back into a String
                 // Because the string was not modified, conversion will always work.
-                Some(Feature { name: name.into_string().unwrap() })
+                Some(Feature {
+                    name: name.into_string().unwrap(),
+                })
             } else {
                 None
             }
@@ -73,7 +75,9 @@ unsafe extern "C" fn feature_callback(feature: *const c_char, refcon: *mut c_voi
 
     let name = CStr::from_ptr(feature);
     if let Ok(name) = name.to_str() {
-        let new_feature = Feature { name: name.to_owned() };
+        let new_feature = Feature {
+            name: name.to_owned(),
+        };
         (*features).push(new_feature);
     }
 }

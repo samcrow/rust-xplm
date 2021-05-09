@@ -1,10 +1,9 @@
-
 #[macro_use(xplane_plugin)]
 extern crate xplm;
 use xplm::plugin::{Plugin, PluginInfo};
 
 use xplm::data::borrowed::{DataRef, FindError};
-use xplm::data::{ReadOnly, ReadWrite, DataRead, ArrayRead, StringRead};
+use xplm::data::{ArrayRead, DataRead, ReadOnly, ReadWrite, StringRead};
 
 struct DatarefPlugin {
     has_joystick: DataRef<bool, ReadOnly>,
@@ -23,9 +22,9 @@ impl DatarefPlugin {
         xplm::debug(format!("date: {}\n", self.date.get()));
         xplm::debug(format!(
             "simulator build: {}\n",
-            self.sim_build_string.get_as_string().unwrap_or(
-                "unknown".into(),
-            )
+            self.sim_build_string
+                .get_as_string()
+                .unwrap_or("unknown".into(),)
         ));
         xplm::debug(format!("latitude: {}\n", self.latitude.get()));
         xplm::debug(format!(
@@ -70,4 +69,3 @@ impl Plugin for DatarefPlugin {
 }
 
 xplane_plugin!(DatarefPlugin);
-

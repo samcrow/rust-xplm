@@ -1,4 +1,3 @@
-
 //!
 //! User interface geometry
 //!
@@ -24,10 +23,10 @@ impl<N> Rect<N> {
     /// Creates a rectangle from left, top, right, and bottom coordinates
     pub fn from_left_top_right_bottom(left: N, top: N, right: N, bottom: N) -> Self {
         Rect {
-            top: top,
-            bottom: bottom,
-            left: left,
-            right: right,
+            top,
+            bottom,
+            left,
+            right,
         }
     }
     /// Creates a rectangle from a top left corner and a bottom right corner
@@ -35,10 +34,10 @@ impl<N> Rect<N> {
         let (left, top) = top_left.into_xy();
         let (bottom, right) = bottom_right.into_xy();
         Rect {
-            top: top,
-            bottom: bottom,
-            left: left,
-            right: right,
+            top,
+            bottom,
+            left,
+            right,
         }
     }
     /// Consumes this rectangle and returns its left, top, bottom, and right coordinates
@@ -99,7 +98,7 @@ pub struct Point<N> {
 impl<N> Point<N> {
     /// Creates a point from X and Y coordinates
     pub fn from_xy(x: N, y: N) -> Self {
-        Point { x: x, y: y }
+        Point { x, y }
     }
     pub fn set_x(&mut self, x: N) {
         self.x = x;

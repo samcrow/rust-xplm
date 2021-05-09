@@ -1,4 +1,3 @@
-
 /// Creates an X-Plane plugin
 ///
 /// Provide the name of your plugin struct. The callbacks that X-Plane uses will be created.
@@ -11,21 +10,21 @@
 ///
 #[macro_export]
 macro_rules! xplane_plugin {
-
     ($plugin_type: ty) => {
         // The plugin
-        static mut PLUGIN: ::xplm::plugin::internal::PluginData<$plugin_type> = ::xplm::plugin::internal::PluginData {
-            plugin: 0 as *mut _,
-            panicked: false,
-        };
+        static mut PLUGIN: ::xplm::plugin::internal::PluginData<$plugin_type> =
+            ::xplm::plugin::internal::PluginData {
+                plugin: 0 as *mut _,
+                panicked: false,
+            };
 
         #[allow(non_snake_case)]
         #[no_mangle]
         pub unsafe extern "C" fn XPluginStart(
             name: *mut ::std::os::raw::c_char,
             signature: *mut ::std::os::raw::c_char,
-            description: *mut ::std::os::raw::c_char) -> ::std::os::raw::c_int
-        {
+            description: *mut ::std::os::raw::c_char,
+        ) -> ::std::os::raw::c_int {
             ::xplm::plugin::internal::xplugin_start(&mut PLUGIN, name, signature, description)
         }
 
@@ -53,10 +52,9 @@ macro_rules! xplane_plugin {
         pub unsafe extern "C" fn XPluginReceiveMessage(
             from: ::std::os::raw::c_int,
             message: ::std::os::raw::c_int,
-            param: *mut ::std::os::raw::c_void)
-        {
+            param: *mut ::std::os::raw::c_void,
+        ) {
             // Nothing
         }
-
-    }
+    };
 }

@@ -19,7 +19,7 @@ where
 /// Sets up a draw callback
 pub struct Draw {
     /// The callback to execute
-    _callback: Box<DrawCallback>,
+    _callback: Box<dyn DrawCallback>,
     /// The draw phase (used when unregistering)
     phase: Phase,
     /// The callback pointer (used when unregistering)
@@ -45,7 +45,7 @@ impl Draw {
         if status == 1 {
             Ok(Draw {
                 _callback: callback_box,
-                phase: phase,
+                phase,
                 callback_ptr: callback_ptr as *mut _,
                 c_callback: Some(draw_callback::<C>),
             })
@@ -124,7 +124,6 @@ quick_error! {
         }
     }
 }
-
 
 /// Stores various flags that can be enabled or disabled
 #[derive(Debug, Clone)]

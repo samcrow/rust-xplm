@@ -1,9 +1,8 @@
-use std::path::PathBuf;
-use std::os::raw::*;
-use std::ptr;
 use std::ffi::{CStr, CString};
+use std::os::raw::*;
+use std::path::PathBuf;
+use std::ptr;
 use xplm_sys;
-
 
 /// Looks for a plugin with the provided signature and returns it if it exists
 pub fn plugin_with_signature(signature: &str) -> Option<Plugin> {
@@ -73,7 +72,6 @@ impl Iterator for Plugins {
 }
 
 impl ExactSizeIterator for Plugins {}
-
 
 /// Another plugin running in X-Plane (or this plugin)
 pub struct Plugin(xplm_sys::XPLMPluginID);

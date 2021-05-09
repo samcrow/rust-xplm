@@ -1,4 +1,3 @@
-
 #![deny(trivial_casts)]
 
 //! Bindings to the X-Plane plugin SDK
@@ -12,36 +11,36 @@ use std::ffi::CString;
 
 /// FFI utilities
 mod ffi;
-/// Plugin macro
-mod plugin_macro;
 /// Path conversion
 mod paths;
+/// Plugin macro
+mod plugin_macro;
 
 /// Utilities that the xplane_plugin macro-generated code uses
 ///
 mod internal;
 
-/// Plugin creation and management
-pub mod plugin;
-/// Flight loop callbacks
-// TODO: Flight loop implementation that supports SDK 1.0
-pub mod flight_loop;
 /// Commands
 pub mod command;
 /// Datarefs
 pub mod data;
+/// Low-level drawing callbacks
+pub mod draw;
 /// Error detection
 pub mod error;
 /// SDK feature management
 pub mod feature;
-/// User interface menus
-pub mod menu;
-/// Low-level drawing callbacks
-pub mod draw;
-/// Relatively low-level windows
-pub mod window;
+/// Flight loop callbacks
+// TODO: Flight loop implementation that supports SDK 1.0
+pub mod flight_loop;
 /// 2D user interface geometry
 pub mod geometry;
+/// User interface menus
+pub mod menu;
+/// Plugin creation and management
+pub mod plugin;
+/// Relatively low-level windows
+pub mod window;
 
 /// Writes a message to the X-Plane log.txt file
 ///

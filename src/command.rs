@@ -1,9 +1,7 @@
-
-use std::ptr;
-use std::ffi::NulError;
 use std::ffi::CString;
-use std::os::raw::{c_void, c_int};
+use std::ffi::NulError;
 use std::ops::DerefMut;
+use std::os::raw::{c_int, c_void};
 
 use xplm_sys::*;
 
@@ -19,9 +17,9 @@ impl Command {
     ///
     /// The command should have already been created by X-Plane or another plugin.
     pub fn find(name: &str) -> Result<Self, CommandFindError> {
-        let name_c = try!(CString::new(name));
+        let name_c = CString::new(name)?;
         let command_ref = unsafe { XPLMFindCommand(name_c.as_ptr()) };
-        if command_ref != ptr::null_mut() {
+        if !command_ref.is_null() {
             Ok(Command { id: command_ref })
         } else {
             Err(CommandFindError::NotFound)
@@ -114,7 +112,7 @@ impl OwnedCommand {
         description: &str,
         handler: H,
     ) -> Result<Self, CommandCreateError> {
-        let mut data = Box::new(try!(OwnedCommandData::new(name, description, handler)));
+        let mut data = Box::new(OwnedCommandData::new(name, description, handler)?);
         let data_ptr: *mut OwnedCommandData = data.deref_mut();
         unsafe {
             XPLMRegisterCommandHandler(
@@ -125,7 +123,7 @@ impl OwnedCommand {
             );
         }
         Ok(OwnedCommand {
-            data: data,
+            data,
             callback: Some(command_handler::<H>),
         })
     }
@@ -145,7 +143,7 @@ struct OwnedCommandData {
     /// The command reference
     id: XPLMCommandRef,
     /// The handler
-    handler: Box<CommandHandler>,
+    handler: Box<dyn CommandHandler>,
 }
 
 impl OwnedCommandData {
@@ -154,19 +152,20 @@ impl OwnedCommandData {
         description: &str,
         handler: H,
     ) -> Result<Self, CommandCreateError> {
-        let name_c = try!(CString::new(name));
-        let description_c = try!(CString::new(description));
+        let name_c = CString::new(name)?;
+        let description_c = CString::new(description)?;
+
         let existing = unsafe { XPLMFindCommand(name_c.as_ptr()) };
-        if existing == ptr::null_mut() {
-            // Command does not exist, proceed
-            let command_id = unsafe { XPLMCreateCommand(name_c.as_ptr(), description_c.as_ptr()) };
-            Ok(OwnedCommandData {
-                id: command_id,
-                handler: Box::new(handler),
-            })
-        } else {
-            Err(CommandCreateError::Exists)
+        if !existing.is_null() {
+            return Err(CommandCreateError::Exists);
         }
+
+        // Command does not exist, proceed
+        let command_id = unsafe { XPLMCreateCommand(name_c.as_ptr(), description_c.as_ptr()) };
+        Ok(OwnedCommandData {
+            id: command_id,
+            handler: Box::new(handler),
+        })
     }
 }
 
@@ -177,7 +176,7 @@ unsafe extern "C" fn command_handler<H: CommandHandler>(
     refcon: *mut c_void,
 ) -> c_int {
     let data = refcon as *mut OwnedCommandData;
-    let handler: *mut CommandHandler = (*data).handler.deref_mut();
+    let handler: *mut dyn CommandHandler = (*data).handler.deref_mut();
     let handler = handler as *mut H;
     if phase == xplm_CommandBegin as i32 {
         (*handler).command_begin();
@@ -189,7 +188,6 @@ unsafe extern "C" fn command_handler<H: CommandHandler>(
     // Prevent other components from handling this equivalent
     0
 }
-
 
 quick_error! {
     /// Errors that can occur when creating a command

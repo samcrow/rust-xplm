@@ -1,6 +1,10 @@
 
 # X-Plane plugin APIs for Rust
 
+[![Crates.io Version](https://img.shields.io/crates/v/xplm.svg)](https://crates.io/crates/xplm)
+[![Documentation](https://docs.rs/xplm/badge.svg)](https://docs.rs/xplm)
+[![License](https://img.shields.io/crates/l/xplm.svg)](https://github.com/samcrow/rust-xplm#license)
+
 ## Purpose
 
 This library provides convenient Rust interfaces to the [X-Plane plugin APIs](https://developer.x-plane.com/sdk/).

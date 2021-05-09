@@ -1,6 +1,3 @@
-
-
-
 use std::os::raw::{c_char, c_int};
 use std::panic;
 use std::panic::AssertUnwindSafe;
@@ -40,8 +37,8 @@ pub unsafe fn xplugin_start<P>(
     signature: *mut c_char,
     description: *mut c_char,
 ) -> c_int
-    where
-        P: Plugin,
+where
+    P: Plugin,
 {
     let unwind = panic::catch_unwind(AssertUnwindSafe(|| {
         super::super::internal::xplm_init();
@@ -52,7 +49,7 @@ pub unsafe fn xplugin_start<P>(
                 copy_to_c_buffer(info.signature, signature);
                 copy_to_c_buffer(info.description, description);
 
-                let mut plugin_box = Box::new(plugin);
+                let plugin_box = Box::new(plugin);
                 data.plugin = Box::into_raw(plugin_box);
                 1
             }
@@ -75,8 +72,8 @@ pub unsafe fn xplugin_start<P>(
 ///
 /// This function never unwinds. It catches any unwind that may occur.
 pub unsafe fn xplugin_stop<P>(data: &mut PluginData<P>)
-    where
-        P: Plugin,
+where
+    P: Plugin,
 {
     if !data.panicked {
         let unwind = panic::catch_unwind(AssertUnwindSafe(|| {
@@ -84,14 +81,12 @@ pub unsafe fn xplugin_stop<P>(data: &mut PluginData<P>)
             data.plugin = ptr::null_mut();
             drop(plugin);
         }));
-        if let Err(_) = unwind {
+        if unwind.is_err() {
             eprintln!("Panic in XPluginStop");
             data.panicked = true;
         }
     } else {
-        debug(
-            "Warning: A plugin that panicked cannot be stopped. It may leak resources.",
-        );
+        debug("Warning: A plugin that panicked cannot be stopped. It may leak resources.");
     }
 }
 
@@ -99,8 +94,8 @@ pub unsafe fn xplugin_stop<P>(data: &mut PluginData<P>)
 ///
 /// This function never unwinds. It catches any unwind that may occur.
 pub unsafe fn xplugin_enable<P>(data: &mut PluginData<P>) -> c_int
-    where
-        P: Plugin,
+where
+    P: Plugin,
 {
     if !data.panicked {
         let unwind = panic::catch_unwind(AssertUnwindSafe(|| match (*data.plugin).enable() {
@@ -125,12 +120,14 @@ pub unsafe fn xplugin_enable<P>(data: &mut PluginData<P>) -> c_int
 ///
 /// This function never unwinds. It catches any unwind that may occur.
 pub unsafe fn xplugin_disable<P>(data: &mut PluginData<P>)
-    where
-        P: Plugin,
+where
+    P: Plugin,
 {
     if !data.panicked {
-        let unwind = panic::catch_unwind(AssertUnwindSafe(|| { (*data.plugin).disable(); }));
-        if let Err(_) = unwind {
+        let unwind = panic::catch_unwind(AssertUnwindSafe(|| {
+            (*data.plugin).disable();
+        }));
+        if unwind.is_err() {
             eprintln!("Panic in XPluginDisable");
             data.panicked = true;
         }

@@ -1,4 +1,3 @@
-
 //! # Flight loop callbacks
 //!
 //! X-Plane can call plugin code at timed intervals or when it runs its flight model.
@@ -41,12 +40,12 @@
 
 use xplm_sys;
 
+use std::f32;
+use std::fmt;
+use std::mem;
 use std::ops::DerefMut;
 use std::os::raw::*;
 use std::time::Duration;
-use std::f32;
-use std::mem;
-use std::fmt;
 
 /// Tracks a flight loop callback, which can be called by X-Plane periodically for calculations
 ///
@@ -73,7 +72,7 @@ impl FlightLoop {
             refcon: data_ptr as *mut c_void,
         };
         data.loop_id = unsafe { Some(xplm_sys::XPLMCreateFlightLoop(&mut config)) };
-        FlightLoop { data: data }
+        FlightLoop { data }
     }
 
     /// Schedules the flight loop callback to be executed in the next flight loop
@@ -99,7 +98,7 @@ impl FlightLoop {
         let seconds_f = (time.as_secs() as f32) + (1e-9_f32 * time.subsec_nanos() as f32);
         self.data.set_interval(LoopResult::Seconds(seconds_f));
     }
-    
+
     /// Deactivates the flight loop
     pub fn deactivate(&mut self) {
         self.data.set_interval(LoopResult::Deactivate);
@@ -113,7 +112,7 @@ struct LoopData {
     /// The loop ID
     loop_id: Option<xplm_sys::XPLMFlightLoopID>,
     /// The callback (stored here but not used)
-    callback: Box<FlightLoopCallback>,
+    callback: Box<dyn FlightLoopCallback>,
 }
 
 impl fmt::Debug for LoopData {
@@ -192,14 +191,14 @@ pub struct LoopState<'a> {
 impl<'a> LoopState<'a> {
     /// Returns the duration since the last time this callback was called
     pub fn since_last_call(&self) -> Duration {
-        self.since_call.clone()
+        self.since_call
     }
     /// Returns the duration since the last flight loop
     ///
     /// If this callback is not called every flight loop, this may be different from the
     /// value returned from `time_since_last_call`.
     pub fn since_last_loop(&self) -> Duration {
-        self.since_loop.clone()
+        self.since_loop
     }
     /// Returns the value of a counter that increments every time the callback is called
     pub fn counter(&self) -> i32 {
@@ -261,10 +260,10 @@ unsafe extern "C" fn flight_loop_callback<C: FlightLoopCallback>(
     let mut state = LoopState {
         since_call: secs_to_duration(since_last_call),
         since_loop: secs_to_duration(since_loop),
-        counter: counter,
+        counter,
         result: (*loop_data).loop_result.as_mut().unwrap(),
     };
-    let callback_ptr: *mut FlightLoopCallback = (*loop_data).callback.as_mut();
+    let callback_ptr: *mut dyn FlightLoopCallback = (*loop_data).callback.as_mut();
     let callback = callback_ptr as *mut C;
     (*callback).flight_loop(&mut state);
 
