@@ -1,4 +1,3 @@
-
 # X-Plane plugin APIs for Rust
 
 [![Crates.io Version](https://img.shields.io/crates/v/xplm.svg)](https://crates.io/crates/xplm)
@@ -7,26 +6,69 @@
 
 ## Purpose
 
-This library provides convenient Rust interfaces to the [X-Plane plugin APIs](https://developer.x-plane.com/sdk/).
+**Rust XPLM** provides a convenient interface for X-Plane plugin development in the Rust programming language for all
+platforms.
 
-With this library, X-Plane plugins can be easily developed in Rust. Because this library uses SDK version 3.0,
-plugins created with this library support X-Plane 11.10 or later.
+As we use the [X-Plane SDK](https://developer.x-plane.com/sdk/) version 3.0, any plugin created with this library
+supports X-Plane version 11.10 or later.
 
 ## Status
 
-This library is incomplete. GUI components need a good API design.
+The library is still in an incomplete state. As a result some parts of the SDK may only be sparsely covered or missing
+completely.
+
+- [x] Compiles and is callable from X-Plane
+- [x] Debug logging to the console / log file
+- [x] DataRef reading and writing
+- [x] Commands
+- [ ] GUI - Needs further work
+- [ ] Drawing - Needs further work
+
+## Example
+
+Some more examples can be found in the `examples/` directory.
+
+This small snipped, however, is the minimal boilerplate needed to make your plugin compile.
+
+```rust
+extern crate xplm;
+
+use xplm::plugin::{Plugin, PluginInfo};
+use xplm::{debugln, xplane_plugin};
+
+struct MinimalPlugin;
+
+impl Plugin for MinimalPlugin {
+    type Error = std::convert::Infallible;
+
+    fn start() -> Result<Self, Self::Error> {
+        // The following message should be visible in the developer console and the Log.txt file
+        debugln!("Hello, World! From the Minimal Rust Plugin");
+        Ok(MinimalPlugin)
+    }
+
+    fn info(&self) -> PluginInfo {
+        PluginInfo {
+            name: String::from("Minimal Rust Plugin"),
+            signature: String::from("org.samcrow.xplm.examples.minimal"),
+            description: String::from("A plugin written in Rust"),
+        }
+    }
+}
+
+xplane_plugin!(MinimalPlugin);
+```
 
 ## License
 
 Licensed under either of
 
- * Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
- * MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+* Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
+* MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
 
 at your option.
 
 ### Contribution
 
-Unless you explicitly state otherwise, any contribution intentionally submitted
-for inclusion in the work by you shall be dual licensed as above, without any
-additional terms or conditions.
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you shall
+be dual licensed as above, without any additional terms or conditions.

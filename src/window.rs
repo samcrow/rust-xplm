@@ -192,7 +192,7 @@ unsafe extern "C" fn window_key(
     if losing_focus == 0 {
         match KeyEvent::from_xplm(key, flags, virtual_key) {
             Ok(event) => (*window).delegate.keyboard_event(&*window, event),
-            Err(e) => super::debug(format!("Invalid key event received: {}", e)),
+            Err(e) => super::debugln!("Invalid key event received: {:?}", e),
         }
     }
 }
@@ -610,19 +610,14 @@ impl KeyEvent {
     }
 }
 
-quick_error! {
-    /// Key event creation errors
-    #[derive(Debug)]
-    enum KeyEventError {
-        InvalidFlags(flags: xplm_sys::XPLMKeyFlags) {
-            description("unexpected combination of key flags")
-            display("Unexpected key flags {:b}", flags)
-        }
-        InvalidKey(key: c_char) {
-            description("invalid or unsupported key")
-            display("Invalid or unsupported key with code 0x{:x}", key)
-        }
-    }
+/// Key event creation error
+#[derive(thiserror::Error, Debug)]
+enum KeyEventError {
+    #[error("Unexpected key flags {0:b}")]
+    InvalidFlags(xplm_sys::XPLMKeyFlags),
+
+    #[error("Invalid or unsupported key with code: 0x{0:x}")]
+    InvalidKey(c_char),
 }
 
 /// Actions that the mouse/cursor can perform
@@ -662,10 +657,7 @@ pub struct MouseEvent {
 impl MouseEvent {
     /// Creates a new event
     fn new(position: Point<i32>, action: MouseAction) -> Self {
-        MouseEvent {
-            position,
-            action,
-        }
+        MouseEvent { position, action }
     }
     /// Returns the position of the mouse, in global coordinates relative to the X-Plane
     /// main window

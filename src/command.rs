@@ -68,21 +68,16 @@ impl<'a> Drop for CommandHold<'a> {
     }
 }
 
-quick_error! {
-    /// Errors that can occur when finding a command
-    #[derive(Debug)]
-    pub enum CommandFindError {
-        /// The provided command name contained a null byte
-        Null(err: NulError) {
-            description("Null byte in command name")
-            cause(err)
-            from()
-        }
-        /// The provided command does not exist
-        NotFound {
-            description("command not found")
-        }
-    }
+/// Errors that can occur when finding a command
+#[derive(thiserror::Error, Debug)]
+pub enum CommandFindError {
+    /// The provided command name contained a null byte
+    #[error("Null byte in command name")]
+    Null(#[from] NulError),
+
+    /// The Command could not be found
+    #[error("Command not found")]
+    NotFound,
 }
 
 /// Trait for things that can handle commands
@@ -189,19 +184,14 @@ unsafe extern "C" fn command_handler<H: CommandHandler>(
     0
 }
 
-quick_error! {
-    /// Errors that can occur when creating a command
-    #[derive(Debug)]
-    pub enum CommandCreateError {
-        /// The provided command name contained a null byte
-        Null(err: NulError) {
-            description("Null byte in command name")
-            cause(err)
-            from()
-        }
-        /// The provided command already exists
-        Exists {
-            description("command already exists")
-        }
-    }
+/// Errors that can occur when creating a Command
+#[derive(thiserror::Error, Debug)]
+pub enum CommandCreateError {
+    /// The provided Command name contained a null byte
+    #[error("Null byte in Command name")]
+    Null(#[from] NulError),
+
+    /// The Command exists already
+    #[error("Command exists already")]
+    Exists,
 }

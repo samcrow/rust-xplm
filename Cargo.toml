@@ -9,16 +9,16 @@ description = "High-level interfaces to the X-Plane plugin SDK"
 readme = "README.md"
 
 [dependencies]
-quick-error = "^1.2.3"
-xplm-sys = "^0.4.0"
+xplm-sys = "0.4.0"
+thiserror = "1.0.24"
 
 [profile.release]
 lto = true
 
 [[example]]
-name = "dataref_test"
+name = "minimal"
 crate-type = ["cdylib"]
 
 [[example]]
-name = "basic_plugin"
+name = "dataref"
 crate-type = ["cdylib"]
