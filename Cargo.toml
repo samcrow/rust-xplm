@@ -22,3 +22,7 @@ crate-type = ["cdylib"]
 [[example]]
 name = "dataref"
 crate-type = ["cdylib"]
+
+[[example]]
+name = "menus"
+crate-type = ["cdylib"]
