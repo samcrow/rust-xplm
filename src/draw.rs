@@ -118,7 +118,7 @@ impl Phase {
 pub enum Error {
     /// X-Plane does not support the provided phase
     #[error("Unsupported draw phase: {0:?}")]
-    UnsupportedPhase(Phase)
+    UnsupportedPhase(Phase),
 }
 
 /// Stores various flags that can be enabled or disabled
