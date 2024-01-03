@@ -28,7 +28,7 @@ completely.
 
 Some more examples can be found in the `examples/` directory.
 
-This small snipped, however, is the minimal boilerplate needed to make your plugin compile.
+This small snippet is the minimal boilerplate needed to make your plugin compile.
 
 ```rust
 extern crate xplm;
@@ -58,6 +58,27 @@ impl Plugin for MinimalPlugin {
 
 xplane_plugin!(MinimalPlugin);
 ```
+
+### Compiling and installing a plugin
+
+```bash
+cargo new --lib my-rxplm-project
+cd my-rxplm-project
+cargo add xplm
+```
+
+Then add to `Cargo.toml`:
+
+```toml
+[lib]
+crate-type = ["cdylib"]
+```
+
+Copy minimal example from above into `src/lib.rs`
+
+`cargo build`
+
+Rename `target/debug/my_rxplm_project.dll` to `win.xpl` (or `my_rxplm_project.so` to `lin.xpl`, etc) and copy to the aircraft/scenery/sim plugins folder
 
 ## License
 
