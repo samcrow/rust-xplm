@@ -80,6 +80,10 @@ Copy minimal example from above into `src/lib.rs`
 
 Rename `target/debug/my_rxplm_project.dll` to `win.xpl` (or `my_rxplm_project.so` to `lin.xpl`, etc) and copy to the aircraft/scenery/sim plugins folder
 
+## Cross-compiling
+
+The [cross](https://github.com/cross-rs/cross) tool may help compile plugins for multiple operating systems/architectures.
+
 ## License
 
 Licensed under either of
