@@ -150,15 +150,8 @@ impl OwnedCommandData {
         let name_c = CString::new(name)?;
         let description_c = CString::new(description)?;
 
-        let existing = unsafe { XPLMFindCommand(name_c.as_ptr()) };
-        if !existing.is_null() {
-            return Err(CommandCreateError::Exists);
-        }
-
-        // Command does not exist, proceed
-        let command_id = unsafe { XPLMCreateCommand(name_c.as_ptr(), description_c.as_ptr()) };
         Ok(OwnedCommandData {
-            id: command_id,
+            id: unsafe { XPLMCreateCommand(name_c.as_ptr(), description_c.as_ptr()) },
             handler: Box::new(handler),
         })
     }
@@ -192,6 +185,7 @@ pub enum CommandCreateError {
     Null(#[from] NulError),
 
     /// The Command exists already
+    #[deprecated(note = "commands persist between plugin reload - not an error if already exists")]
     #[error("Command exists already")]
     Exists,
 }
