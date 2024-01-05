@@ -99,9 +99,10 @@ pub struct OwnedCommand {
 }
 
 impl OwnedCommand {
-    /// Creates a new command with a provided name and description
+    /// Creates a new command with a provided name and description,
+    /// or finds an existing command
     ///
-    /// Returns an error if a matching command already exists.
+    /// In either case, the command will trigger the provided handler.
     pub fn new<H: CommandHandler>(
         name: &str,
         description: &str,
