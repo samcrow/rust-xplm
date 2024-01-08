@@ -94,3 +94,15 @@ pub fn find_symbol<S: Into<String>>(name: S) -> *mut std::os::raw::c_void {
         Err(_) => ptr::null_mut(),
     }
 }
+
+/// Speak the string and/or display it onscreen/in the ATC history window
+pub fn speak<S: Into<String>>(msg: S) {
+    match std::ffi::CString::new(msg.into()) {
+        Ok(msg) => unsafe {
+            xplm_sys::XPLMSpeakString(msg.as_ptr());
+        },
+        Err(_) => unsafe {
+            crate::XPLMDebugString("[xplm] Invalid speak message\n\0".as_ptr() as *const _)
+        },
+    }
+}
