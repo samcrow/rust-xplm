@@ -1,4 +1,4 @@
-use ffi::StringBuffer;
+use crate::ffi::StringBuffer;
 use std::ffi::{CString, NulError};
 use std::string::FromUtf8Error;
 use xplm_sys::*;
