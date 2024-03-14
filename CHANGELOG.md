@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## 0.4.0 - 2024-03-13
+
+* Updated xplm-sys dependency to 0.5.0
 * Changed from the `quick-error` crate to the more maintained derive macro `thiserror` crate
 * Implemented the `debug!` and `debugln!` macros (same usage as `print!`/`println!`)
 * Marked the `debug()` function as deprecated and changed all usages over to the new macros
@@ -9,11 +12,10 @@
 * Shortened the minimal example (easier to understand for newcomers)
 * Updated the README again, mainly the example and status
 
-  
 * README badges for easy access to the docs etc.
-* Flatten the module structure: e.g. `plugin/mod.rs` into `plugin.rs`  
+* Flatten the module structure: e.g. `plugin/mod.rs` into `plugin.rs`
 * Some refactoring for readability
-* Project formatting  
+* Project formatting
 * Updated deprecated code
 * Removed editor specific config files
 
