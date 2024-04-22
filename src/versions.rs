@@ -9,17 +9,18 @@ pub struct VersionInfo {
 
 impl VersionInfo {
     pub fn get() -> Self {
-        let xplane_version: *mut i32 = std::ptr::null_mut();
-        let xplm_version: *mut i32 = std::ptr::null_mut();
-        let host_id: *mut i32 = std::ptr::null_mut();
+        let mut xplane_version: i32 = -1;
+        let mut xplm_version: i32 = -1;
+        let mut host_id: i32 = -1;
 
         unsafe {
-            xplm_sys::XPLMGetVersions(xplane_version, xplm_version, host_id);
-            return VersionInfo {
-                xplane_version: *xplane_version.as_ref().unwrap_or(&-1),
-                xplm_version: *xplm_version.as_ref().unwrap_or(&-1),
-                host_id: *host_id.as_ref().unwrap_or(&-1),
-            };
+            xplm_sys::XPLMGetVersions(&mut xplane_version, &mut xplm_version, &mut host_id);
+        }
+
+        VersionInfo {
+            xplane_version,
+            xplm_version,
+            host_id,
         }
     }
 }
