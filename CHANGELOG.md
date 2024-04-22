@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.4.1 - 2024-04-21
+
+* Added versions module with a wrapper for `XPLMGetVersions`
+
 ## 0.4.0 - 2024-03-13
 
 * Updated xplm-sys dependency to 0.5.0
