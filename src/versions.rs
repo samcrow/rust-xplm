@@ -1,5 +1,6 @@
 use xplm_sys;
 
+#[derive(Debug)]
 pub struct VersionInfo {
     pub xplane_version: i32,
     pub xplm_version: i32,
