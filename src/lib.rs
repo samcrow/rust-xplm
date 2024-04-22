@@ -36,6 +36,8 @@ pub mod geometry;
 pub mod menu;
 /// Plugin creation and management
 pub mod plugin;
+/// X-Plane and XPLM version info
+pub mod versions;
 /// Relatively low-level windows
 pub mod window;
 
