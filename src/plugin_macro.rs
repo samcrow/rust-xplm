@@ -47,14 +47,13 @@ macro_rules! xplane_plugin {
         }
 
         #[allow(non_snake_case)]
-        #[allow(unused_variables)]
         #[no_mangle]
         pub unsafe extern "C" fn XPluginReceiveMessage(
             from: ::std::os::raw::c_int,
             message: ::std::os::raw::c_int,
             param: *mut ::std::os::raw::c_void,
         ) {
-            // Nothing
+            ::xplm::plugin::internal::xplugin_receive_message(&mut PLUGIN, from, message, param)
         }
     };
 }

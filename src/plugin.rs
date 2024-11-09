@@ -1,3 +1,5 @@
+use std::os::raw::{c_int, c_void};
+
 /// Accessing and communicating with other plugins
 pub mod management;
 
@@ -39,4 +41,10 @@ pub trait Plugin: Sized {
 
     /// Returns information on this plugin
     fn info(&self) -> PluginInfo;
+
+    #[allow(unused_variables)]
+    /// Called when the plugin receives a message
+    ///
+    /// The default implementation does nothing.
+    fn receive_message(&mut self, from: c_int, message: c_int, param: *mut c_void) {}
 }

@@ -1,4 +1,4 @@
-use std::os::raw::{c_char, c_int};
+use std::os::raw::{c_char, c_int, c_void};
 use std::panic;
 use std::panic::AssertUnwindSafe;
 use std::ptr;
@@ -129,6 +129,29 @@ where
         }));
         if unwind.is_err() {
             eprintln!("Panic in XPluginDisable");
+            data.panicked = true;
+        }
+    }
+}
+
+#[allow(unused_variables)]
+/// Implements the XPluginReceiveMessage callback
+///
+/// This function never unwinds. It catches any unwind that may accour.
+pub unsafe fn xplugin_receive_message<P>(
+    data: &mut PluginData<P>,
+    from: c_int,
+    message: c_int,
+    param: *mut c_void,
+) where
+    P: Plugin,
+{
+    if !data.panicked {
+        let unwind = panic::catch_unwind(AssertUnwindSafe(|| {
+            (*data.plugin).receive_message(from, message, param);
+        }));
+        if unwind.is_err() {
+            eprintln!("Panic in XPluginReceiveMessage");
             data.panicked = true;
         }
     }
