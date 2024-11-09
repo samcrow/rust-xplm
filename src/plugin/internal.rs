@@ -148,6 +148,7 @@ pub unsafe fn xplugin_receive_message<P>(
 {
     if !data.panicked {
         let unwind = panic::catch_unwind(AssertUnwindSafe(|| {
+            let message = message as u32;
             (*data.plugin).receive_message(from, message, param);
         }));
         if unwind.is_err() {
