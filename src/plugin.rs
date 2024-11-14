@@ -3,6 +3,9 @@ use std::os::raw::c_void;
 /// Accessing and communicating with other plugins
 pub mod management;
 
+/// Inter-plugin messaging
+pub mod messages;
+
 /// Items used by the xplane_plugin! macro, which must be public
 #[doc(hidden)]
 pub mod internal;
