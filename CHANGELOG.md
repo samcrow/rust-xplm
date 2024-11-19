@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.4.2 - 2024-11-18
+
+* Added `Plugin::receive_message` function, to get messages from X-Plane or other plugins [#22](https://github.com/samcrow/rust-xplm/pull/22)
+
 ## 0.4.1 - 2024-04-21
 
 * Added versions module with a wrapper for `XPLMGetVersions`
