@@ -1,5 +1,10 @@
+use std::os::raw::c_void;
+
 /// Accessing and communicating with other plugins
 pub mod management;
+
+/// Inter-plugin messaging
+pub mod messages;
 
 /// Items used by the xplane_plugin! macro, which must be public
 #[doc(hidden)]
@@ -39,4 +44,10 @@ pub trait Plugin: Sized {
 
     /// Returns information on this plugin
     fn info(&self) -> PluginInfo;
+
+    #[allow(unused_variables)]
+    /// Called when the plugin receives a message
+    ///
+    /// The default implementation does nothing.
+    fn receive_message(&mut self, from: i32, message: i32, param: *mut c_void) {}
 }
