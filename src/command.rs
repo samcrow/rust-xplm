@@ -62,7 +62,7 @@ pub struct CommandHold<'a> {
     command: &'a mut Command,
 }
 
-impl<'a> Drop for CommandHold<'a> {
+impl Drop for CommandHold<'_> {
     fn drop(&mut self) {
         self.command.release();
     }
@@ -167,11 +167,11 @@ unsafe extern "C" fn command_handler<H: CommandHandler>(
     let data = refcon as *mut OwnedCommandData;
     let handler: *mut dyn CommandHandler = (*data).handler.deref_mut();
     let handler = handler as *mut H;
-    if phase == xplm_CommandBegin as i32 {
+    if phase == xplm_CommandBegin {
         (*handler).command_begin();
-    } else if phase == xplm_CommandContinue as i32 {
+    } else if phase == xplm_CommandContinue {
         (*handler).command_continue();
-    } else if phase == xplm_CommandEnd as i32 {
+    } else if phase == xplm_CommandEnd {
         (*handler).command_end();
     }
     // Prevent other components from handling this equivalent

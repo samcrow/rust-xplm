@@ -49,7 +49,7 @@ pub fn debug<S: Into<String>>(message: S) {
     match CString::new(message.into()) {
         Ok(message_c) => unsafe { XPLMDebugString(message_c.as_ptr()) },
         Err(_) => unsafe {
-            XPLMDebugString("[xplm] Invalid debug message\n\0".as_ptr() as *const _)
+            XPLMDebugString(c"[xplm] Invalid debug message\n".as_ptr() as *const _)
         },
     }
 }
@@ -104,7 +104,7 @@ pub fn speak<S: Into<String>>(msg: S) {
             xplm_sys::XPLMSpeakString(msg.as_ptr());
         },
         Err(_) => unsafe {
-            crate::XPLMDebugString("[xplm] Invalid speak message\n\0".as_ptr() as *const _)
+            crate::XPLMDebugString(c"[xplm] Invalid speak message\n".as_ptr() as *const _)
         },
     }
 }

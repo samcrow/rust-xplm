@@ -95,7 +95,7 @@ pub struct Menu {
     /// The items, separators, and submenus in this menu
     ///
     /// Each item is in a Box, to allow callbacks to reference it.
-    children: RefCell<Vec<Box<Item>>>,
+    children: RefCell<Vec<Item>>,
     /// The status of this menu
     state: Cell<MenuState>,
 }
@@ -139,7 +139,7 @@ impl Menu {
         Rc<C>: Into<Item>,
     {
         let mut borrow = self.children.borrow_mut();
-        borrow.push(Box::new(child.into().into()));
+        borrow.push(child.into().into());
     }
 
     /// Adds this menu as a child of the plugins menu
@@ -370,7 +370,7 @@ impl ActionItem {
 
     fn handle_click(&self) {
         let mut borrow = self.handler.borrow_mut();
-        borrow.item_clicked(&self);
+        borrow.item_clicked(self);
     }
 }
 

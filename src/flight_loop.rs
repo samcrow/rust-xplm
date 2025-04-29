@@ -67,7 +67,7 @@ impl FlightLoop {
         // Create a flight loop
         let mut config = xplm_sys::XPLMCreateFlightLoop_t {
             structSize: mem::size_of::<xplm_sys::XPLMCreateFlightLoop_t>() as c_int,
-            phase: xplm_sys::xplm_FlightLoop_Phase_AfterFlightModel as i32,
+            phase: xplm_sys::xplm_FlightLoop_Phase_AfterFlightModel,
             callbackFunc: Some(flight_loop_callback::<C>),
             refcon: data_ptr as *mut c_void,
         };
@@ -188,7 +188,7 @@ pub struct LoopState<'a> {
     result: &'a mut LoopResult,
 }
 
-impl<'a> LoopState<'a> {
+impl LoopState<'_> {
     /// Returns the duration since the last time this callback was called
     pub fn since_last_call(&self) -> Duration {
         self.since_call

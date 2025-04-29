@@ -10,7 +10,6 @@
 //! Foreign function interface utilities
 //!
 
-use std::iter;
 use std::os::raw::c_char;
 use std::str;
 use std::str::Utf8Error;
@@ -30,7 +29,7 @@ impl StringBuffer {
     /// set to null bytes (`\0`).
     pub fn new(length: usize) -> StringBuffer {
         StringBuffer {
-            bytes: iter::repeat(b'\0').take(length).collect(),
+            bytes: std::iter::repeat_n(b'\0', length).collect(),
         }
     }
 

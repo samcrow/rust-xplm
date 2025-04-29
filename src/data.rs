@@ -46,6 +46,8 @@ pub trait DataReadWrite<T>: DataRead<T> {
 
 /// Trait for readable array data accessors
 pub trait ArrayRead<T: ArrayType + ?Sized> {
+    // Array datarefs always have at least one entry
+    #![allow(clippy::len_without_is_empty)]
     /// Reads values
     ///
     /// Values are stored in the provided slice. If the dataref is larger than the provided slice,

@@ -8,9 +8,10 @@ use xplm_sys;
 use super::geometry::{Point, Rect};
 
 /// Cursor states that windows can apply
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub enum Cursor {
     /// X-Plane draws the default cursor
+    #[default]
     Default,
     /// X-Plane draws an arrow cursor (not any other cursor type)
     Arrow,
@@ -26,12 +27,6 @@ impl Cursor {
             Cursor::Arrow => xplm_sys::xplm_CursorArrow as xplm_sys::XPLMCursorStatus,
             Cursor::None => xplm_sys::xplm_CursorHidden as xplm_sys::XPLMCursorStatus,
         }
-    }
-}
-
-impl Default for Cursor {
-    fn default() -> Self {
-        Cursor::Default
     }
 }
 
@@ -95,6 +90,8 @@ impl Window {
     /// Creates a new window with the provided geometry and returns a reference to it
     ///
     /// The window is originally not visible.
+    // TODO: determine if Clippy warning about `new` not returning `self` is applicable
+    #[allow(clippy::new_ret_no_self)]
     pub fn new<R: Into<Rect<i32>>, D: WindowDelegate>(geometry: R, delegate: D) -> WindowRef {
         let geometry = geometry.into();
 

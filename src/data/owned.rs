@@ -1,7 +1,6 @@
 use super::{Access, ArrayRead, ArrayReadWrite, DataRead, DataReadWrite, DataType, ReadOnly};
 use std::cmp;
 use std::ffi::{CString, NulError};
-use std::i32;
 use std::marker::PhantomData;
 use std::os::raw::{c_int, c_void};
 use std::ptr;
@@ -84,84 +83,84 @@ impl<T: DataType + ?Sized, A: Access> OwnedData<T, A> {
         }
     }
     fn int_read() -> XPLMGetDatai_f {
-        if T::sim_type() & xplmType_Int as i32 != 0 {
+        if T::sim_type() & xplmType_Int != 0 {
             Some(int_read)
         } else {
             None
         }
     }
     fn int_write() -> XPLMSetDatai_f {
-        if T::sim_type() & xplmType_Int as i32 != 0 && A::writeable() {
+        if T::sim_type() & xplmType_Int != 0 && A::writeable() {
             Some(int_write)
         } else {
             None
         }
     }
     fn float_read() -> XPLMGetDataf_f {
-        if T::sim_type() & xplmType_Float as i32 != 0 {
+        if T::sim_type() & xplmType_Float != 0 {
             Some(float_read)
         } else {
             None
         }
     }
     fn float_write() -> XPLMSetDataf_f {
-        if T::sim_type() & xplmType_Float as i32 != 0 && A::writeable() {
+        if T::sim_type() & xplmType_Float != 0 && A::writeable() {
             Some(float_write)
         } else {
             None
         }
     }
     fn double_read() -> XPLMGetDatad_f {
-        if T::sim_type() & xplmType_Double as i32 != 0 {
+        if T::sim_type() & xplmType_Double != 0 {
             Some(double_read)
         } else {
             None
         }
     }
     fn double_write() -> XPLMSetDatad_f {
-        if T::sim_type() & xplmType_Double as i32 != 0 && A::writeable() {
+        if T::sim_type() & xplmType_Double != 0 && A::writeable() {
             Some(double_write)
         } else {
             None
         }
     }
     fn int_array_read() -> XPLMGetDatavi_f {
-        if T::sim_type() & xplmType_IntArray as i32 != 0 {
+        if T::sim_type() & xplmType_IntArray != 0 {
             Some(int_array_read)
         } else {
             None
         }
     }
     fn int_array_write() -> XPLMSetDatavi_f {
-        if T::sim_type() & xplmType_IntArray as i32 != 0 && A::writeable() {
+        if T::sim_type() & xplmType_IntArray != 0 && A::writeable() {
             Some(int_array_write)
         } else {
             None
         }
     }
     fn float_array_read() -> XPLMGetDatavf_f {
-        if T::sim_type() & xplmType_FloatArray as i32 != 0 {
+        if T::sim_type() & xplmType_FloatArray != 0 {
             Some(float_array_read)
         } else {
             None
         }
     }
     fn float_array_write() -> XPLMSetDatavf_f {
-        if T::sim_type() & xplmType_FloatArray as i32 != 0 && A::writeable() {
+        if T::sim_type() & xplmType_FloatArray != 0 && A::writeable() {
             Some(float_array_write)
         } else {
             None
         }
     }
     fn byte_array_read() -> XPLMGetDatab_f {
-        if T::sim_type() & xplmType_Data as i32 != 0 {
+        if T::sim_type() & xplmType_Data != 0 {
             Some(byte_array_read)
         } else {
             None
         }
     }
     fn byte_array_write() -> XPLMSetDatab_f {
-        if T::sim_type() & xplmType_Data as i32 != 0 && A::writeable() {
+        if T::sim_type() & xplmType_Data != 0 && A::writeable() {
             Some(byte_array_write)
         } else {
             None

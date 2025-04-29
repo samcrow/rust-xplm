@@ -99,6 +99,8 @@ pub enum Phase {
 
 impl Phase {
     /// Converts this phase into an XPLMDrawingPhase and a 0 for after or 1 for before
+    // TODO: examine if this warning is applicable and this should be `to_xplm(self)`
+    #[allow(clippy::wrong_self_convention)]
     fn to_xplm(&self) -> xplm_sys::XPLMDrawingPhase {
         use self::Phase::*;
         let phase = match *self {
@@ -175,10 +177,10 @@ pub fn bind_texture(texture_number: i32, texture_id: i32) {
 /// Texture IDs are placed in the provided slice. If the slice contains more than i32::max_value()
 /// elements, no more than i32::max_value() texture IDs will be generated.
 pub fn generate_texture_numbers(numbers: &mut [i32]) {
-    let count = if numbers.len() < (i32::max_value() as usize) {
+    let count = if numbers.len() < (i32::MAX as usize) {
         numbers.len() as i32
     } else {
-        i32::max_value()
+        i32::MAX
     };
     unsafe {
         xplm_sys::XPLMGenerateTextureNumbers(numbers.as_mut_ptr(), count);
