@@ -31,3 +31,7 @@ crate-type = ["cdylib"]
 [[example]]
 name = "menus"
 crate-type = ["cdylib"]
+
+[[example]]
+name = "paths"
+crate-type = ["cdylib"]

@@ -8,8 +8,6 @@ use std::ffi::CString;
 
 /// FFI utilities
 mod ffi;
-/// Path conversion
-mod paths;
 /// Plugin macro
 mod plugin_macro;
 
@@ -34,6 +32,8 @@ pub mod flight_loop;
 pub mod geometry;
 /// User interface menus
 pub mod menu;
+/// X-Plane and plugin paths
+pub mod paths;
 /// Plugin creation and management
 pub mod plugin;
 /// X-Plane and XPLM version info
